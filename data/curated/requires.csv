@@ -1,1 +1,60 @@
-construct_id,prereq_id,note
+construct_id,prereq_id,note,confidence
+342,3378,"Listing multiples of a number means recalling its times table.",high
+331,3378,"Finding factors relies on recalling multiplication facts in pairs.",high
+331,164,"A factor is a number that divides exactly, so checking factors is mental division.",high
+345,342,"The lowest common multiple is found by listing multiples of each number.",high
+338,331,"The highest common factor is found by listing the factors of each number.",high
+164,3378,"Mental division uses times-table facts in reverse.",high
+3193,164,"Writing a ÷ b as a/b assumes the student understands division as equal sharing.",medium
+408,3342,"Matching shaded diagrams to fractions needs the meaning of numerator (parts taken) and denominator (equal parts).",high
+409,3342,"Recognising equivalent fractions needs the meaning of numerator and denominator.",high
+409,3378,"Equivalent fractions scale numerator and denominator by the same factor using multiplication facts.",high
+409,408,"Numeric equivalence is normally taught after the same idea shown with shapes (concrete before abstract).",medium
+410,409,"Simplifying is finding an equivalent fraction with smaller terms.",high
+411,409,"Simplifying is finding an equivalent fraction with smaller terms.",high
+410,338,"Simplifying to a unit fraction means dividing both parts by their highest common factor, which here is the numerator.",medium
+411,338,"Simplifying fully in one step means dividing by the highest common factor.",high
+424,3342,"Adding like fractions counts parts, which needs the meaning of numerator and denominator.",high
+432,3342,"Subtracting like fractions takes away parts, which needs the meaning of numerator and denominator.",high
+430,424,"Adding improper fractions with one denominator uses the same rule as proper fractions.",high
+428,424,"Adding mixed numbers with one denominator adds the fraction parts as like fractions.",high
+436,432,"Subtracting mixed numbers with one denominator subtracts the fraction parts as like fractions.",high
+425,424,"After converting one fraction, the sum is an addition of like fractions.",high
+425,409,"One fraction must be rewritten as an equivalent fraction with the larger denominator.",high
+425,342,"The student must see that one denominator is a multiple of the other.",high
+433,432,"After converting one fraction, the difference is a subtraction of like fractions.",high
+433,409,"One fraction must be rewritten as an equivalent fraction with the larger denominator.",high
+433,342,"The student must see that one denominator is a multiple of the other.",high
+426,425,"This extends the one-denominator-is-a-multiple case to finding a new common denominator.",medium
+426,345,"The lowest common denominator is the LCM of the two denominators.",high
+434,433,"This extends the one-denominator-is-a-multiple case to finding a new common denominator.",medium
+434,345,"The lowest common denominator is the LCM of the two denominators.",high
+427,424,"After converting both fractions, the sum is an addition of like fractions.",high
+427,409,"Both fractions must be rewritten as equivalent fractions.",high
+427,345,"The common denominator is the LCM of the denominators (here their product).",high
+435,432,"After converting both fractions, the difference is a subtraction of like fractions.",high
+435,409,"Both fractions must be rewritten as equivalent fractions.",high
+435,345,"The common denominator is the LCM of the denominators (here their product).",high
+429,428,"Mixed-number addition with unlike denominators builds on the like-denominator mixed case.",high
+429,427,"The fraction parts are added as unlike fractions; the coprime case is representative but depends on the denominators.",medium
+437,436,"Mixed-number subtraction with unlike denominators builds on the like-denominator mixed case.",high
+437,435,"The fraction parts are subtracted as unlike fractions; the coprime case is representative but depends on the denominators.",medium
+3241,424,"A missing-addend problem with fractions needs fraction addition.",high
+3241,432,"The missing addend is found by subtracting fractions (the inverse operation).",medium
+3328,432,"Subtracting an integer from a fraction is done by writing the integer over the same denominator and subtracting.",medium
+413,3342,"Comparing fractions with the same denominator means comparing numerators, which needs the meaning of each part.",high
+417,413,"This is the same comparison written with inequality notation.",high
+3320,3342,"Comparing fractions with the same numerator needs the idea that a larger denominator means smaller parts.",high
+414,409,"Ordering needs converting to a common denominator through equivalent fractions.",high
+414,413,"After converting, the fractions are ordered as same-denominator fractions.",high
+415,409,"Ordering needs converting to a common denominator through equivalent fractions.",high
+415,345,"The common denominator for unrelated denominators is their LCM.",high
+415,413,"After converting, the fractions are ordered as same-denominator fractions.",high
+418,414,"This is the same comparison written with inequality notation.",high
+419,415,"This is the same comparison written with inequality notation.",high
+420,3342,"Placing 1/n on a number line needs the idea that the denominator is the number of equal parts.",high
+421,420,"A non-unit fraction a/n is a steps of the unit fraction 1/n along the line.",high
+3118,421,"Reading a dash between labelled values extends placing fractions on a number line.",medium
+3839,3193,"Finding the whole numbers either side of a/b means working out a ÷ b.",high
+3632,415,"Rounding to 0, 1/2 or 1 means comparing each fraction against those benchmarks.",medium
+3587,408,"Seeing that a fraction depends on its whole builds on fraction models of a shape; the link is indirect.",low
