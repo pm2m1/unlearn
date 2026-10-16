@@ -84,7 +84,7 @@ One real dataset (Eedi, CC BY 4.0) supplies the misconception graph. Everything 
 
 | Source | What you get | Status | Licence |
 | --- | --- | --- | --- |
-| [Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/wangwangduishuidajiao/Eedi-Misconceptions-Graph) `data/construct-map.csv` | 2,258 constructs with Subject → Topic → SubTopic hierarchy | Real | CC BY 4.0 |
+| [Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph) `data/construct-map.csv` | 2,258 constructs with Subject → Topic → SubTopic hierarchy | Real | CC BY 4.0 |
 | Same dataset, `data/misconception-map.csv` | 19,294 weighted misconception↔construct edges, 8,117 misconceptions | Real | CC BY 4.0 |
 | `REQUIRES` prerequisite edges | Construct → prerequisite construct, chosen topic only | Authored by you (LLM draft + manual review) | Yours |
 | Questions and options | 3–5 MCQs per construct, each wrong option → one misconception | Generated + reviewed | Yours |
@@ -101,7 +101,7 @@ One real dataset (Eedi, CC BY 4.0) supplies the misconception graph. Everything 
 
 - The release has no questions, no distractors and no student data. You must generate questions yourself.
 - There are no construct-to-construct prerequisite edges. `REQUIRES` is your own work, so label it `source:'curated'`.
-- The page used here is a duplicate marked "Duplicate from Eedi/Eedi-Misconceptions-Graph". Download from the canonical `Eedi/Eedi-Misconceptions-Graph` repo if it is public, and pin the version.
+- Download from the canonical `Eedi/Eedi-Misconceptions-Graph` repo (public), pinned to commit `2ae0839debf73c0ce7dd6578d8ea8b99e7be8631`. The duplicate `wangwangduishuidajiao/Eedi-Misconceptions-Graph` is only a fallback.
 - Do not commit the Kaggle "Mining Misconceptions" CSVs. Their redistribution terms are unverified.
 
 **Attribution line for the README** (required by the licence):
@@ -753,7 +753,7 @@ The biggest risk is time, not FalkorDB. Hand-curating prerequisites and question
 
 **Sources**
 
-- [Eedi Misconceptions Graph v1.0 (Hugging Face)](https://huggingface.co/datasets/wangwangduishuidajiao/Eedi-Misconceptions-Graph) and its [data dictionary](https://huggingface.co/datasets/wangwangduishuidajiao/Eedi-Misconceptions-Graph/blob/main/docs/data-dictionary.md)
+- [Eedi Misconceptions Graph v1.0 (Hugging Face)](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph) and its [data dictionary](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph/blob/main/docs/data-dictionary.md)
 - FalkorDB docs: [PageRank](https://docs.falkordb.com/algorithms/pagerank), [algo.SPpaths](https://docs.falkordb.com/algorithms/sppath), [WCC](https://docs.falkordb.com/algorithms/wcc.html), [Betweenness](https://docs.falkordb.com/algorithms/betweenness-centrality.html), [Vector index](https://docs.falkordb.com/cypher/indexing/vector-index.html), [GRAPH.COPY](https://docs.falkordb.com/commands/graph.copy.html), [Concurrency](https://docs.falkordb.com/design/concurrency.html), [Known limitations](https://docs.falkordb.com/cypher/known-limitations.html)
 - [falkordb-py client](https://github.com/FalkorDB/falkordb-py)
 - [Graph Hacks rules](https://www.wemakedevs.org/hackathons/falkordb/rules)

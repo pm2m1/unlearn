@@ -14,6 +14,7 @@ make up && make seed && make test
 
 ## Data
 
-"Eedi Misconceptions Graph v1.0" by Eedi, licensed under CC BY 4.0. Adapted: filtered to Number/Fractions for the class graphs, with curated prerequisite edges and generated questions added.
+"[Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph)" by Eedi, licensed under CC BY 4.0. Adapted: filtered to Number/Fractions for the class graphs, with curated prerequisite edges and generated questions added.
+Source: `Eedi/Eedi-Misconceptions-Graph` on Hugging Face, pinned to commit `2ae0839d`.
 
 AI assistant use is disclosed in [AI_USAGE.md](AI_USAGE.md).
