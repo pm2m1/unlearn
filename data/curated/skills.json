@@ -1,1 +1,92 @@
-[]
+[
+ {
+  "name": "Fraction wall",
+  "description": "Line up rows of equal-length strips cut into halves, thirds, quarters and so on, so equivalence and size can be seen.",
+  "steps": [
+   "Show a fraction wall with rows for halves, thirds, quarters, sixths, eighths and twelfths, all the same length.",
+   "Ask the student to find the fraction from the question on the wall and trace straight down to every row it lines up with.",
+   "Name the fractions that line up exactly and say what was done to the top and bottom numbers to get there (both multiplied or divided by the same number).",
+   "Point to a row that does not line up exactly and explain why adding, subtracting or changing only one number breaks equivalence.",
+   "Ask the student to predict one more equivalent fraction before checking it on the wall."
+  ],
+  "misconceptions": [14944, 18649, 18650, 19079, 19773, 19778, 21176, 14007, 17669, 19414, 19786, 20776, 22626, 22639, 22644, 23144, 14110, 14494, 14537, 14538, 14539, 15074, 15267, 15522, 22306, 24732, 16804, 14092, 16784, 21826, 14121]
+ },
+ {
+  "name": "Number line",
+  "description": "Count equal gaps, not marks, along a number line to place and read fractions, including past 1.",
+  "steps": [
+   "Draw a number line with its end values labelled and ask the student to count the gaps (not the dashes) between them.",
+   "Work out what one gap is worth: the length of the line divided by the number of gaps.",
+   "Count gaps from the start value to the arrow, then add the start value if the line does not begin at 0.",
+   "Extend the line past 1 and show that a fraction like 7/4 sits between 1 and 2."
+  ],
+  "misconceptions": [15046, 15358, 15999, 18121, 18155, 18486, 15112, 15304, 18297, 18805, 18806, 18349, 18904, 26288, 16966, 19360]
+ },
+ {
+  "name": "Area model",
+  "description": "Shade parts of one same-size rectangle to show that adding or subtracting like fractions changes how many parts there are, not their size.",
+  "steps": [
+   "Draw one rectangle split into equal parts matching the denominator.",
+   "Shade the first fraction, then shade (or cross out) the second fraction in the same rectangle.",
+   "Count the shaded parts for the new numerator and point out that the size of each part, the denominator, did not change.",
+   "Contrast this with the wrong answer: show that adding the denominators would make each part smaller, so the total would shrink."
+  ],
+  "misconceptions": [15031, 15032, 18355, 19192, 19219, 19251, 21177, 21651, 15931, 15932, 18356, 18627, 19220, 19221, 19222, 16460, 26157, 18669, 14014, 15450]
+ },
+ {
+  "name": "LCM-first common denominators",
+  "description": "Find the lowest common multiple of the denominators first, rewrite both fractions with it, then add or subtract.",
+  "steps": [
+   "List the first few multiples of each denominator and circle the first one they share: that is the common denominator.",
+   "For each fraction, work out what its denominator was multiplied by and multiply its numerator by the same number.",
+   "Check each rewritten fraction is equivalent to the original before going on.",
+   "Add or subtract the numerators only and keep the common denominator.",
+   "Simplify the answer if the numerator and denominator share a factor."
+  ],
+  "misconceptions": [14220, 15521, 26161, 26985, 26989, 13807, 19088, 22639, 19849, 15472, 26999, 14107, 17587, 18369, 24501, 15341, 15424, 15500, 15501, 15969, 24069, 13957, 15985, 18618, 20492, 22136, 22410]
+ },
+ {
+  "name": "Worked-example contrast",
+  "description": "Put a correct worked example next to one that holds the student's misconception and ask them to find the step where they differ.",
+  "steps": [
+   "Show two worked solutions to the same question side by side: one correct and one using the misconception.",
+   "Ask the student which answer is right and how they could check it without redoing the method.",
+   "Have them point to the exact step where the two solutions split and say what went wrong there.",
+   "Give a similar question and ask them to write the correct method out step by step."
+  ],
+  "misconceptions": [15333, 18151, 18227, 26058, 26998, 15634, 15635, 26035, 15098, 26054, 18158, 18159, 27398, 16653, 16654, 16655, 16656, 14786, 22562, 18310, 13954]
+ },
+ {
+  "name": "Estimation check",
+  "description": "Round each fraction to 0, 1/2 or 1 before calculating, then use the estimate to catch answers that cannot be right.",
+  "steps": [
+   "For each fraction, ask whether it is close to 0, close to 1/2 or close to 1.",
+   "Add or subtract those benchmarks to get an estimate.",
+   "Compare the calculated answer with the estimate: if 1/3 + 1/4 gives 2/7, which is less than 1/3, something has gone wrong.",
+   "Explain that an estimate is a quick check, not the exact answer."
+  ],
+  "misconceptions": [15931, 22168, 22351, 22411, 24501, 21651, 19849, 26157, 16966, 26992, 22991]
+ },
+ {
+  "name": "Same-size pieces comparison",
+  "description": "Compare fractions only after making the pieces the same size (a common denominator) or the piece count the same (a common numerator).",
+  "steps": [
+   "Ask what the denominator tells you about the size of each piece: more pieces means smaller pieces.",
+   "If the denominators match, compare the numerators. If the numerators match, the larger denominator is the smaller fraction.",
+   "Otherwise rewrite the fractions with a common denominator and compare the numerators.",
+   "Write the result with < or > and read it aloud as 'is less than' or 'is greater than'."
+  ],
+  "misconceptions": [14068, 18234, 18235, 18656, 18657, 18659, 14089, 15582, 15852, 22129, 23849, 14090, 15439, 17372, 19731, 15438, 17374, 18663, 14081, 18661, 18664, 18665, 19024, 15482, 19420, 22647, 16804]
+ },
+ {
+  "name": "Factor and multiple ladders",
+  "description": "Build factor pairs and multiple lists from times-table facts so HCF, LCM and division come from facts the student already knows.",
+  "steps": [
+   "Write the number at the top and list its factor pairs, starting from 1 times the number, using times-table facts.",
+   "Separately, list the first multiples of each number by counting up in that number.",
+   "Circle the shared factors and take the largest (the HCF), or the first shared multiple (the LCM).",
+   "Check by dividing: a factor divides exactly, and a multiple divides exactly by the original number."
+  ],
+  "misconceptions": [13957, 14338, 14892, 15423, 16249, 18617, 21793, 15352, 15424, 15642, 17605, 17611, 21713, 14138, 15384, 15515, 15627, 18289, 22345, 22436, 16794, 18085, 18384, 18518, 18519, 22595, 14839, 15004, 15150, 15636, 17978, 26147, 26992, 22991, 14537, 15522]
+ }
+]

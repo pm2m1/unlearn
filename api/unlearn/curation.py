@@ -229,3 +229,21 @@ def load_questions(path: Path = CURATED / "questions.json", seen_in: dict[int, s
     if problems:
         raise CurationError("questions failed verification:\n" + "\n".join(f"  {k}: {v}" for k, v in problems.items()))
     return questions
+
+
+# --- Skills -------------------------------------------------------------------
+
+def load_skills(path: Path = CURATED / "skills.json", questions: list[dict] | None = None) -> list[dict]:
+    """Load remediation skills. With questions, also require every distractor misconception to be covered."""
+    skills = json.loads(path.read_text())
+    for s in skills:
+        if not 3 <= len(s["steps"]) <= 5:
+            raise CurationError(f"skill {s['name']!r} needs 3-5 steps, has {len(s['steps'])}")
+        if not s["misconceptions"]:
+            raise CurationError(f"skill {s['name']!r} remediates nothing")
+    if questions is not None:
+        covered = {m for s in skills for m in s["misconceptions"]}
+        used = {o["misconception_id"] for q in questions for o in q["options"] if not o.get("correct")}
+        if missing := used - covered:
+            raise CurationError(f"misconceptions in questions with no skill: {sorted(missing)}")
+    return skills
