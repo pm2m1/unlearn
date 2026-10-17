@@ -7,6 +7,19 @@ Two students both score 40% on fractions and need opposite fixes. Asha can't fin
 
 Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory and Coordination** (primary) and **01 Agents That Act on Connected Data** (secondary).
 
+## Try it
+
+- **Demo video:** <link>
+- **No hosted deployment.** There was no budget for one, so Unlearn runs locally. With Docker installed, one command starts it after cloning (full steps in [Local setup](#local-setup)):
+
+  ```
+  docker compose --profile dev up -d --build --wait
+  ```
+
+  Then open **http://localhost:8000**. For the video's two students, run `docker compose exec api python scripts/demo_scenario.py` and open `http://localhost:8000/?class=demo_video`.
+- **No API keys needed.** Without them every reply is a template built from the graph's rows. The diagnosis, memory and receipts are the same either way.
+- **Explaining it to someone:** [docs/EXPLAIN.md](docs/EXPLAIN.md) is a one-page cheat sheet.
+
 ## Why I built this
 
 <!-- PARTH: rewrite in your own words -->
@@ -313,7 +326,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 
 Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
 
-Candidate lists, averaged over the same students: 6.7 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B and B+. A planted misconception is on A's list for 20% of students and on B's for 16%, which caps their misconception scores whatever the model does.
+Candidate lists, averaged over the same students: 6.7 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B and B+. A planted misconception is on A's list for 20% of students and on B's for 16%, which caps A's and B's misconception scores whatever the model does. **B+ is capped by the same list:** its prompt lists every misconception with its ID, but only IDs on B's retrieved list are scored, so a planted misconception it names from the graph text counts as wrong.
 
 <sup>Footnote: cross-check with `gemini-3.6-flash` on seed 0 (A: n=3, B: n=2), first scoring method. **Indicative only, n too small to conclude.** The Gemini free tier allows 20 requests per model per day.</sup>
 
@@ -419,6 +432,7 @@ Then open **http://localhost:8000**.
 - **The demo video's scenario.** Run `docker compose exec api python scripts/demo_scenario.py`, then open `http://localhost:8000/?class=demo_video`. Asha and Ben both score 40% and have different root causes; `--verify 10` replays both students 10 times.
 - **Stop it.** `docker compose --profile dev down`. The graphs stay in the `falkor-data` volume. Add `-v` to wipe them; the next start re-seeds itself.
 - **Optional LLMs.** Put any of `GROQ_API_KEY`, `GEMINI_API_KEY` or `OPENROUTER_API_KEY` in `.env` before starting. Without them, every reply is a template built from the graph's rows.
+- **A local model instead (dev profile only).** With [Ollama](https://ollama.com) running on the host, set `OLLAMA_BASE_URL=http://host.docker.internal:11434/v1` (and optionally `OLLAMA_MODEL`) in `.env` and run the `up` command again. The app then tries the local model first. The `prod` profile never passes it.
 
 Both containers bind to `127.0.0.1` in the `dev` profile. `docker compose --profile prod up -d --build --wait` publishes only the API on port 8000; FalkorDB has no published port.
 

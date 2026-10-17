@@ -79,8 +79,10 @@ def block() -> str:
               f"Candidate lists, averaged over the same students: {sizes['prerequisites']:.1f} root-cause candidates "
               f"(the target's prerequisites), {sizes['A_misconceptions']:.1f} misconception candidates for A and "
               f"{sizes['B_misconceptions']:.0f} for B and B+. A planted misconception is on A's list for "
-              f"{100 * on_list['A']:.0f}% of students and on B's for {100 * on_list['B_and_Bplus']:.0f}%, which caps "
-              "their misconception scores whatever the model does."]
+              f"{100 * on_list['A']:.0f}% of students and on B's for {100 * on_list['B_and_Bplus']:.0f}%, which caps A's "
+              "and B's misconception scores whatever the model does. **B+ is capped by the same list:** its prompt "
+              "lists every misconception with its ID, but only IDs on B's retrieved list are scored, so a planted "
+              "misconception it names from the graph text counts as wrong."]
     cc_path = RESULTS / "crosscheck.json"
     if cc_path.exists():
         cc = json.loads(cc_path.read_text())

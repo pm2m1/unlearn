@@ -27,7 +27,7 @@ x-api: &api
     context: .
     dockerfile: api/Dockerfile
   image: unlearn-api:local
-  environment:
+  environment: &api-env
     FALKOR_HOST: falkordb
     FALKOR_PORT: "6379"
     FALKOR_PASSWORD: ${FALKOR_PASSWORD}
@@ -35,7 +35,7 @@ x-api: &api
     GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
     GROQ_MODEL: ${GROQ_MODEL:-}
-    GEMINI_MODEL: ${GEMINI_MODEL:-}
+    GEMINI_MODELS: ${GEMINI_MODELS:-}
     OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
     UNLEARN_LLM: ${UNLEARN_LLM:-auto}
   restart: unless-stopped
@@ -58,6 +58,14 @@ services:
   api:
     <<: *api
     profiles: ["dev"]
+    # Dev only: a local Ollama model first in the chain when OLLAMA_BASE_URL is set in .env (for recording the
+    # demo). Use http://host.docker.internal:11434/v1 from inside the container. Prod never passes it.
+    environment:
+      <<: *api-env
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:

@@ -5,7 +5,7 @@ Cursor. It is a thin wrapper over `unlearn.tools`. It adds no logic and runs no 
 
 | Tool | What it returns |
 | --- | --- |
-| `recall(class_id, student_id)` | Misconceptions the student showed with confidence > 0.6, with recent events |
+| `recall(class_id, student_id)` | Misconceptions the student showed, those on the last diagnosed root cause first, with recent events |
 | `root_cause(class_id, student_id, construct_id)` | Deepest unmastered prerequisite with misconception evidence, plus the `REQUIRES` chain |
 | `learning_path(class_id, student_id, target_id, to_id?)` | Teaching order, deepest first; with `to_id`, the shortest chain (`algo.SPpaths`) |
 | `cohorts(class_id)` | Student groups that share confident misconceptions (`algo.WCC`) |
@@ -56,6 +56,19 @@ Restart Claude Desktop. Then try:
 > Using the unlearn tools on class `demo`, find the cohorts, then propose regrouping the largest one.
 
 The proposal shows up as pending until a teacher approves it in the UI.
+
+## MCP Inspector (no Claude Desktop needed)
+
+The official MCP Inspector runs the same server from the same JSON. Save the config block above to a file, e.g.
+`unlearn-mcp.json`, then:
+
+```
+npx -y @modelcontextprotocol/inspector@2.9.0 --cli --config unlearn-mcp.json --server unlearn --method tools/list
+npx -y @modelcontextprotocol/inspector@2.9.0 --web --config unlearn-mcp.json --server unlearn
+```
+
+The first lists the seven tools. The second opens the Inspector's web UI, where you can call `cohorts` and then
+`propose` by hand.
 
 ## Checking it without a client
 
