@@ -192,6 +192,7 @@ def main(argv=None) -> int:
     ap.add_argument("--model", help="model tag override (default: OLLAMA_MODEL or qwen3.5:27b-q4_K_M for ollama)")
     ap.add_argument("--max-calls", type=int, help="hard cap on uncached A/B LLM calls (free-tier quotas)")
     ap.add_argument("--out", default="eval", help="results file stem in eval/results (eval, crosscheck)")
+    ap.add_argument("--no-calibrate", action="store_true", help="skip the 5 timing calls (quota-limited cross-checks)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     seeds = [int(s) for s in a.seeds.split(",")]
@@ -213,7 +214,7 @@ def main(argv=None) -> int:
         return 0
 
     calibration = None
-    if needs_llm:
+    if needs_llm and not a.no_calibrate:
         sims = {sid: (Simulator(seed=seeds[0]), Simulator(seed=seeds[0]).student(sid))
                 for sid in [f"s{i:02d}" for i in range(1, a.students + 1)]}
         calibration = calibrate(provider, sims, n=min(5, a.students))
@@ -223,6 +224,8 @@ def main(argv=None) -> int:
               f"tokens per call, JSON valid {calibration['json_valid']}. Projected A/B time (upper bound, before cache): "
               f"{eta / 60:.1f} min", flush=True)
         BL.reset_stats(None if a.max_calls is None else max(a.max_calls - calibration["calls"], 0))  # cap includes calibration
+    elif needs_llm:
+        BL.reset_stats(a.max_calls)
 
     writer = functools.partial(llm.write, providers=[])  # C: template wording, graph-derived metrics
     per_seed, raw, stopped = {}, {}, None

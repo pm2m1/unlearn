@@ -101,8 +101,18 @@ def _call(provider, system: str, user: str) -> str:
     import time
     if STATS["limit"] is not None and STATS["calls"] >= STATS["limit"]:
         raise BudgetExceeded(f"LLM call cap {STATS['limit']} reached")
-    t0 = time.perf_counter()
-    text, cached = llm.complete(provider, [{"role": "system", "content": system}, {"role": "user", "content": user}])
+    from openai import APITimeoutError, InternalServerError, RateLimitError
+    # Free tiers rate-limit per minute and hosted models have demand spikes (503): wait and retry the SAME model,
+    # never another one.
+    for attempt in range(4):
+        try:
+            t0 = time.perf_counter()
+            text, cached = llm.complete(provider, [{"role": "system", "content": system}, {"role": "user", "content": user}])
+            break
+        except (RateLimitError, InternalServerError, APITimeoutError):
+            if attempt == 3:
+                raise
+            time.sleep(20 * (attempt + 1))
     if cached:
         STATS["cached"] += 1
     else:

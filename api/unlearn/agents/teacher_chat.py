@@ -107,8 +107,9 @@ class TeacherChat(Agent):
             out = llm.chat_tools(provider, messages, TOOL_SPECS)
             if out["tool_calls"]:
                 messages.append({"role": "assistant", "content": out["content"] or None, "tool_calls": [
-                    {"id": t["id"], "type": "function",
-                     "function": {"name": t["name"], "arguments": json.dumps(t["arguments"])}} for t in out["tool_calls"]]})
+                    t.get("raw") or {"id": t["id"], "type": "function",
+                                     "function": {"name": t["name"], "arguments": json.dumps(t["arguments"])}}
+                    for t in out["tool_calls"]]})
                 for t in out["tool_calls"]:
                     rows = self.run_tool(task_id, t["name"], t["arguments"])
                     messages.append({"role": "tool", "tool_call_id": t["id"],

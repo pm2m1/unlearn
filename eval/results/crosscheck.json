@@ -1,0 +1,206 @@
+{
+  "meta": {
+    "students": 3,
+    "seeds": [
+      0
+    ],
+    "sessions": 2,
+    "conditions_run": [
+      "A",
+      "B"
+    ],
+    "llm": "gemini / gemini-3.6-flash",
+    "llm_role": "A and B only, one model, no fallback; C uses template wording",
+    "n_per_condition": {
+      "A": 3,
+      "B": 2
+    },
+    "llm_calls": {
+      "calls": 18,
+      "cached": 2,
+      "seconds": 36.7,
+      "tokens": 1500,
+      "json_failures": 0,
+      "limit": 18
+    },
+    "calibration": null,
+    "stopped": "LLM call cap 18 reached during B. Vector RAG, seed 0, after 2 students",
+    "not_run": {
+      "C": "not requested"
+    },
+    "judge": {
+      "recall_max_distance": 0.35,
+      "pool_questions": 6
+    },
+    "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C"
+  },
+  "per_seed": {
+    "0": {
+      "A": {
+        "top1_misconception": 0,
+        "top3_misconception": 0,
+        "root_cause_accuracy": 0,
+        "questions_to_diagnosis": 6,
+        "session2_recall": 0,
+        "latency_p50_ms": 9721.3,
+        "latency_p95_ms": 64753.2,
+        "n": 3
+      },
+      "B": {
+        "top1_misconception": 0,
+        "top3_misconception": 0,
+        "root_cause_accuracy": 0.5,
+        "questions_to_diagnosis": 6,
+        "session2_recall": 0,
+        "latency_p50_ms": 2032.4,
+        "latency_p95_ms": 2349.0,
+        "n": 2
+      }
+    }
+  },
+  "summary": {
+    "A": {
+      "top1_misconception": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "top3_misconception": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "root_cause_accuracy": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "questions_to_diagnosis": {
+        "mean": 6,
+        "min": 6,
+        "max": 6
+      },
+      "session2_recall": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "latency_p50_ms": {
+        "mean": 9721.3,
+        "min": 9721.3,
+        "max": 9721.3
+      },
+      "latency_p95_ms": {
+        "mean": 64753.2,
+        "min": 64753.2,
+        "max": 64753.2
+      }
+    },
+    "B": {
+      "top1_misconception": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "top3_misconception": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "root_cause_accuracy": {
+        "mean": 0.5,
+        "min": 0.5,
+        "max": 0.5
+      },
+      "questions_to_diagnosis": {
+        "mean": 6,
+        "min": 6,
+        "max": 6
+      },
+      "session2_recall": {
+        "mean": 0,
+        "min": 0,
+        "max": 0
+      },
+      "latency_p50_ms": {
+        "mean": 2032.4,
+        "min": 2032.4,
+        "max": 2032.4
+      },
+      "latency_p95_ms": {
+        "mean": 2349.0,
+        "min": 2349.0,
+        "max": 2349.0
+      }
+    }
+  },
+  "students": {
+    "0": {
+      "A": [
+        {
+          "sid": "s01",
+          "predicted": [
+            18659,
+            14059
+          ],
+          "root": 411,
+          "asked": 6,
+          "latency_ms": 9721.314665977843,
+          "recalled": false,
+          "opening": "Welcome back! It\u2019s great to see you again. I\u2019m ready to dive into some maths whenever you are. \n\nWhat topic are we focusing on today, and what would you like to get out of this session? Let me know where you'd like to begin!"
+        },
+        {
+          "sid": "s02",
+          "predicted": [
+            24975
+          ],
+          "root": 3587,
+          "asked": 6,
+          "latency_ms": 5691.36774999788,
+          "recalled": false,
+          "opening": "Welcome back! It\u2019s great to see you again. I\u2019m ready to dive into some maths whenever you are. \n\nWhat topic are we focusing on today, and what would you like to get out of this session? Let me know where you'd like to begin!"
+        },
+        {
+          "sid": "s03",
+          "predicted": [
+            18369,
+            22562
+          ],
+          "root": 3241,
+          "asked": 6,
+          "latency_ms": 70867.80333396746,
+          "recalled": false,
+          "opening": "Welcome back! It\u2019s great to see you again. I\u2019m ready to dive into some maths whenever you are. \n\nWhat topic are we focusing on today, and what would you like to get out of this session? Let me know where you'd like to begin!"
+        }
+      ],
+      "B": [
+        {
+          "sid": "s01",
+          "predicted": [
+            15114,
+            14008,
+            15635
+          ],
+          "root": 3587,
+          "asked": 6,
+          "latency_ms": 1680.5727920145728,
+          "recalled": false,
+          "opening": "Hi! Welcome back to our math session. \n\nGreat job finding the highest common factor last time! Today, we\u2019re going to build on that and work on fractions\u2014specifically simplifying them, finding equivalent fractions, and understanding numerators and denominators. \n\nDon't worry, we'll take it step by step. Ready to get started?"
+        },
+        {
+          "sid": "s02",
+          "predicted": [
+            18227,
+            26999,
+            22640
+          ],
+          "root": 428,
+          "asked": 6,
+          "latency_ms": 2384.1779170325026,
+          "recalled": false,
+          "opening": "Hi! Great job adding basic fractions and finding equivalent parts in our last session! \n\nToday, we're going to build on that success by focusing on **adding mixed numbers** (like $1 \\frac{2}{5} + 2 \\frac{1}{5}$) and visualizing how fractions compare using shapes. \n\nReady to get started?"
+        }
+      ]
+    }
+  }
+}

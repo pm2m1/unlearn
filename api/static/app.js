@@ -663,18 +663,19 @@ async function loadEval() {
   const { results } = await api("/eval/results");
   box.replaceChildren();
   if (!Object.keys(results).length) { box.append(el("p", { class: "empty", text: "No results yet." })); return; }
-  const order = ["eval", "concurrency", "latency"];
+  const order = ["eval", "crosscheck", "concurrency", "latency"];
   const names = Object.keys(results).sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99);
   for (const name of names) {
     const r = results[name];
-    if (name === "eval" && r.summary) box.append(...evalTable(r));
+    if (r.summary && r.meta) box.append(...evalTable(r, name === "eval" ? "Graph vs vector RAG vs no memory"
+      : `Cross-check (${r.meta.llm || "LLM"}), n = ${Object.entries(r.meta.n_per_condition || {}).map(([c, n]) => `${c}: ${n}`).join(", ")}`));
     else if (name === "concurrency" && r.isolation) box.append(...concurrencyView(r));
     else if (r.tools) box.append(...latencyTable(r));
     else box.append(el("h2", { text: name }), el("pre", { text: JSON.stringify(r, null, 2).slice(0, 4000) }));
   }
 }
 
-function evalTable(r) {
+function evalTable(r, title) {
   const conds = [["A", "A. No memory"], ["B", "B. Vector RAG"], ["C", "C. Unlearn"]];
   const rows = [["Top-1 misconception", "top1_misconception", "%"], ["Top-3 misconception", "top3_misconception", "%"],
     ["Root-cause accuracy", "root_cause_accuracy", "%"], ["Questions to diagnosis", "questions_to_diagnosis", ""],
@@ -688,8 +689,8 @@ function evalTable(r) {
   };
   const m = r.meta;
   const notes = Object.entries(m.not_run || {}).map(([c, why]) => el("p", { class: "muted", text: `${c} not run: ${why}.` }));
-  return [el("h2", { text: "Graph vs vector RAG vs no memory" }),
-    el("p", { class: "muted", text: `${m.students} simulated students × seeds ${m.seeds.join(", ")} × ${m.sessions} sessions · mean, min–max across seeds · LLM: ${m.llm || "none (template wording)"}` }),
+  return [el("h2", { text: title }),
+    el("p", { class: "muted", text: `${m.students} simulated students × seeds ${m.seeds.join(", ")} × ${m.sessions} sessions · mean, min–max across seeds · A/B model: ${m.llm || "none"} · C: template wording${m.stopped ? ` · stopped early: ${m.stopped}` : ""}` }),
     el("table", { class: "eval" }, el("thead", {}, el("tr", {}, el("th", { text: "Metric" }), conds.map(([, l]) => el("th", { text: l })))),
       el("tbody", {}, rows.map(([label, key, u]) => el("tr", {}, el("td", { text: label }), conds.map(([c]) => cell(c, key, u)))))),
     ...notes, el("p", { class: "muted", text: `Simulator bias: ${m.simulator_bias}.` })];

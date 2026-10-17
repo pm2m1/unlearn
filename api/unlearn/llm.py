@@ -282,11 +282,21 @@ def chat_tools(provider: Provider, messages: list[dict], tool_specs: list[dict])
     each round depends on live tool rows."""
     from openai import OpenAI
 
+    from openai import BadRequestError
+
     client = OpenAI(api_key=provider.key, base_url=provider.base_url, timeout=provider_timeout(provider), max_retries=0)
-    resp = client.chat.completions.create(model=provider.model, messages=messages, tools=tool_specs,
-                                          max_tokens=MAX_TOKENS, temperature=0.2,
-                                          extra_body=dict(provider.extra_body) or None)
+    kwargs = dict(model=provider.model, messages=messages, tools=tool_specs, max_tokens=MAX_TOKENS, temperature=0.2)
+    try:
+        resp = client.chat.completions.create(**kwargs, extra_body=dict(provider.extra_body) or None)
+    except BadRequestError:
+        if not provider.extra_body:
+            raise
+        # gemini-3.5-flash-lite rejects reasoning_effort together with tools ("invalid argument"); retry without it.
+        resp = client.chat.completions.create(**kwargs)
     msg = resp.choices[0].message
-    calls = [{"id": c.id, "name": c.function.name, "arguments": json.loads(c.function.arguments or "{}")}
+    calls = [{"id": c.id, "name": c.function.name, "arguments": json.loads(c.function.arguments or "{}"),
+              # the call exactly as returned: Gemini 3 attaches a thought signature (extra_content) that must be
+              # echoed back with the tool results, or the next round fails with "invalid argument"
+              "raw": c.model_dump(exclude_none=True)}
              for c in (msg.tool_calls or [])]
     return {"content": (msg.content or "").strip(), "tool_calls": calls}
