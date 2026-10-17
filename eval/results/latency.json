@@ -18,115 +18,115 @@
   "tools": {
     "record_attempt": {
       "n": 50,
-      "p50_ms": 1.22,
-      "p95_ms": 1.69,
-      "mean_ms": 1.28,
-      "max_ms": 4.41
+      "p50_ms": 1.17,
+      "p95_ms": 1.45,
+      "mean_ms": 1.17,
+      "max_ms": 1.71
     },
     "diagnose_text": {
       "n": 50,
-      "p50_ms": 3.89,
-      "p95_ms": 4.63,
-      "mean_ms": 3.97,
-      "max_ms": 5.24
+      "p50_ms": 2.35,
+      "p95_ms": 2.68,
+      "mean_ms": 2.36,
+      "max_ms": 3.5
     },
     "next_question": {
       "n": 50,
-      "p50_ms": 0.45,
-      "p95_ms": 0.92,
-      "mean_ms": 0.55,
-      "max_ms": 1.1
+      "p50_ms": 0.81,
+      "p95_ms": 0.95,
+      "mean_ms": 0.81,
+      "max_ms": 1.08
     },
     "root_cause": {
       "n": 50,
-      "p50_ms": 0.97,
-      "p95_ms": 1.1,
-      "mean_ms": 0.97,
-      "max_ms": 1.58
+      "p50_ms": 0.87,
+      "p95_ms": 0.97,
+      "mean_ms": 0.86,
+      "max_ms": 1.07
     },
     "probe_frontier": {
       "n": 50,
-      "p50_ms": 0.59,
-      "p95_ms": 0.7,
+      "p50_ms": 0.58,
+      "p95_ms": 0.68,
       "mean_ms": 0.56,
-      "max_ms": 0.76
+      "max_ms": 0.74
     },
     "learning_path": {
       "n": 50,
-      "p50_ms": 0.68,
-      "p95_ms": 0.75,
-      "mean_ms": 0.69,
-      "max_ms": 0.83
+      "p50_ms": 0.67,
+      "p95_ms": 0.84,
+      "mean_ms": 0.7,
+      "max_ms": 1.65
     },
     "recall": {
       "n": 50,
-      "p50_ms": 0.4,
-      "p95_ms": 0.48,
-      "mean_ms": 0.4,
-      "max_ms": 0.61
+      "p50_ms": 0.38,
+      "p95_ms": 0.53,
+      "mean_ms": 0.39,
+      "max_ms": 0.59
     },
     "pick_skill": {
       "n": 50,
-      "p50_ms": 0.67,
+      "p50_ms": 0.66,
       "p95_ms": 0.75,
-      "mean_ms": 0.68,
-      "max_ms": 0.83
+      "mean_ms": 0.67,
+      "max_ms": 0.88
     },
     "update_skill": {
       "n": 50,
-      "p50_ms": 0.59,
-      "p95_ms": 0.65,
-      "mean_ms": 0.6,
-      "max_ms": 0.66
+      "p50_ms": 0.57,
+      "p95_ms": 0.63,
+      "mean_ms": 0.58,
+      "max_ms": 0.71
     },
     "cohorts": {
       "n": 50,
       "p50_ms": 1.67,
-      "p95_ms": 1.81,
-      "mean_ms": 1.69,
-      "max_ms": 1.84
+      "p95_ms": 1.79,
+      "mean_ms": 1.67,
+      "max_ms": 1.85
     },
     "keystones": {
       "n": 50,
-      "p50_ms": 0.81,
+      "p50_ms": 0.8,
       "p95_ms": 0.96,
       "mean_ms": 0.83,
-      "max_ms": 1.15
+      "max_ms": 1.07
     },
     "bridges": {
       "n": 50,
-      "p50_ms": 35.87,
-      "p95_ms": 40.89,
-      "mean_ms": 36.39,
-      "max_ms": 41.39
+      "p50_ms": 38.2,
+      "p95_ms": 41.01,
+      "mean_ms": 38.64,
+      "max_ms": 47.24
     },
     "claim": {
       "n": 50,
-      "p50_ms": 0.38,
-      "p95_ms": 0.5,
-      "mean_ms": 0.39,
-      "max_ms": 0.55
+      "p50_ms": 0.42,
+      "p95_ms": 0.55,
+      "mean_ms": 0.44,
+      "max_ms": 0.71
     },
     "handoff": {
       "n": 50,
-      "p50_ms": 0.33,
-      "p95_ms": 0.39,
-      "mean_ms": 0.33,
-      "max_ms": 0.41
+      "p50_ms": 0.36,
+      "p95_ms": 0.44,
+      "mean_ms": 0.42,
+      "max_ms": 2.25
     },
     "propose": {
       "n": 50,
-      "p50_ms": 0.33,
-      "p95_ms": 0.36,
-      "mean_ms": 0.33,
-      "max_ms": 0.52
+      "p50_ms": 0.34,
+      "p95_ms": 0.4,
+      "mean_ms": 0.35,
+      "max_ms": 0.44
     },
     "decide": {
       "n": 50,
-      "p50_ms": 1.09,
-      "p95_ms": 1.2,
-      "mean_ms": 1.11,
-      "max_ms": 1.26
+      "p50_ms": 1.18,
+      "p95_ms": 1.46,
+      "mean_ms": 1.21,
+      "max_ms": 1.54
     }
   }
 }

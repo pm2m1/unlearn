@@ -702,7 +702,7 @@ function concurrencyView(r) {
     el("p", { class: "muted", text: `${r.students_per_graph} simulated students in each of ${r.graphs.join(" and ")}, at once, through the async client.` }),
     el("table", {}, el("thead", {}, el("tr", {}, ["", "p50 ms", "p95 ms", "queries"].map((h) => el("th", { text: h })))),
       el("tbody", {}, Object.entries(r.per_graph).map(([g, x]) => t(`${g} (both classes running)`, x)))),
-    el("p", { class: "muted", text: "Probe writes into class A while a heavy write load runs:" }),
+    el("p", { class: "muted", text: "Probe writes into class A, one at a time, while other load runs:" }),
     el("table", {}, el("thead", {}, el("tr", {}, ["", "p50 ms", "p95 ms", "writes"].map((h) => el("th", { text: h })))),
       el("tbody", {}, t("A alone (baseline)", iso.baseline), t("heavy writes on class B (other graph)", iso.load_on_other_graph),
         t("heavy writes on class A (same graph)", iso.load_on_same_graph),
