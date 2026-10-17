@@ -31,21 +31,22 @@ def fake_llm(monkeypatch, tmp_path):
 def test_no_model_stops_before_running(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(run_eval, "eval_provider", lambda which, model: (None, "Ollama is not reachable"))
     monkeypatch.setattr(run_eval, "RESULTS", tmp_path)
-    assert run_eval.main(["--students", "2", "--seeds", "0"]) == 2
+    assert run_eval.main(["--students", "2", "--seeds", "0", "--out", "pytest_eval"]) == 2
     assert "stops here" in capsys.readouterr().out
-    assert not (tmp_path / "eval.json").exists()
+    assert not (tmp_path / "pytest_eval.json").exists()
 
 
 def test_harness_runs_all_conditions(fake_llm):
     calls, out = fake_llm
-    assert run_eval.main(["--students", "2", "--seeds", "0"]) == 0
-    result = json.loads((out / "eval.json").read_text())
+    # Own output name: its scratch graphs (class_pytest_eval_s0) never collide with a real eval run.
+    assert run_eval.main(["--students", "2", "--seeds", "0", "--out", "pytest_eval"]) == 0
+    result = json.loads((out / "pytest_eval.json").read_text())
     assert set(result["summary"]) == {"A", "B", "C"}
     for c in "ABC":
         assert set(result["summary"][c]) == set(run_eval.METRICS)
     assert result["meta"]["llm"] == "fake / fake-1"
     assert result["meta"]["calibration"]["json_valid"] == "2/2"
-    assert "| Root-cause accuracy |" in (out / "eval.md").read_text()
+    assert "| Root-cause accuracy |" in (out / "pytest_eval.md").read_text()
     assert any("Candidate misconceptions retrieved" in c for c in calls)  # B saw retrieved misconceptions
 
 
@@ -62,7 +63,7 @@ def test_judge_recall_matches_close_sentences_only():
 def test_call_cap_stops_cleanly(fake_llm):
     calls, out = fake_llm
     assert run_eval.main(["--students", "3", "--seeds", "0", "--conditions", "A,B", "--max-calls", "4",
-                          "--out", "capped"]) == 0
-    result = json.loads((out / "capped.json").read_text())
+                          "--out", "pytest_capped"]) == 0
+    result = json.loads((out / "pytest_capped.json").read_text())
     total = result["meta"]["llm_calls"]["calls"] + result["meta"]["calibration"]["calls"]
     assert total <= 4 and "cap" in result["meta"]["stopped"]  # the cap includes the calibration calls
