@@ -29,7 +29,7 @@ async function api(path, opts = {}) {
 }
 
 const state = {
-  classId: "demo",
+  classId: new URLSearchParams(location.search).get("class") || "demo",
   students: [],
   aliases: {},
   targets: [],
@@ -84,6 +84,7 @@ async function loadClass() {
   $("#target-select").replaceChildren(...Object.entries(groups).map(([sub, xs]) =>
     el("optgroup", { label: sub }, xs.map((x) => el("option", { value: x.id, text: `${x.name} (${x.depth} levels)` })))));
   syncTarget();
+  $("#class-name").textContent = state.classId;
   $("#class-summary").textContent = `${s.students.length} simulated students · ${s.students.reduce((a, x) => a + x.sessions, 0)} sessions so far`;
 }
 
@@ -116,6 +117,7 @@ async function startSession() {
     state.session = { id: out.session_id, studentId: sid, target, n: out.session_n };
     addSteps(`Session ${out.session_n} start · ${state.aliases[sid]}`, out.receipts);
     showRecall(out.recall, out.greeting);
+    state.pending = out.kind === "question" ? { kind: "diagnose", question: out.question, constructId: out.construct_id } : null;
     await refreshGraph();
     await handleStep(out);
   } catch (e) {
