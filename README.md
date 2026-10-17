@@ -320,7 +320,7 @@ It walks up to four prerequisite hops back from the skill the student is working
   - Top-3 misconception went from 20% to 33%.
   - Root cause stayed at 37%: every planted root is one of the prerequisites B+ was offered anyway.
   - A, B, C, latency and recall are unchanged.
-- **Re-run after the human review (Oct 18).** Parth's review of the curated data ([REVIEW.md](REVIEW.md), section 0) deleted 2 `REQUIRES` edges and removed 9 options. Every condition was then re-run on the new data on the same students, so all the numbers below are post-review. The pre-review run is kept in [`eval/results/eval_pre_review.json`](eval/results/eval_pre_review.json).
+- **Re-run after the human review (Oct 18).** Parth's review of the curated data ([REVIEW.md](REVIEW.md), section 0) deleted 2 `REQUIRES` edges and removed 9 options. Every condition was then re-run on the new data with the same seeds, so all the numbers below are post-review. The simulator draws each student's planted state from the graph, so 14 of the 90 students have a different planted root or misconceptions than before; within the run, every condition still faces the same students. The pre-review run is kept in [`eval/results/eval_pre_review.json`](eval/results/eval_pre_review.json).
 
 **Results** (generated from [`eval/results/eval.json`](eval/results/eval.json) and [`random_baseline.json`](eval/results/random_baseline.json) by `scripts/readme_eval.py`):
 
