@@ -274,3 +274,12 @@ I'd try (a) first: it keeps your "generic spread counts less" property, and it s
 25. **`.env` is loaded by repo path** in `db.py` and `llm.py`, so the MCP server works from any working directory (the test starts it from `/`).
 26. **Demo helpers:** `reset_student` (session 1 of `demo_session.py` replays from scratch), `sessions`, `chain`, `proposals`, `showed_on` and `name_vocabulary`. All their Cypher is in `queries.py`.
 27. **The simulator reads the curated files, not the graph.** It is the ground truth, so it must not share the agents' queries. It has a `noiseless` mode used only by the end-to-end tests.
+28. **Tutor check question:** it asks on the root cause if a question is left. Otherwise it asks on the closest construct above the root on the `root_cause` chain, which depends on the root.
+
+### Questions run out across sessions (decision needed)
+`next_question` excludes every question the student has ever attempted (`NOT (s)-[:ATTEMPTED]->(q)`). With 3 questions per construct, session 1 often uses all of the root's questions. Session 2 then can't re-ask the root. It opens with recall as it should, but its diagnosis and check question land on other constructs: in the s18 transcript, 408 has nothing left in session 2.
+
+Options:
+- (a) Exclude only questions attempted in the current session. This is a one-clause change to the SPEC query: `NOT (s)-[:ATTEMPTED {session:$sess}]->(q)`.
+- (b) Author 5 questions for the constructs that are often roots.
+- (c) Accept it for the demo, since session 2's job is recall.

@@ -1,7 +1,7 @@
 PY ?= .venv/bin/python
 export PYTHONPATH := api:.
 
-.PHONY: up down seed test topics
+.PHONY: up down seed test topics latency demo
 
 up:
 	docker compose up -d --wait falkordb

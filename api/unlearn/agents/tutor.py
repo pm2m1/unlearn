@@ -34,9 +34,10 @@ class Tutor(Agent):
                  "skill": skill["skill"] if skill else None, "steps": skill["steps"] if skill else []}
         self.say(task_id, "explain", facts, [rc, path, [mis], skills])
 
-        # One check question: on the root cause if any is left, else the next construct up the path.
+        # One check question: on the root cause if any is left, else the closest construct above it on the
+        # root_cause chain (target -> ... -> root), which depends on the root.
         check = None
-        for construct in [root["id"]] + [p["id"] for p in path if p["id"] != root["id"]]:
+        for construct in [root["id"]] + list(reversed(root["chain_ids"][:-1])):
             rows = self.call(task_id, tools.next_question, c, sid, construct)["rows"]
             if rows:
                 check = (construct, rows[0])

@@ -2,7 +2,7 @@
 
   p1: root 408, target 410, misconception 18650 (on two of 408's questions, so it can be shown twice)
   p2: root 408, target 419, misconceptions 18650 and 19773 (shares 18650 with p1, so the Teacher regroups)
-  p3: root 3378, target 411, misconceptions 15384 and 22436 (no cohort, so the Teacher assigns practice)
+  p3: root 3378, target 411, misconception 15384 (no cohort, so the Teacher assigns practice)
 """
 
 import pytest
@@ -15,7 +15,7 @@ from unlearn.agents.runner import run_session_sync
 from unlearn.db import copy_graph, delete_graph, run, run_batched
 
 CLASS_ID = "pytest_agents"
-PLANTED = {"p1": (408, 410, [18650]), "p2": (408, 419, [18650, 19773]), "p3": (3378, 411, [15384, 22436]),
+PLANTED = {"p1": (408, 410, [18650]), "p2": (408, 419, [18650, 19773]), "p3": (3378, 411, [15384]),
            "p4": (408, 410, [18650])}
 
 
