@@ -84,18 +84,51 @@ def _prerequisites(sim, target: int) -> list[int]:
     return list(nx.descendants(sim.g, target))  # edge a -> b means a REQUIRES b
 
 
-def _ask(provider, system: str, user: str) -> dict:
-    text, _ = llm.complete(provider, [{"role": "system", "content": system}, {"role": "user", "content": user}])
+class BudgetExceeded(RuntimeError):
+    pass
+
+
+# Every A/B LLM call goes through _call: it counts uncached calls, enforces an optional cap (the Gemini
+# cross-check has a free-tier quota), and records time, tokens and JSON parse failures.
+STATS = {"calls": 0, "cached": 0, "seconds": 0.0, "tokens": 0, "json_failures": 0, "limit": None}
+
+
+def reset_stats(limit: int | None = None) -> None:
+    STATS.update(calls=0, cached=0, seconds=0.0, tokens=0, json_failures=0, limit=limit)
+
+
+def _call(provider, system: str, user: str) -> str:
+    import time
+    if STATS["limit"] is not None and STATS["calls"] >= STATS["limit"]:
+        raise BudgetExceeded(f"LLM call cap {STATS['limit']} reached")
+    t0 = time.perf_counter()
+    text, cached = llm.complete(provider, [{"role": "system", "content": system}, {"role": "user", "content": user}])
+    if cached:
+        STATS["cached"] += 1
+    else:
+        STATS["calls"] += 1
+        STATS["seconds"] += time.perf_counter() - t0
+        STATS["tokens"] += llm.LAST_USAGE.get("tokens") or 0
+    return text
+
+
+def parse_json(text: str) -> dict | None:
     m = re.search(r"\{.*\}", text, re.S)
     try:
-        return json.loads(m.group(0)) if m else {}
+        return json.loads(m.group(0)) if m else None
     except json.JSONDecodeError:
-        return {}
+        return None
+
+
+def _ask(provider, system: str, user: str) -> dict:
+    out = parse_json(_call(provider, system, user))
+    if out is None:
+        STATS["json_failures"] += 1
+    return out or {}
 
 
 def _say(provider, system: str, user: str) -> str:
-    text, _ = llm.complete(provider, [{"role": "system", "content": system}, {"role": "user", "content": user}])
-    return text
+    return _call(provider, system, user)
 
 
 def _render(q: dict, key: str) -> str:

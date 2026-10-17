@@ -52,7 +52,7 @@ def test_fabricated_reply_retries_once_then_template(fake_chain):
 
 
 def test_retry_can_recover(fake_chain):
-    fake_chain += ["You hold [[Believes fractions are pizzas]].", "It's [[Find the lowest common multiple]]."]
+    fake_chain += ["You hold [[Believes fractions are pizzas]].", "Your answers point back to [[Find the lowest common multiple]]."]
     assert llm.write("diagnosis", FACTS, ROWS, VOCAB).source == "fake"
 
 
@@ -78,3 +78,10 @@ def test_cache_key_is_stable_and_model_specific(monkeypatch, tmp_path):
     a, b = llm.PROVIDERS[0], llm.PROVIDERS[1]
     m = llm.messages_for("diagnosis", FACTS, "draft")
     assert llm._cache_path(a, m) == llm._cache_path(a, m) != llm._cache_path(b, m)
+
+
+def test_malformed_reply_is_retried_then_templated(fake_chain):
+    fake_chain += ["Warm message for teacher? Yes.\n *", "Yes."]
+    reply = llm.write("diagnosis", FACTS, ROWS, VOCAB)
+    assert reply.source == "template"
+    assert any("words" in p or "list marker" in p for a in reply.attempts[:2] for p in a["problems"])

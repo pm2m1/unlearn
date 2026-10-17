@@ -22,14 +22,14 @@ def fake_llm(monkeypatch, tmp_path):
                                "root_cause": "Find the lowest common multiple"}), False
         return "Welcome back! Let's keep practising fractions today.", False
 
-    monkeypatch.setattr(llm, "available", lambda: [fake])
+    monkeypatch.setattr(run_eval, "eval_provider", lambda which, model: (fake, None))
     monkeypatch.setattr(llm, "complete", complete)
     monkeypatch.setattr(run_eval, "RESULTS", tmp_path)
     return calls, tmp_path
 
 
-def test_no_key_stops_before_running(monkeypatch, tmp_path, capsys):
-    monkeypatch.setattr(llm, "available", lambda: [])
+def test_no_model_stops_before_running(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(run_eval, "eval_provider", lambda which, model: (None, "Ollama is not reachable"))
     monkeypatch.setattr(run_eval, "RESULTS", tmp_path)
     assert run_eval.main(["--students", "2", "--seeds", "0"]) == 2
     assert "stops here" in capsys.readouterr().out
@@ -44,6 +44,7 @@ def test_harness_runs_all_conditions(fake_llm):
     for c in "ABC":
         assert set(result["summary"][c]) == set(run_eval.METRICS)
     assert result["meta"]["llm"] == "fake / fake-1"
+    assert result["meta"]["calibration"]["json_valid"] == "2/2"
     assert "| Root-cause accuracy |" in (out / "eval.md").read_text()
     assert any("Candidate misconceptions retrieved" in c for c in calls)  # B saw retrieved misconceptions
 
@@ -56,3 +57,12 @@ def test_judge_recall_matches_close_sentences_only():
     name = rows[0]["n"]
     assert judge.recalled(f"Last time you showed: {name}.", [15341])
     assert not judge.recalled("Welcome back! Let's keep practising fractions today.", [15341])
+
+
+def test_call_cap_stops_cleanly(fake_llm):
+    calls, out = fake_llm
+    assert run_eval.main(["--students", "3", "--seeds", "0", "--conditions", "A,B", "--max-calls", "4",
+                          "--out", "capped"]) == 0
+    result = json.loads((out / "capped.json").read_text())
+    total = result["meta"]["llm_calls"]["calls"] + result["meta"]["calibration"]["calls"]
+    assert total <= 4 and "cap" in result["meta"]["stopped"]  # the cap includes the calibration calls

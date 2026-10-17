@@ -114,7 +114,7 @@ class TeacherChat(Agent):
                     messages.append({"role": "tool", "tool_call_id": t["id"],
                                      "content": json.dumps(rows[:ROWS_FOR_MODEL], default=str)})
                 continue
-            problems = llm.check_reply(out["content"], self.turn_rows, self.vocabulary())
+            problems = llm.check_reply(out["content"], self.turn_rows, self.vocabulary()) + llm.malformed(out["content"])
             attempts.append({"provider": provider.name, "model": provider.model, "ok": not problems, "problems": problems})
             if not problems:
                 return llm.unmark(out["content"]), []

@@ -115,6 +115,20 @@ def check_reply(text: str, turn_rows: list, vocabulary: list[str]) -> list[str]:
     return problems
 
 
+MIN_WORDS = 8
+
+
+def malformed(text: str) -> list[str]:
+    """Replies that name nothing can't fail the receipt check, so also reject ones that aren't a message at all
+    (a live Gemini reply was "Warm message for teacher? Yes.\n *")."""
+    problems = []
+    if len(re.findall(r"[A-Za-z]+", unmark(text))) < MIN_WORDS:
+        problems.append(f"fewer than {MIN_WORDS} words")
+    if re.search(r"^\s*[*\-•]\s*$", text, re.M):
+        problems.append("a bare list marker")
+    return problems
+
+
 def unmark(text: str) -> str:
     return MARK.sub(lambda m: m.group(1), text)
 
@@ -244,15 +258,15 @@ def write(kind: str, facts: dict, turn_rows: list, vocabulary: list[str], provid
         try:
             for _ in range(2):
                 text, cached = complete(provider, messages)
-                problems = check_reply(text, turn_rows, vocabulary)
+                problems = check_reply(text, turn_rows, vocabulary) + malformed(text)
                 attempts.append({"provider": provider.name, "model": provider.model, "ok": not problems,
                                  "problems": problems, "cached": cached})
                 if not problems:
                     return Reply(unmark(text), provider.name, attempts)
                 messages = messages + [
                     {"role": "assistant", "content": text},
-                    {"role": "user", "content": "These names are not in FACTS: " + "; ".join(problems)
-                     + ". Rewrite using only names from FACTS, copied exactly, in [[double brackets]]."}]
+                    {"role": "user", "content": "Problems: " + "; ".join(problems) + ". Write a complete message "
+                     "of at least two sentences, using only names from FACTS, copied exactly, in [[double brackets]]."}]
         except Exception as e:  # network, auth, rate limit: try the next provider
             attempts.append({"provider": provider.name, "model": provider.model, "ok": False,
                              "error": f"{type(e).__name__}: {str(e)[:200]}"})

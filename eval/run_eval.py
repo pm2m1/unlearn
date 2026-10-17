@@ -116,7 +116,7 @@ def summarise(per_seed: dict, conds: list[str]) -> dict:
     for c in conds:
         out[c] = {}
         for m in METRICS:
-            xs = [per_seed[s][c][m] for s in per_seed if per_seed[s][c][m] is not None]
+            xs = [per_seed[s][c][m] for s in per_seed if c in per_seed[s] and per_seed[s][c][m] is not None]
             out[c][m] = {"mean": round(statistics.mean(xs), 3), "min": min(xs), "max": max(xs)} if xs else None
     return out
 
@@ -139,7 +139,8 @@ def markdown(result: dict) -> str:
     meta = result["meta"]
     lines = [f"# Eval results", "",
              f"{meta['students']} simulated students × seeds {meta['seeds']} × {meta['sessions']} sessions. "
-             f"Mean (min–max across seeds). LLM: {meta['llm'] or 'none (template wording)'}.", "",
+             f"Mean (min–max across seeds). A/B model: {meta['llm'] or 'none'}; C: template wording. "
+             f"n per condition: {meta.get('n_per_condition')}.", "",
              "| Metric | " + " | ".join(LABELS[c] for c in conds) + " |", "| --- | --- | --- | --- |"]
     lines += [f"| {name} | " + " | ".join(cell(c, m, u) for c in conds) + " |" for name, m, u in rows]
     for c, why in meta.get("not_run", {}).items():
@@ -148,38 +149,88 @@ def markdown(result: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def eval_provider(which: str, model: str | None):
+    """The one model A and B use, with no fallback. None if it isn't available."""
+    if which == "ollama":
+        prov = llm.ollama_provider(model)
+        import httpx
+        try:
+            tags = httpx.get(prov.base_url.rsplit("/v1", 1)[0] + "/api/tags", timeout=5).json()
+        except Exception:
+            return None, "Ollama is not reachable at " + prov.base_url
+        if prov.model not in {m["name"] for m in tags.get("models", [])}:
+            return None, f"Ollama has no model {prov.model!r} (ollama pull {prov.model})"
+        return prov, None
+    prov = next(p for p in llm.PROVIDERS if p.name == which)
+    if model:
+        import dataclasses
+        prov = dataclasses.replace(prov, default_model=model, model_env="")
+    return (prov, None) if prov.key else (None, f"no {prov.key_env} in .env")
+
+
+def calibrate(provider, sims: dict, n: int = 5) -> dict:
+    """Time n real A/B prompts before the run: seconds and tokens per call, and whether the JSON parses."""
+    BL.reset_stats()
+    parsed = 0
+    for i, (sim, student) in enumerate(list(sims.values())[:n]):
+        answers = BL.answer_session(student, BL.pool_questions(sim, student))
+        prompt = ("Attempt history:\n" + BL.history_text(answers) + '\n\nReply as JSON: {"misconceptions": [the 3 most likely], '
+                  '"root_cause": "the earlier skill this student is most likely missing"} (calibration)')
+        parsed += BL.parse_json(BL._call(provider, BL.DIAG_SYSTEM, prompt)) is not None
+    calls = max(BL.STATS["calls"], 1)
+    return {"calls": BL.STATS["calls"], "cached": BL.STATS["cached"], "json_valid": f"{parsed}/{n}",
+            "seconds_per_call": round(BL.STATS["seconds"] / calls, 2), "tokens_per_call": round(BL.STATS["tokens"] / calls, 1)}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--students", type=int, default=30)
     ap.add_argument("--seeds", default="0,1,2")
     ap.add_argument("--conditions", default="A,B,C")
+    ap.add_argument("--llm", default="ollama", choices=["ollama", "gemini", "openrouter", "groq"],
+                    help="the single model A and B use (C is template-only)")
+    ap.add_argument("--model", help="model tag override (default: OLLAMA_MODEL or qwen3.5:27b-q4_K_M for ollama)")
+    ap.add_argument("--max-calls", type=int, help="hard cap on uncached A/B LLM calls (free-tier quotas)")
+    ap.add_argument("--out", default="eval", help="results file stem in eval/results (eval, crosscheck)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     seeds = [int(s) for s in a.seeds.split(",")]
     conds = [c.strip().upper() for c in a.conditions.split(",")]
-    providers = llm.available()
-    provider = providers[0] if providers else None
+    needs_llm = any(c in conds for c in "AB")
+    provider, why = eval_provider(a.llm, a.model) if needs_llm else (None, None)
 
     n = a.students * len(seeds)
-    budget = {c: CALLS_PER_STUDENT[c] * n for c in conds if c in "AB" or provider}
+    budget = {c: CALLS_PER_STUDENT[c] * n for c in conds if c in "AB"}
     print(f"Eval: {a.students} students × seeds {seeds} × 2 sessions, conditions {conds}")
-    print(f"LLM: {f'{provider.name} / {provider.model}' if provider else 'none configured'}")
-    print("LLM calls, upper bound before cache: " + ", ".join(f"{c} {v}" for c, v in budget.items())
-          + f" | total {sum(budget.values())}")
+    print(f"A/B model: {f'{provider.name} / {provider.model}' if provider else (why or 'not needed')}; C: template wording")
+    if budget:
+        print("A/B LLM calls, upper bound before cache: " + ", ".join(f"{c} {v}" for c, v in budget.items())
+              + f" | total {sum(budget.values())}" + (f" | capped at {a.max_calls}" if a.max_calls else ""))
+    if needs_llm and provider is None:
+        print(f"A and B need an LLM and {why}, so the eval stops here without running anything.")
+        return 2
     if a.dry_run:
         return 0
-    if provider is None and any(c in conds for c in "AB"):
-        print("No LLM API key in .env (GROQ_API_KEY, GEMINI_API_KEY or OPENROUTER_API_KEY). Conditions A and B need "
-              "an LLM, so the eval stops here without running anything. Add a key, or run --conditions C for Unlearn alone.")
-        return 2
 
-    writer = functools.partial(llm.write, providers=[provider]) if provider else llm.write
-    per_seed, raw = {}, {}
+    calibration = None
+    if needs_llm:
+        sims = {sid: (Simulator(seed=seeds[0]), Simulator(seed=seeds[0]).student(sid))
+                for sid in [f"s{i:02d}" for i in range(1, a.students + 1)]}
+        calibration = calibrate(provider, sims, n=min(5, a.students))
+        upper = min(sum(budget.values()), a.max_calls or 10**9)
+        eta = upper * calibration["seconds_per_call"]
+        print(f"Calibration on 5 real prompts: {calibration['seconds_per_call']} s and {calibration['tokens_per_call']} "
+              f"tokens per call, JSON valid {calibration['json_valid']}. Projected A/B time (upper bound, before cache): "
+              f"{eta / 60:.1f} min", flush=True)
+        BL.reset_stats(None if a.max_calls is None else max(a.max_calls - calibration["calls"], 0))  # cap includes calibration
+
+    writer = functools.partial(llm.write, providers=[])  # C: template wording, graph-derived metrics
+    per_seed, raw, stopped = {}, {}, None
     for seed in seeds:
         sim = Simulator(seed=seed)
         sids = [f"s{i:02d}" for i in range(1, a.students + 1)]
         students = {sid: sim.student(sid) for sid in sids}
-        class_id = f"eval_s{seed}"
+        class_id = f"{a.out}_s{seed}"  # per output, so a cross-check can run alongside the main eval
         g = T.graph_name(class_id)
         delete_graph(g)
         copy_graph("class_template", g)
@@ -191,27 +242,43 @@ def main(argv=None) -> int:
             rows = []
             for sid in sids:
                 student = Simulator(seed=seed).student(sid)  # fresh answer stream per condition, same planted state
-                r = run_c(class_id, student, writer, judge) if c == "C" else run_ab(c, provider, sim, student, judge)
+                try:
+                    r = run_c(class_id, student, writer, judge) if c == "C" else run_ab(c, provider, sim, student, judge)
+                except BL.BudgetExceeded as e:
+                    stopped = f"{e} during {LABELS[c]}, seed {seed}, after {len(rows)} students"
+                    break
                 rows.append({"sid": sid, **r})
-            per_seed[seed][c] = score(rows, students)
-            raw[seed][c] = rows
-            print(f"seed {seed} {LABELS[c]}: {json.dumps(per_seed[seed][c])} ({time.time() - t0:.1f}s)", flush=True)
+            if rows:
+                per_seed[seed][c] = score(rows, students)
+                per_seed[seed][c]["n"] = len(rows)
+                raw[seed][c] = rows
+                print(f"seed {seed} {LABELS[c]} (n={len(rows)}): {json.dumps(per_seed[seed][c])} ({time.time() - t0:.1f}s)", flush=True)
+            if stopped:
+                print("STOPPED:", stopped)
+                break
         delete_graph(g)
+        if stopped:
+            break
 
+    ran = [c for c in conds if any(c in per_seed[s] for s in per_seed)]
     result = {
-        "meta": {"students": a.students, "seeds": seeds, "sessions": 2, "conditions_run": conds,
+        "meta": {"students": a.students, "seeds": seeds, "sessions": 2, "conditions_run": ran,
                  "llm": f"{provider.name} / {provider.model}" if provider else None,
-                 "not_run": {c: "no LLM API key configured" for c in "AB" if c not in conds},
+                 "llm_role": "A and B only, one model, no fallback; C uses template wording",
+                 "n_per_condition": {c: sum(per_seed[s][c]["n"] for s in per_seed if c in per_seed[s]) for c in ran},
+                 "llm_calls": {k: (round(v, 1) if isinstance(v, float) else v) for k, v in BL.STATS.items()} if needs_llm else None,
+                 "calibration": calibration, "stopped": stopped,
+                 "not_run": {c: why or "not requested" for c in "ABC" if c not in ran},
                  "judge": {"recall_max_distance": BL.RECALL_MAX_DISTANCE, "pool_questions": BL.POOL_QUESTIONS},
                  "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C"},
         "per_seed": per_seed,
-        "summary": summarise(per_seed, conds),
+        "summary": summarise({s: v for s, v in per_seed.items()}, ran),
         "students": {seed: {c: [{k: v for k, v in r.items() if k not in ("raw",)} for r in rows]
                             for c, rows in conds_rows.items()} for seed, conds_rows in raw.items()},
     }
     RESULTS.mkdir(parents=True, exist_ok=True)
-    (RESULTS / "eval.json").write_text(json.dumps(result, indent=2, default=str) + "\n")
-    (RESULTS / "eval.md").write_text(markdown(result))
+    (RESULTS / f"{a.out}.json").write_text(json.dumps(result, indent=2, default=str) + "\n")
+    (RESULTS / f"{a.out}.md").write_text(markdown(result))
     print(markdown(result))
     return 0
 
