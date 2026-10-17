@@ -83,8 +83,8 @@ def test_recall_in_second_session(planted):
         "Multiplies the two numbers together to find the lowest common multiple"]
     assert rows[0]["times"] == 2
     assert rows[0]["recent"] == ["Picked B on q-3-2", "Picked B on q-3-1"]  # newest first
-    # Ben's one-off misconception (confidence 0.5) is not recalled.
-    assert len(T.recall(planted, "sb")["rows"]) == 1
+    # Ben's one-off misconception is recalled too, after the one he showed twice (strongest first).
+    assert [r["times"] for r in T.recall(planted, "sb")["rows"]] == [2, 1]
 
 
 def test_cohorts_group_students_sharing_a_gap(planted):

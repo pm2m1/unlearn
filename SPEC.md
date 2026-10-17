@@ -379,16 +379,17 @@ YIELD path, pathWeight
 RETURN [n IN nodes(path) | n.name] AS chain, pathWeight
 ```
 
-**`recall`** opens each session with what the tutor remembers:
+**`recall`** opens each session with what the tutor remembers: every misconception the student has shown, strongest (most repeated) first. It used to keep only confidence > 0.6, meaning seen twice. That left 58 of 90 simulated students with nothing to recall, so the threshold was lowered. Measured on 90 simulated students, the change raised recall of a planted misconception in the session-2 opening from 29% to 53%, while precision (named misconceptions that were planted) fell from 81% to 30%:
 
 ```
 MATCH (s:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
-WHERE e.confidence > 0.6
+WHERE e.count >= 1
 OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(ev:Event)-[:ABOUT]->(m)
 WITH m, e, ev ORDER BY ev.ts DESC
 WITH m, e, collect(ev.summary) AS events
-RETURN m.name AS misconception, e.count AS times, e.last_ts AS last_seen, events[0..3] AS recent
-ORDER BY last_seen DESC LIMIT 5
+RETURN m.name AS misconception, e.count AS times, e.confidence AS confidence, e.last_ts AS last_seen,
+       events[0..3] AS recent
+ORDER BY confidence DESC, last_seen DESC LIMIT 5
 ```
 
 **`pick_skill`** and **`update_skill`** are procedural memory. Two separate `SET` clauses keep the update order explicit:

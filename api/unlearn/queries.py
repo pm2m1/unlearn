@@ -312,14 +312,18 @@ YIELD path, pathWeight
 RETURN [n IN nodes(path) | n.name] AS chain, pathWeight
 """
 
+# Changed from SPEC (decision, Phase 6): every misconception seen at least once, strongest first. With the SPEC's
+# confidence > 0.6 (seen twice) 58/90 simulated students had nothing to recall in session 2; recall of a planted
+# misconception rose from 29% to 53%, while the share of named misconceptions that were planted fell 81% -> 30%.
 RECALL = """
 MATCH (s:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
-WHERE e.confidence > 0.6
+WHERE e.count >= 1
 OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(ev:Event)-[:ABOUT]->(m)
 WITH m, e, ev ORDER BY ev.ts DESC
 WITH m, e, collect(ev.summary) AS events
-RETURN m.name AS misconception, e.count AS times, e.last_ts AS last_seen, events[0..3] AS recent
-ORDER BY last_seen DESC LIMIT 5
+RETURN m.name AS misconception, e.count AS times, e.confidence AS confidence, e.last_ts AS last_seen,
+       events[0..3] AS recent
+ORDER BY confidence DESC, last_seen DESC LIMIT 5
 """
 
 PICK_SKILL = """
