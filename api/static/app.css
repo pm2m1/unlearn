@@ -60,6 +60,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
   color: var(--ink-2); font-weight: 500;
 }
 .tab[aria-selected="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.class-pick { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.class-pick select { width: auto; padding: 5px 10px; border-radius: 999px; background: var(--paper); font-family: var(--mono); font-size: 13px; }
+.scoreboard .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.score { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: #fdfcf9; cursor: pointer; text-align: left; }
+.score.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.score .who { font-weight: 600; }
+.score .pct { font-family: var(--serif); font-size: 30px; font-weight: 600; line-height: 1.1; }
+.score .frac { color: var(--muted); font-size: 13px; }
+.q-score { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--ink-2); }
 .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; white-space: nowrap; }
 .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey); }
 .status.ok .dot { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
@@ -272,6 +281,7 @@ label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 
   .topbar { padding: 10px 16px; gap: 12px; flex-wrap: wrap; }
   .tabs { margin-left: 0; order: 3; width: 100%; justify-content: center; }
   .status .label { display: none; }
+  .class-pick span { display: none; }
   .status { margin-left: auto; }
   main { padding: 16px 16px 40px; }
   .card { padding: 16px; }

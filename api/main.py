@@ -106,7 +106,14 @@ def _session_class(sess: str) -> tuple[str, str]:
     raise HTTPException(404, f"no session {sess!r}")
 
 
-def _sim(student_id: str):
+def _sim(student_id: str, class_id: str | None = None):
+    """The simulated student behind 'simulate': a scenario student's stored noiseless profile if it has one
+    (class_demo_video), else the seeded default student for that id."""
+    if class_id:
+        rows = tools.student_profile(class_id, student_id)["rows"]
+        p = rows[0] if rows else None
+        if p and p["root"] is not None:
+            return Simulator(seed=p["seed"] or 0, noiseless=True).student(student_id, p["root"], p["target"], p["mids"])
     return Simulator(seed=SIM_SEED).student(student_id)
 
 
@@ -152,7 +159,7 @@ def classes():
 def students(cid: str):
     rows = tools.class_students(_class(cid))["rows"]
     for r in rows:
-        r["default_target"] = _sim(r["id"]).target
+        r["default_target"] = _sim(r["id"], cid).target
     return {"students": rows}
 
 
@@ -183,7 +190,7 @@ class AnswerBody(BaseModel):
 @app.post("/classes/{cid}/students/{sid}/sessions")
 def start_session(cid: str, sid: str, body: StartBody | None = None):
     _class(cid)
-    target = body.construct_id if body and body.construct_id else _sim(sid).target
+    target = body.construct_id if body and body.construct_id else _sim(sid, cid).target
     col = receipts.Collector()
     out = runner.start(cid, sid, target, on_step=col)
     return _with_receipts({**out, "class_id": cid, "student_id": sid, "target": target}, col)
@@ -195,12 +202,13 @@ def answer(sess: str, body: AnswerBody):
     key = body.key
     if body.simulate:
         t = runner.awaiting(cid, sess)
-        key = _sim(sid).answer(t["pending_qid"])
+        key = _sim(sid, cid).answer(t["pending_qid"])
     if not key:
         raise HTTPException(422, "key is required unless simulate is true")
     col = receipts.Collector()
     out = runner.answer(cid, sess, body.qid, key, body.explanation, on_step=col)
-    return _with_receipts({**out, "class_id": cid, "student_id": sid}, col)
+    score = tools.session_score(cid, sid, sess)["rows"][0]
+    return _with_receipts({**out, "class_id": cid, "student_id": sid, "session_score": score}, col)
 
 
 @app.get("/sessions/{sess}")
@@ -236,7 +244,7 @@ def remediate(sess: str):
 # --- simulation (fills the teacher view) ------------------------------------------
 
 def _simulate(cid: str, sid: str, sessions: int) -> list[dict]:
-    student = _sim(sid)
+    student = _sim(sid, cid)
     out = []
     for _ in range(sessions):
         res = runner.run_session_sync(cid, sid, student.target, lambda _s, q: student.answer(q),

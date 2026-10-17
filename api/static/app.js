@@ -69,6 +69,30 @@ function showView(name) {
 
 /* ------------------------------------------------------------------ class data */
 
+async function loadClasses() {
+  const { classes } = await api("/classes");
+  const sel = $("#class-select");
+  sel.replaceChildren(...classes.map((c) => el("option", { value: c, text: c })));
+  sel.value = state.classId;
+  sel.addEventListener("change", () => {
+    const q = new URLSearchParams(location.search);
+    q.set("class", sel.value);
+    q.delete("student");
+    location.search = q.toString();
+  });
+}
+
+function renderScoreboard() {
+  const withCheck = state.students.filter((s) => s.check);
+  $("#scoreboard").hidden = !withCheck.length;
+  $("#scores").replaceChildren(...withCheck.map((s) => el("button", {
+    class: `score${s.id === $("#student-select").value ? " active" : ""}`,
+    onclick: () => { $("#student-select").value = s.id; syncTarget(); renderScoreboard(); },
+  }, el("div", { class: "who", text: s.alias }),
+     el("div", { class: "pct", text: `${Math.round((100 * s.check.correct) / s.check.total)}%` }),
+     el("div", { class: "frac", text: `${s.check.correct} of ${s.check.total} right` }))));
+}
+
 async function loadClass() {
   const [s, t] = await Promise.all([api(`/classes/${state.classId}/students`), api(`/classes/${state.classId}/targets`)]);
   state.students = s.students;
@@ -77,13 +101,14 @@ async function loadClass() {
   state.targetNames = Object.fromEntries(t.targets.map((x) => [x.id, x.name]));
   const sel = $("#student-select");
   sel.replaceChildren(...s.students.map((x) => el("option", { value: x.id, text: `${x.alias} · ${x.id}${x.sessions ? ` · ${x.sessions} session${x.sessions > 1 ? "s" : ""}` : ""}` })));
-  const wanted = new URLSearchParams(location.search).get("student") || "s18";
+  const wanted = new URLSearchParams(location.search).get("student") || (state.aliases.s18 ? "s18" : s.students[0]?.id);
   if (state.aliases[wanted]) sel.value = wanted;
   const groups = {};
   for (const x of t.targets) (groups[x.subtopic] ||= []).push(x);
   $("#target-select").replaceChildren(...Object.entries(groups).map(([sub, xs]) =>
     el("optgroup", { label: sub }, xs.map((x) => el("option", { value: x.id, text: `${x.name} (${x.depth} levels)` })))));
   syncTarget();
+  renderScoreboard();
   $("#class-name").textContent = state.classId;
   $("#class-summary").textContent = `${s.students.length} simulated students · ${s.students.reduce((a, x) => a + x.sessions, 0)} sessions so far`;
 }
@@ -109,6 +134,7 @@ async function startSession() {
   if (state.busy) return;
   state.busy = true;
   resetStudentView();
+  $("#q-score").textContent = "";
   const sid = $("#student-select").value;
   const target = Number($("#target-select").value);
   setBusy("#start-btn", true, "Starting…");
@@ -177,6 +203,7 @@ async function submitAnswer(key, simulate = false) {
       method: "POST", body: { qid: question.id, key, explanation: explanation || null, simulate },
     });
     const a = out.answer;
+    if (out.session_score) showSessionScore(out.session_score);
     markPicked(box, a.key, a.correct);
     showFeedback(kind === "check" ? "#tutor-feedback" : "#feedback", a, out.explanation_matches);
     addSteps(`${kind === "check" ? "Check" : "Answer"} ${question.id} → ${a.key}`, out.receipts);
@@ -193,6 +220,10 @@ async function submitAnswer(key, simulate = false) {
   } finally {
     state.busy = false;
   }
+}
+
+function showSessionScore(s) {
+  $("#q-score").textContent = s.total ? `this session ${s.correct} of ${s.total} right` : "";
 }
 
 function markPicked(box, key, correct) {
@@ -670,7 +701,7 @@ function toast(msg) {
 document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
   $("#start-btn").addEventListener("click", startSession);
-  $("#student-select").addEventListener("change", syncTarget);
+  $("#student-select").addEventListener("change", () => { syncTarget(); renderScoreboard(); });
   $("#simulate-btn").addEventListener("click", () => submitAnswer(null, true));
   $("#tutor-btn").addEventListener("click", startTutor);
   $("#autoplay").addEventListener("change", () => { if ($("#autoplay").checked && state.pending) autoplayNext(); });
@@ -689,6 +720,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (["student", "teacher", "eval"].includes(v)) showView(v);
   });
   loadHealth();
+  loadClasses().catch(() => {});
   try { await loadClass(); } catch (e) { toast(`Could not load the class: ${e.message}`); }
   const view = location.hash.slice(1);
   showView(["student", "teacher", "eval"].includes(view) ? view : "student");

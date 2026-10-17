@@ -432,9 +432,28 @@ def student_graph(class_id: str, student_id: str, target_id: int, session_id: st
 
 
 def class_students(class_id: str) -> dict:
+    """Students with their session count and, if they took the fixed fractions check, its score."""
     r = _Receipt(graph_name(class_id))
     rows = r.run(Q.CLASS_STUDENTS)
+    quiz = {q["id"]: q for q in r.run(Q.QUIZ_SCORES)}
+    for row in rows:
+        q = quiz.get(row["id"])
+        row["check"] = {"correct": int(q["correct"]), "total": q["total"]} if q else None
     return r.done(rows, _ids("Student", [x["id"] for x in rows]))
+
+
+def student_profile(class_id: str, student_id: str) -> dict:
+    """The planted simulator profile of a scenario student (None fields for ordinary students)."""
+    r = _Receipt(graph_name(class_id))
+    return r.done(r.run(Q.STUDENT_SIM_PROFILE, {"sid": student_id}), _ids("Student", [student_id]))
+
+
+def session_score(class_id: str, student_id: str, session_id: str) -> dict:
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.SESSION_SCORE, {"sid": student_id, "sess": session_id})
+    for row in rows:
+        row["correct"] = int(row["correct"] or 0)
+    return r.done(rows, _ids("Student", [student_id]))
 
 
 def targets(class_id: str) -> dict:

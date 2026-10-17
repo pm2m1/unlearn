@@ -46,6 +46,9 @@ class SimStudent:
     guess_rate: float = GUESS_RATE
     pick_planted: float = PICK_PLANTED
     known_correct: float = KNOWN_CORRECT
+    # Noiseless students draw their (only) random choice from a per-question seed, so the same question always
+    # gets the same answer, however many requests or processes ask it. The demo scenario relies on this.
+    per_question_seed: str | None = None
 
     def knows(self, construct_id: int) -> bool:
         return construct_id not in self.unknown
@@ -53,6 +56,8 @@ class SimStudent:
     def answer(self, question: dict | str) -> str:
         """Return the option key this student picks. Accepts a question id or any dict with an "id"."""
         q = self.bank[question if isinstance(question, str) else question["id"]]
+        if self.per_question_seed is not None:
+            self.rng = random.Random(f"{self.per_question_seed}:{q['id']}")
         options = q["options"]
         wrong = [o for o in options if not o.get("correct")]
         if self.rng.random() < self.guess_rate:
@@ -73,6 +78,7 @@ class Simulator:
 
     def __init__(self, seed: int = 0, noiseless: bool = False):
         self.seed = seed
+        self.noiseless = noiseless
         self.rates = {"guess_rate": 0.0, "pick_planted": 1.0, "known_correct": 1.0} if noiseless else {}
         self.bank = load_bank()
         self.g = requires_graph(load_requires())  # edge a -> b means a REQUIRES b
@@ -108,7 +114,8 @@ class Simulator:
                 raise ValueError(f"misconceptions {misconceptions} are not distractors on {root}")
             planted = list(misconceptions)
         unknown = {root} | set(self.dependants(root))
-        return SimStudent(student_id, root, planted, target, unknown, self.bank, rng, **self.rates)
+        per_q = f"{self.seed}:{student_id}" if self.noiseless else None
+        return SimStudent(student_id, root, planted, target, unknown, self.bank, rng, **self.rates, per_question_seed=per_q)
 
     def cohort(self, student_ids: list[str]) -> list[SimStudent]:
         return [self.student(sid) for sid in student_ids]

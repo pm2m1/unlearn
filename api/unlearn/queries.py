@@ -718,3 +718,31 @@ MATCH (p:Proposal {id:$id}) RETURN p.id AS id, p.state AS state
 COUNT_NODES = """
 MATCH (n) RETURN count(n) AS n
 """
+
+# --- Demo scenario (scripts/demo_scenario.py) ------------------------------------------------------------
+
+# Students with a planted simulator profile. Ground truth for the simulated answers only: no agent query
+# reads the sim_* properties.
+LOAD_STUDENT_PROFILES = """
+UNWIND $rows AS r
+MERGE (s:Student {id:r.id})
+SET s.alias = r.alias, s.sim_root = r.root, s.sim_target = r.target, s.sim_misconceptions = r.mids,
+    s.sim_seed = r.seed
+"""
+
+STUDENT_SIM_PROFILE = """
+MATCH (s:Student {id:$sid})
+RETURN s.sim_root AS root, s.sim_target AS target, s.sim_misconceptions AS mids, s.sim_seed AS seed
+"""
+
+# Scores on the fixed fractions check: answers recorded in a 'quiz:<student>' session (not a tutoring Session).
+QUIZ_SCORES = """
+MATCH (s:Student)-[a:ATTEMPTED]->(:Question)
+WHERE a.session STARTS WITH 'quiz:'
+RETURN s.id AS id, sum(CASE WHEN a.correct THEN 1 ELSE 0 END) AS correct, count(a) AS total
+"""
+
+SESSION_SCORE = """
+MATCH (:Student {id:$sid})-[a:ATTEMPTED {session:$sess}]->(:Question)
+RETURN sum(CASE WHEN a.correct THEN 1 ELSE 0 END) AS correct, count(a) AS total
+"""

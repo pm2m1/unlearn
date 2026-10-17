@@ -24,6 +24,10 @@
       <button role="tab" class="tab" data-view="teacher" aria-selected="false">Teacher</button>
       <button role="tab" class="tab" data-view="eval" aria-selected="false">Eval</button>
     </nav>
+    <label class="class-pick" title="Class graph">
+      <span>Class</span>
+      <select id="class-select" aria-label="Class"></select>
+    </label>
     <div class="status" id="health" title="FalkorDB status"><span class="dot"></span><span class="label">connecting…</span></div>
   </header>
 
@@ -32,6 +36,11 @@
     <section class="view" id="view-student" data-view="student">
       <div class="student-grid">
         <div class="col-left">
+          <div class="card scoreboard" id="scoreboard" hidden>
+            <div class="card-kicker"><span>Fractions check</span><span class="muted">same five questions, before any tutoring</span></div>
+            <div class="scores" id="scores"></div>
+          </div>
+
           <div class="card setup">
             <div class="field">
               <label for="student-select">Student</label>
@@ -55,7 +64,7 @@
           </div>
 
           <div class="card question" id="question-card" hidden>
-            <div class="card-kicker"><span id="q-agent" class="agent-chip">Diagnoser</span><span id="q-progress"></span></div>
+            <div class="card-kicker"><span id="q-agent" class="agent-chip">Diagnoser</span><span id="q-score" class="q-score"></span><span id="q-progress"></span></div>
             <h2 class="q-text" id="q-text"></h2>
             <div class="options" id="q-options" role="group" aria-label="Answer options"></div>
             <details class="explain" id="explain-box">
