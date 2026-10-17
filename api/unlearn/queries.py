@@ -356,11 +356,12 @@ WITH a, b, collect(m.name) AS miscs
 CREATE (a)-[:SHARES_GAP {miscs: miscs}]->(b)
 """
 
+# Added to SPEC: `ids` alongside the aliases, so the Teacher agent can propose for those students.
 COHORTS_WCC = """
 CALL algo.WCC({nodeLabels: ['Student'], relationshipTypes: ['SHARES_GAP']}) YIELD node, componentId
-WITH componentId, collect(node.alias) AS students
+WITH componentId, collect(node.alias) AS students, collect(node.id) AS ids
 WHERE size(students) > 1
-RETURN componentId, students ORDER BY size(students) DESC
+RETURN componentId, students, ids ORDER BY size(students) DESC
 """
 
 KEYSTONES = """
@@ -391,9 +392,11 @@ SET t.state = 'working', t.claimed_by = $worker
 RETURN t.id AS id, t.kind AS kind
 """
 
+# Added to SPEC: the new task copies construct_id and session from prev in the same write, so a
+# worker that claims it immediately never sees a task without its context.
 HANDOFF = """
 MATCH (prev:Task {id:$prev}), (s:Student {id:$sid}), (a:Agent {name:$to})
-CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts})
+CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts, construct_id:prev.construct_id, session:prev.session})
 CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a), (t)-[:HANDED_OFF_FROM]->(prev)
 SET prev.state = 'completed'
 RETURN t.id AS id
@@ -414,7 +417,7 @@ RETURN p.kind AS kind, p.payload AS payload
 # Not one of the 16 tools: the first task of a chain (handoff needs a previous task).
 CREATE_TASK = """
 MATCH (s:Student {id:$sid}), (a:Agent {name:$agent})
-CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts})
+CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts, construct_id:$cid, session:$sess})
 CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a)
 RETURN t.id AS id
 """
@@ -432,4 +435,148 @@ MATCH (t:Task {id:$id}) RETURN t.state AS state, t.claimed_by AS claimed_by
 REQUIRES_PROPS = """
 MATCH (:Construct)-[e:REQUIRES]->(:Construct)
 RETURN count(e) AS n, collect(DISTINCT e.weight) AS weights, collect(DISTINCT e.source) AS sources
+"""
+
+# --- Agent helpers (not among the 16 tools) -----------------------------------
+
+TASK_CONTEXT = """
+MATCH (t:Task {id:$id})-[:ABOUT]->(s:Student)
+RETURN t.id AS id, t.kind AS kind, s.id AS student_id, t.construct_id AS construct_id, t.session AS session
+"""
+
+COMPLETE_TASK = """
+MATCH (t:Task {id:$id}) SET t.state = 'completed' RETURN t.id AS id
+"""
+
+FAIL_TASK = """
+MATCH (t:Task {id:$id}) SET t.state = 'failed', t.error = $error RETURN t.id AS id
+"""
+
+# Tasks in the chain that starts at $root which are still open.
+CHAIN_OPEN = """
+MATCH (t:Task)-[:HANDED_OFF_FROM*0..]->(:Task {id:$root})
+WHERE t.state IN ['submitted', 'working']
+RETURN count(t) AS open
+"""
+
+CHAIN = """
+MATCH p = (t:Task)-[:HANDED_OFF_FROM*0..]->(:Task {id:$root})
+OPTIONAL MATCH (t)-[:ASSIGNED_TO]->(a:Agent)
+RETURN t.id AS id, t.kind AS kind, t.state AS state, a.name AS agent, length(p) AS step
+ORDER BY step
+"""
+
+# The student's misconceptions on one construct, strongest weighted evidence first (root_cause's weighting).
+SHOWED_ON = """
+MATCH (:Student {id:$sid})-[e:SHOWED]->(m:Misconception)-[si:SEEN_IN]->(:Construct {id:$cid})
+RETURN m.id AS mid, m.name AS name, e.count AS count, e.confidence AS confidence,
+       e.count * e.confidence * si.pct / 100.0 AS evidence
+ORDER BY evidence DESC, m.id
+"""
+
+SKILL_STEPS = """
+MATCH (:Skill {name:$name})-[h:HAS_STEP]->(st:Step)
+RETURN h.order AS order, st.text AS text ORDER BY order
+"""
+
+# Every construct and misconception name in a class graph: the vocabulary the receipt check scans for.
+NAME_VOCABULARY = """
+MATCH (n) WHERE n:Construct OR n:Misconception
+RETURN labels(n)[0] AS label, n.id AS id, n.name AS name
+"""
+
+PROPOSALS = """
+MATCH (p:Proposal)
+WHERE $state IS NULL OR p.state = $state
+OPTIONAL MATCH (p)-[:FOR]->(s:Student)
+RETURN p.id AS id, p.kind AS kind, p.state AS state, p.payload AS payload, p.created_ts AS created_ts,
+       collect(s.id) AS students
+ORDER BY created_ts
+"""
+
+# Demo reset: drop one student's memory and coordination state so session 1 can be replayed.
+RESET_STUDENT_SESSIONS = """
+MATCH (:Student {id:$sid})-[:HAD_SESSION]->(se:Session)
+OPTIONAL MATCH (se)-[:HAD_EVENT]->(ev:Event)
+DETACH DELETE se, ev
+"""
+
+RESET_STUDENT_EDGES = """
+MATCH (:Student {id:$sid})-[r:ATTEMPTED|SHOWED|MASTERED|SHARES_GAP]-()
+DELETE r
+"""
+
+RESET_STUDENT_TASKS = """
+MATCH (t:Task)-[:ABOUT]->(:Student {id:$sid})
+DETACH DELETE t
+"""
+
+RESET_STUDENT_PROPOSALS = """
+MATCH (p:Proposal)-[:FOR]->(:Student {id:$sid})
+OPTIONAL MATCH (p)-[:HAD_EVENT]->(ev:Event)
+OPTIONAL MATCH (a:Assignment {proposal:p.id})
+DETACH DELETE p, ev, a
+"""
+
+RESET_STUDENT_GROUPS = """
+MATCH (:Group)-[r:HAS_MEMBER]->(:Student {id:$sid})
+DELETE r
+"""
+
+# --- Approval executor: runs only after decide(approved) ------------------------
+
+EXEC_REGROUP = """
+MATCH (p:Proposal {id:$pid})-[:FOR]->(s:Student)
+MERGE (g:Group {id:$gid})
+MERGE (g)-[:HAS_MEMBER]->(s)
+RETURN g.id AS group_id, collect(s.id) AS members
+"""
+
+EXEC_SKIP_AHEAD = """
+MATCH (p:Proposal {id:$pid})-[:FOR]->(s:Student), (c:Construct {id:$cid})
+MERGE (s)-[m:MASTERED]->(c)
+ON CREATE SET m.ts = $ts, m.evidence = 'teacher_override'
+RETURN s.id AS student_id, c.id AS construct_id, m.evidence AS evidence
+"""
+
+EXEC_ASSIGN_PRACTICE = """
+MATCH (p:Proposal {id:$pid}), (c:Construct {id:$cid})
+CREATE (a:Assignment {id:$aid, ts:$ts, proposal:$pid})
+CREATE (a)-[:PRACTICES]->(c)
+WITH a, p
+MATCH (p)-[:FOR]->(s:Student)
+CREATE (a)-[:FOR]->(s)
+RETURN a.id AS assignment_id, collect(s.id) AS students
+"""
+
+LOG_PROPOSAL_EVENT = """
+MATCH (p:Proposal {id:$pid})
+CREATE (p)-[:HAD_EVENT]->(ev:Event {id:$id, type:$type, ts:$ts, summary:$summary})
+WITH ev
+OPTIONAL MATCH (c:Construct {id:$cid})
+FOREACH (_ IN CASE WHEN c IS NULL THEN [] ELSE [1] END | CREATE (ev)-[:ABOUT]->(c))
+RETURN ev.id AS id
+"""
+
+# Read-backs for the approval tests.
+GROUP_MEMBERS = """
+MATCH (g:Group {id:$gid})-[:HAS_MEMBER]->(s:Student) RETURN s.id AS id ORDER BY id
+"""
+
+ASSIGNMENTS_FOR = """
+MATCH (a:Assignment)-[:FOR]->(:Student {id:$sid})
+MATCH (a)-[:PRACTICES]->(c:Construct)
+RETURN a.id AS id, c.id AS construct_id
+"""
+
+MASTERED_EDGE = """
+MATCH (:Student {id:$sid})-[m:MASTERED]->(:Construct {id:$cid}) RETURN m.evidence AS evidence
+"""
+
+PROPOSAL_EVENTS = """
+MATCH (:Proposal {id:$pid})-[:HAD_EVENT]->(ev:Event) RETURN ev.id AS id, ev.type AS type, ev.summary AS summary
+"""
+
+COUNT_LABELS = """
+MATCH (n) WHERE n:Group OR n:Assignment RETURN labels(n)[0] AS label, count(n) AS n
 """

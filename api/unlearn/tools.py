@@ -146,9 +146,11 @@ def recall(class_id: str, student_id: str) -> dict:
 
 
 def pick_skill(class_id: str, misconception_id: int) -> dict:
-    """The remediation skill with the best success rate for this misconception."""
+    """The remediation skill with the best success rate for this misconception, with its steps."""
     r = _Receipt(graph_name(class_id))
     rows = r.run(Q.PICK_SKILL, {"mid": misconception_id})
+    for row in rows:
+        row["steps"] = [x["text"] for x in r.run(Q.SKILL_STEPS, {"name": row["skill"]})]
     return r.done(rows, _ids("Skill", [x["skill"] for x in rows]) + _ids("Misconception", [misconception_id]))
 
 
@@ -205,11 +207,12 @@ def bridges() -> dict:
 
 # --- Coordination -------------------------------------------------------------
 
-def create_task(class_id: str, task_id: str, kind: str, student_id: str, agent: str, ts: int | None = None) -> dict:
-    """Helper, not one of the 16 tools: open the first task of a chain."""
+def create_task(class_id: str, task_id: str, kind: str, student_id: str, agent: str, ts: int | None = None,
+                construct_id: int | None = None, session_id: str | None = None) -> dict:
+    """Helper, not one of the 16 tools: open the first task of a chain. Later tasks inherit its construct and session."""
     r = _Receipt(graph_name(class_id))
     rows = r.run(Q.CREATE_TASK, {"id": task_id, "kind": kind, "sid": student_id, "agent": agent,
-                                 "ts": ts if ts is not None else now_ms()})
+                                 "ts": ts if ts is not None else now_ms(), "cid": construct_id, "sess": session_id})
     return r.done(rows, _ids("Task", [task_id]) + _ids("Student", [student_id]))
 
 
@@ -231,9 +234,15 @@ def handoff(class_id: str, prev_task_id: str, student_id: str, to_agent: str, ki
 
 def propose(class_id: str, proposal_id: str, kind: str, payload: dict, student_ids: list[str],
             ts: int | None = None) -> dict:
-    """Write a pending Proposal for the teacher. Only allowlisted kinds."""
+    """Write a pending Proposal for the teacher. Only allowlisted kinds, with the payload their executor needs."""
     if kind not in PROPOSAL_KINDS:
         raise ValueError(f"proposal kind {kind!r} not in {sorted(PROPOSAL_KINDS)}")
+    if not student_ids:
+        raise ValueError("a proposal needs at least one student")
+    if kind == "regroup" and len(set(student_ids)) < 2:
+        raise ValueError("regroup needs at least two students")
+    if kind in ("skip_ahead", "assign_practice") and not isinstance(payload.get("construct_id"), int):
+        raise ValueError(f"{kind} needs an integer payload['construct_id']")
     r = _Receipt(graph_name(class_id))
     r.run(Q.PROPOSE, {"id": proposal_id, "kind": kind, "json": json.dumps(payload), "sids": student_ids,
                       "ts": ts if ts is not None else now_ms()})
@@ -242,14 +251,112 @@ def propose(class_id: str, proposal_id: str, kind: str, payload: dict, student_i
 
 
 def decide(class_id: str, proposal_id: str, decision: str, ts: int | None = None) -> dict:
-    """Approve or reject a pending proposal. Returns nothing if it was not pending."""
+    """Approve or reject a pending proposal. Returns nothing if it was not pending.
+
+    Approval runs the executor for the proposal's kind and logs an Event; rejection only changes state.
+    """
     if decision not in DECISIONS:
         raise ValueError(f"decision must be one of {sorted(DECISIONS)}")
+    ts = ts if ts is not None else now_ms()
     r = _Receipt(graph_name(class_id))
-    rows = r.run(Q.DECIDE, {"id": proposal_id, "decision": decision, "ts": ts if ts is not None else now_ms()})
+    rows = r.run(Q.DECIDE, {"id": proposal_id, "decision": decision, "ts": ts})
+    nodes = _ids("Proposal", [proposal_id])
     for row in rows:
         row["payload"] = json.loads(row["payload"])
-    return r.done(rows, _ids("Proposal", [proposal_id]))
+        if decision == "approved":
+            row["applied"], more = _execute(r, proposal_id, row["kind"], row["payload"], ts)
+            nodes += more
+    return r.done(rows, nodes)
+
+
+def _execute(r: _Receipt, proposal_id: str, kind: str, payload: dict, ts: int) -> tuple[dict, list[dict]]:
+    """Apply an approved proposal. The change is read from the graph (FOR edges), not trusted from the caller."""
+    cid = payload.get("construct_id")
+    if kind == "regroup":
+        gid = payload.get("group_id") or f"g-{proposal_id}"
+        out = r.run(Q.EXEC_REGROUP, {"pid": proposal_id, "gid": gid})[0]
+        summary = f"Teacher approved regroup: group {gid} with {', '.join(out['members'])}"
+        nodes = _ids("Group", [gid]) + _ids("Student", out["members"])
+    elif kind == "skip_ahead":
+        rows = r.run(Q.EXEC_SKIP_AHEAD, {"pid": proposal_id, "cid": cid, "ts": ts})
+        out = {"construct_id": cid, "students": [x["student_id"] for x in rows]}
+        summary = f"Teacher approved skip_ahead: construct {cid} marked mastered for {', '.join(out['students'])}"
+        nodes = _ids("Construct", [cid]) + _ids("Student", out["students"])
+    else:  # assign_practice
+        aid = payload.get("assignment_id") or f"a-{proposal_id}"
+        out = r.run(Q.EXEC_ASSIGN_PRACTICE, {"pid": proposal_id, "cid": cid, "aid": aid, "ts": ts})[0]
+        summary = f"Teacher approved assign_practice: construct {cid} for {', '.join(out['students'])}"
+        nodes = _ids("Assignment", [aid]) + _ids("Construct", [cid]) + _ids("Student", out["students"])
+    ev = r.run(Q.LOG_PROPOSAL_EVENT, {"pid": proposal_id, "id": f"{proposal_id}-applied", "type": "proposal_applied",
+                                      "ts": ts, "summary": summary, "cid": cid})[0]
+    out["event_id"] = ev["id"]
+    return out, nodes + _ids("Event", [ev["id"]])
+
+
+# --- Agent helpers (not among the 16 tools) -----------------------------------
+
+def task_context(class_id: str, task_id: str) -> dict:
+    """The student, construct and session a task is about."""
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.TASK_CONTEXT, {"id": task_id})
+    return r.done(rows, _ids("Task", [task_id]) + _ids("Student", [x["student_id"] for x in rows]))
+
+
+def complete_task(class_id: str, task_id: str) -> dict:
+    """End a chain: mark the last task completed without handing off."""
+    r = _Receipt(graph_name(class_id))
+    return r.done(r.run(Q.COMPLETE_TASK, {"id": task_id}), _ids("Task", [task_id]))
+
+
+def fail_task(class_id: str, task_id: str, error: str) -> dict:
+    r = _Receipt(graph_name(class_id))
+    return r.done(r.run(Q.FAIL_TASK, {"id": task_id, "error": error[:500]}), _ids("Task", [task_id]))
+
+
+def chain(class_id: str, root_task_id: str) -> dict:
+    """Every task handed off from root_task_id, in order, with its agent and state."""
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.CHAIN, {"root": root_task_id})
+    open_ = r.run(Q.CHAIN_OPEN, {"root": root_task_id})[0]["open"]
+    return {**r.done(rows, _ids("Task", [x["id"] for x in rows])), "open": open_}
+
+
+def showed_on(class_id: str, student_id: str, construct_id: int) -> dict:
+    """The student's misconceptions on one construct, strongest weighted evidence first."""
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.SHOWED_ON, {"sid": student_id, "cid": construct_id})
+    return r.done(rows, _ids("Misconception", [x["mid"] for x in rows]) + _ids("Construct", [construct_id]))
+
+
+def proposals(class_id: str, state: str | None = "pending") -> dict:
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.PROPOSALS, {"state": state})
+    for row in rows:
+        row["payload"] = json.loads(row["payload"])
+    return r.done(rows, _ids("Proposal", [x["id"] for x in rows]))
+
+
+def name_vocabulary(class_id: str) -> dict:
+    """Every construct and misconception name in the class graph, for the receipt check."""
+    r = _Receipt(graph_name(class_id))
+    return r.done(r.run(Q.NAME_VOCABULARY), [])
+
+
+def reset_student(class_id: str, student_id: str) -> dict:
+    """Demo helper: forget one student's sessions, attempts, evidence, tasks and proposals."""
+    r = _Receipt(graph_name(class_id))
+    for q in (Q.RESET_STUDENT_PROPOSALS, Q.RESET_STUDENT_TASKS, Q.RESET_STUDENT_SESSIONS,
+              Q.RESET_STUDENT_EDGES, Q.RESET_STUDENT_GROUPS):
+        r.run(q, {"sid": student_id})
+    return r.done([], _ids("Student", [student_id]))
+
+
+# Query text -> its name in queries.py, so traces can print "ROOT_CAUSE" instead of the Cypher.
+QUERY_NAMES = {v.strip(): k for k, v in vars(Q).items() if k.isupper() and isinstance(v, str)}
+
+
+def query_names(receipt: dict) -> list[str]:
+    return [QUERY_NAMES.get(c, "?") for c in receipt["cypher"]]
 
 
 TOOLS = [record_attempt, diagnose_text, next_question, root_cause, probe_frontier, learning_path, recall,

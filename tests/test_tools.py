@@ -128,8 +128,14 @@ def test_handoff_and_approval_gate(planted):
     assert T.claim(planted, "Tutor", "w2")["rows"] == [{"id": "t-2", "kind": "remediate"}]
     with pytest.raises(ValueError):
         T.propose(planted, "p-bad", "delete_students", {}, ["sa"])
-    T.propose(planted, "p-1", "regroup", {"group": ["sa", "sc"]}, ["sa", "sc"], ts=3)
-    assert T.decide(planted, "p-1", "approved", ts=4)["rows"] == [{"kind": "regroup", "payload": {"group": ["sa", "sc"]}}]
+    with pytest.raises(ValueError):
+        T.propose(planted, "p-solo", "regroup", {}, ["sa"])  # a group needs two students
+    with pytest.raises(ValueError):
+        T.propose(planted, "p-noc", "assign_practice", {}, ["sa"])  # needs a construct
+    T.propose(planted, "p-1", "regroup", {"group_id": "g-1"}, ["sa", "sc"], ts=3)
+    row = T.decide(planted, "p-1", "approved", ts=4)["rows"][0]
+    assert (row["kind"], row["payload"]) == ("regroup", {"group_id": "g-1"})
+    assert row["applied"]["group_id"] == "g-1" and sorted(row["applied"]["members"]) == ["sa", "sc"]
     assert T.decide(planted, "p-1", "rejected", ts=5)["rows"] == []  # no longer pending
 
 
