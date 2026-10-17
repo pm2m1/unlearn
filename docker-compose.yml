@@ -9,6 +9,10 @@ x-falkordb: &falkordb
   image: falkordb/falkordb:v4.20.7
   environment:
     - REDIS_ARGS=--requirepass ${FALKOR_PASSWORD}
+    # The image default is "MAX_QUEUED_QUERIES 25 TIMEOUT 1000 RESULTSET_SIZE 10000". 25 queued queries is
+    # too few: 60 concurrent simulated students (eval/concurrency.py) got "Max pending queries exceeded".
+    # Setting FALKORDB_ARGS replaces the default, so the other two settings are restated unchanged.
+    - FALKORDB_ARGS=MAX_QUEUED_QUERIES 256 TIMEOUT 1000 RESULTSET_SIZE 10000
   volumes:
     - falkor-data:/var/lib/falkordb/data
   healthcheck:

@@ -29,8 +29,8 @@
         "root_cause_accuracy": 0.667,
         "questions_to_diagnosis": 5.233,
         "session2_recall": 0.333,
-        "latency_p50_ms": 50.6,
-        "latency_p95_ms": 66.5
+        "latency_p50_ms": 48.7,
+        "latency_p95_ms": 60.1
       }
     },
     "1": {
@@ -40,8 +40,8 @@
         "root_cause_accuracy": 0.8,
         "questions_to_diagnosis": 5.267,
         "session2_recall": 0.267,
-        "latency_p50_ms": 50.2,
-        "latency_p95_ms": 65.0
+        "latency_p50_ms": 48.7,
+        "latency_p95_ms": 50.4
       }
     },
     "2": {
@@ -51,8 +51,8 @@
         "root_cause_accuracy": 0.733,
         "questions_to_diagnosis": 5.367,
         "session2_recall": 0.3,
-        "latency_p50_ms": 50.1,
-        "latency_p95_ms": 58.5
+        "latency_p50_ms": 48.8,
+        "latency_p95_ms": 53.0
       }
     }
   },
@@ -84,14 +84,14 @@
         "max": 0.333
       },
       "latency_p50_ms": {
-        "mean": 50.3,
-        "min": 50.1,
-        "max": 50.6
+        "mean": 48.733,
+        "min": 48.7,
+        "max": 48.8
       },
       "latency_p95_ms": {
-        "mean": 63.333,
-        "min": 58.5,
-        "max": 66.5
+        "mean": 54.5,
+        "min": 50.4,
+        "max": 60.1
       }
     }
   },
@@ -108,7 +108,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 59.97499998193234,
+          "latency_ms": 61.725208011921495,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -120,7 +120,7 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 36.834083031862974,
+          "latency_ms": 37.02845796942711,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When adding mixed numbers believes they only need to add the integers (2 times). Let's check whether that has changed."
         },
@@ -133,7 +133,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 48.2347920187749,
+          "latency_ms": 50.44804199133068,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -146,7 +146,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 47.84999997355044,
+          "latency_ms": 48.71641600038856,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -159,7 +159,7 @@
           ],
           "root": 164,
           "asked": 6,
-          "latency_ms": 51.90016597043723,
+          "latency_ms": 49.73199998494238,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks the division sign means to subtract (4 times). Let's check whether that has changed."
         },
@@ -173,7 +173,7 @@
           ],
           "root": 342,
           "asked": 5,
-          "latency_ms": 57.20224999822676,
+          "latency_ms": 46.486583014484495,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -186,7 +186,7 @@
           ],
           "root": 345,
           "asked": 5,
-          "latency_ms": 46.053500031121075,
+          "latency_ms": 46.7014160240069,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes the lowest common multiple is found by multiplying the numbers together (2 times). Let's check whether that has changed."
         },
@@ -198,7 +198,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 53.01929102279246,
+          "latency_ms": 48.68712497409433,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -213,7 +213,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 52.97029099892825,
+          "latency_ms": 47.98133403528482,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When finding the difference between two marks on a scale, counts lines instead of gaps (2 times). Let's check whether that has changed."
         },
@@ -226,7 +226,7 @@
           ],
           "root": 3193,
           "asked": 4,
-          "latency_ms": 39.27987499628216,
+          "latency_ms": 39.93954200996086,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -239,7 +239,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 63.12412500847131,
+          "latency_ms": 47.67025000182912,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Mixes up smallest and largest when ordering fractions (2 times). Let's check whether that has changed."
         },
@@ -252,7 +252,7 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 39.18729204451665,
+          "latency_ms": 36.38945799320936,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -265,7 +265,7 @@
           ],
           "root": 414,
           "asked": 5,
-          "latency_ms": 55.40225002914667,
+          "latency_ms": 47.95229196315631,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -277,7 +277,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 65.33258297713473,
+          "latency_ms": 46.94620898226276,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When finding the difference between two marks on a scale, counts lines instead of gaps (5 times). Let's check whether that has changed."
         },
@@ -290,7 +290,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 46.54087498784065,
+          "latency_ms": 41.993458988144994,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -302,7 +302,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 49.8954999493435,
+          "latency_ms": 59.7877079853788,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When finding the difference between two marks on a scale, counts lines instead of gaps (3 times). Let's check whether that has changed."
         },
@@ -316,7 +316,7 @@
           ],
           "root": 432,
           "asked": 6,
-          "latency_ms": 50.75549997854978,
+          "latency_ms": 49.34816597960889,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Does not consider the denominator when adding/ subtracting fractions. Adds/subtracts the numerator and makes the denominator the one with the highest value (2 times). Let's check whether that has changed."
         },
@@ -331,7 +331,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 69.50716697610915,
+          "latency_ms": 50.41812499985099,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -344,7 +344,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 50.443290965631604,
+          "latency_ms": 48.95274998852983,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Mixes up smallest and largest when ordering fractions (2 times). Let's check whether that has changed."
         },
@@ -358,7 +358,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 60.95479102805257,
+          "latency_ms": 51.37179099256173,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks the first number in an unordered list must be the smallest (2 times) and Believes the last number of an unordered list must be the largest (2 times). Let's check whether that has changed."
         },
@@ -373,7 +373,7 @@
           ],
           "root": 420,
           "asked": 6,
-          "latency_ms": 50.07558304350823,
+          "latency_ms": 49.312999995891005,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -382,7 +382,7 @@
           "predicted": [],
           "root": null,
           "asked": 1,
-          "latency_ms": 17.962749989237636,
+          "latency_ms": 16.925791976973414,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -396,7 +396,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 50.76229199767113,
+          "latency_ms": 50.053165992721915,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -411,7 +411,7 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 57.08858300931752,
+          "latency_ms": 51.9012080039829,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -426,7 +426,7 @@
           ],
           "root": 164,
           "asked": 6,
-          "latency_ms": 49.11516699939966,
+          "latency_ms": 51.00558401318267,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -438,7 +438,7 @@
           ],
           "root": 421,
           "asked": 4,
-          "latency_ms": 36.05729102855548,
+          "latency_ms": 36.806417047046125,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (2 times). Let's check whether that has changed."
         },
@@ -451,7 +451,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 66.15658302325755,
+          "latency_ms": 50.400375039316714,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -464,7 +464,7 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 39.885500038508326,
+          "latency_ms": 37.44058299344033,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -478,7 +478,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 66.83137500658631,
+          "latency_ms": 60.43216696707532,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -489,7 +489,7 @@
           ],
           "root": 436,
           "asked": 3,
-          "latency_ms": 32.1009160252288,
+          "latency_ms": 30.42345802532509,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When subtracting a fraction from a mixed number, assumes they just subtract the numerator from the integer of the mixed number (3 times). Let's check whether that has changed."
         }
@@ -504,7 +504,7 @@
           ],
           "root": 421,
           "asked": 3,
-          "latency_ms": 42.70579101284966,
+          "latency_ms": 37.11616701912135,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (3 times). Let's check whether that has changed."
         },
@@ -516,7 +516,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 41.63537500426173,
+          "latency_ms": 36.26145899761468,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (2 times). Let's check whether that has changed."
         },
@@ -530,7 +530,7 @@
           ],
           "root": 342,
           "asked": 5,
-          "latency_ms": 44.51033298391849,
+          "latency_ms": 43.55450003640726,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -545,7 +545,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 50.342542002908885,
+          "latency_ms": 49.58604194689542,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -558,7 +558,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 51.552333985455334,
+          "latency_ms": 49.119000032078475,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -571,7 +571,7 @@
           ],
           "root": 414,
           "asked": 5,
-          "latency_ms": 43.150791025254875,
+          "latency_ms": 44.51937502017245,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -585,7 +585,7 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 44.37049996340647,
+          "latency_ms": 42.859540961217135,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -598,7 +598,7 @@
           ],
           "root": 3193,
           "asked": 4,
-          "latency_ms": 46.661707980092615,
+          "latency_ms": 35.87220795452595,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -612,7 +612,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 64.67079202411696,
+          "latency_ms": 48.98650001268834,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -624,7 +624,7 @@
           ],
           "root": 421,
           "asked": 4,
-          "latency_ms": 37.4609170248732,
+          "latency_ms": 35.58737499406561,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (2 times). Let's check whether that has changed."
         },
@@ -639,7 +639,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 49.21258403919637,
+          "latency_ms": 50.31233298359439,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -653,7 +653,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 50.784041988663375,
+          "latency_ms": 50.14320800546557,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -666,7 +666,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 49.60020899306983,
+          "latency_ms": 51.123499986715615,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -679,7 +679,7 @@
           ],
           "root": 345,
           "asked": 5,
-          "latency_ms": 44.93854194879532,
+          "latency_ms": 43.8066249480471,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Confuses the calculations for HCF and LCM (2 times). Let's check whether that has changed."
         },
@@ -692,7 +692,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 51.45824997453019,
+          "latency_ms": 48.962707980535924,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -705,7 +705,7 @@
           ],
           "root": 3193,
           "asked": 4,
-          "latency_ms": 36.334041971713305,
+          "latency_ms": 37.17258299002424,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -718,7 +718,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 51.98495899094269,
+          "latency_ms": 36.0918749938719,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -731,7 +731,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 53.06358402594924,
+          "latency_ms": 47.88975004339591,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -744,7 +744,7 @@
           ],
           "root": 3193,
           "asked": 4,
-          "latency_ms": 37.33779100002721,
+          "latency_ms": 36.55195899773389,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -758,7 +758,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 50.27645803056657,
+          "latency_ms": 50.35358399618417,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Copies the order from the question without understanding (2 times). Let's check whether that has changed."
         },
@@ -770,7 +770,7 @@
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 50.432207994163036,
+          "latency_ms": 49.456332984846085,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When subtracting fractions, believes you just subtract the numerators and subtract the denominators (3 times). Let's check whether that has changed."
         },
@@ -783,7 +783,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 49.5889579760842,
+          "latency_ms": 49.3096659774892,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -796,7 +796,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 65.28112501837313,
+          "latency_ms": 48.35570795694366,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -808,7 +808,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 62.19137494917959,
+          "latency_ms": 36.773125000763685,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (2 times). Let's check whether that has changed."
         },
@@ -822,7 +822,7 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 44.27870799554512,
+          "latency_ms": 44.71483296947554,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -836,7 +836,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 50.82191695692018,
+          "latency_ms": 50.29062501853332,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When finding the difference between two marks on a scale, counts lines instead of gaps (3 times). Let's check whether that has changed."
         },
@@ -850,7 +850,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 77.35254196450114,
+          "latency_ms": 50.15379103133455,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Confuses the calculations for HCF and LCM (2 times). Let's check whether that has changed."
         },
@@ -862,7 +862,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 51.2461670441553,
+          "latency_ms": 50.4643339663744,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that only denominators need to be changed to create equivalent fractions, ignoring the numerators (2 times). Let's check whether that has changed."
         },
@@ -875,7 +875,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 58.3521660300903,
+          "latency_ms": 49.514500016812235,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -889,7 +889,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 50.0820410088636,
+          "latency_ms": 50.35574996145442,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         }
@@ -907,7 +907,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 58.58895898563787,
+          "latency_ms": 58.460666972678155,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -919,7 +919,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 43.10991597594693,
+          "latency_ms": 35.00379202887416,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (2 times). Let's check whether that has changed."
         },
@@ -933,7 +933,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 54.89716702140868,
+          "latency_ms": 50.03120901528746,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -946,7 +946,7 @@
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 54.35233301250264,
+          "latency_ms": 47.05179197480902,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -960,7 +960,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 51.04312498588115,
+          "latency_ms": 50.031375023536384,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -973,7 +973,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 48.614999977871776,
+          "latency_ms": 48.578583053313196,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -987,7 +987,7 @@
           ],
           "root": 3378,
           "asked": 4,
-          "latency_ms": 39.19995902106166,
+          "latency_ms": 36.55112499836832,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1000,7 +1000,7 @@
           ],
           "root": 408,
           "asked": 5,
-          "latency_ms": 43.7856669886969,
+          "latency_ms": 53.71225002454594,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks dimensions are needed to compare fractions (2 times). Let's check whether that has changed."
         },
@@ -1013,7 +1013,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 48.94987499574199,
+          "latency_ms": 48.62470901571214,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When finding the difference between two marks on a scale, counts lines instead of gaps (4 times). Let's check whether that has changed."
         },
@@ -1025,7 +1025,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 51.32491700351238,
+          "latency_ms": 48.71408297913149,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1039,7 +1039,7 @@
           ],
           "root": 345,
           "asked": 5,
-          "latency_ms": 46.5809169691056,
+          "latency_ms": 44.19812501873821,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1052,7 +1052,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 51.690082997083664,
+          "latency_ms": 49.00399997131899,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1067,7 +1067,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 55.59283297043294,
+          "latency_ms": 49.16220798622817,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes a fraction and decimal are related such that numerator/denominator = numerator.denominator (2 times). Let's check whether that has changed."
         },
@@ -1080,7 +1080,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 51.549334020819515,
+          "latency_ms": 49.91050000535324,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Mixes up smallest and largest when ordering fractions (2 times). Let's check whether that has changed."
         },
@@ -1093,7 +1093,7 @@
           ],
           "root": 3193,
           "asked": 4,
-          "latency_ms": 37.64508303720504,
+          "latency_ms": 37.19804197316989,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1106,7 +1106,7 @@
           ],
           "root": 338,
           "asked": 5,
-          "latency_ms": 45.59583304217085,
+          "latency_ms": 45.08858302142471,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1119,7 +1119,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 58.388707984704524,
+          "latency_ms": 49.36429200461134,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1128,7 +1128,7 @@
           "predicted": [],
           "root": null,
           "asked": 2,
-          "latency_ms": 24.2977500311099,
+          "latency_ms": 22.59512501768768,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1140,7 +1140,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 52.37749998923391,
+          "latency_ms": 49.07437495421618,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When finding the difference between two marks on a scale, counts lines instead of gaps (5 times). Let's check whether that has changed."
         },
@@ -1154,7 +1154,7 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 45.38904200308025,
+          "latency_ms": 44.27129199029878,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1166,7 +1166,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 48.12691698316485,
+          "latency_ms": 49.173332983627915,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1178,7 +1178,7 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 44.635541969910264,
+          "latency_ms": 36.39987495262176,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes the integers are multiplied and the fractions of mixed numbers are multiplied rather than added when adding mixed numbers (2 times). Let's check whether that has changed."
         },
@@ -1191,7 +1191,7 @@
           ],
           "root": 3193,
           "asked": 4,
-          "latency_ms": 39.08095898805186,
+          "latency_ms": 38.64241699920967,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1203,7 +1203,7 @@
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 49.24170800950378,
+          "latency_ms": 52.20625002402812,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When subtracting fractions, believes you just subtract the numerators and subtract the denominators (2 times). Let's check whether that has changed."
         },
@@ -1217,7 +1217,7 @@
           ],
           "root": 432,
           "asked": 6,
-          "latency_ms": 68.3951250393875,
+          "latency_ms": 50.03404099261388,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1230,7 +1230,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 57.51891701947898,
+          "latency_ms": 48.89291699510068,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1243,7 +1243,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 56.30516598466784,
+          "latency_ms": 48.311332997400314,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks dimensions are needed to compare fractions (2 times). Let's check whether that has changed."
         },
@@ -1257,7 +1257,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 53.484999982174486,
+          "latency_ms": 51.83083302108571,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks the first number in an unordered list must be the smallest (2 times). Let's check whether that has changed."
         },
@@ -1271,7 +1271,7 @@
           ],
           "root": 424,
           "asked": 6,
-          "latency_ms": 51.49899999378249,
+          "latency_ms": 49.169042031280696,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -1285,7 +1285,7 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 45.44808296486735,
+          "latency_ms": 43.14345901366323,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         }

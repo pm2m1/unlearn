@@ -704,7 +704,10 @@ function concurrencyView(r) {
       el("tbody", {}, Object.entries(r.per_graph).map(([g, x]) => t(`${g} (both classes running)`, x)))),
     el("p", { class: "muted", text: "Probe writes into class A while a heavy write load runs:" }),
     el("table", {}, el("thead", {}, el("tr", {}, ["", "p50 ms", "p95 ms", "writes"].map((h) => el("th", { text: h })))),
-      el("tbody", {}, t("A alone (baseline)", iso.baseline), t("load on class B (other graph)", iso.load_on_other_graph), t("load on class A (same graph)", iso.load_on_same_graph)))];
+      el("tbody", {}, t("A alone (baseline)", iso.baseline), t("heavy writes on class B (other graph)", iso.load_on_other_graph),
+        t("heavy writes on class A (same graph)", iso.load_on_same_graph),
+        ...(iso.sessions_on_other_graph ? [t("a class of sessions on B", iso.sessions_on_other_graph), t("a class of sessions on A", iso.sessions_on_same_graph)] : []))),
+    el("p", { class: "muted", text: "Probes run in a separate process with their own connection. Writes in A wait behind A's writes, not B's; a load that fills the server's query thread pool slows every class equally." })];
 }
 
 function latencyTable(r) {

@@ -58,6 +58,12 @@ def unlearn_predictions(class_id: str, sid: str, root: dict | None) -> list[int]
     return ranked + [r["mid"] for r in others if r["mid"] not in ranked]
 
 
+def finish_review(class_id: str, task_id: str | None, writer) -> None:
+    """Run the Teacher on an escalation here, as a full session would, so no task is left for another worker."""
+    if task_id and T.claim_task(class_id, task_id, "Teacher", "eval")["rows"]:
+        runner.Teacher(class_id, writer=writer).handle(task_id)
+
+
 def run_c(class_id: str, student, writer, judge) -> dict:
     sid = student.id
     t0 = time.perf_counter()
@@ -70,7 +76,8 @@ def run_c(class_id: str, student, writer, judge) -> dict:
     if out.get("next_task"):
         tut = runner.remediate(class_id, f"{sid}-eval-1", writer=writer)
         if tut["kind"] == "check":
-            runner.answer(class_id, f"{sid}-eval-1", tut["question"]["id"], student.answer(tut["question"]), writer=writer)
+            done = runner.answer(class_id, f"{sid}-eval-1", tut["question"]["id"], student.answer(tut["question"]), writer=writer)
+            finish_review(class_id, done.get("next_task"), writer)
     s2 = runner.start(class_id, sid, student.target, session_id=f"{sid}-eval-2", writer=writer)
     opening = s2["greeting"]
     while s2["kind"] == "question":

@@ -760,3 +760,15 @@ ORDER BY score ASC
 CLASS_CONSTRUCTS = """
 MATCH (c:Construct) RETURN c.id AS id, c.name AS name ORDER BY id
 """
+
+# --- Concurrency demo (eval/concurrency.py) --------------------------------------------------------------
+
+# A small write: what a probe times while other writers run.
+CONC_PROBE_WRITE = """
+MERGE (p:Probe {id:$id}) SET p.ts = $ts RETURN p.id AS id
+"""
+
+# A deliberately heavy write (creates $n nodes) to keep a graph's write lock busy.
+CONC_HEAVY_WRITE = """
+UNWIND range(1, $n) AS i CREATE (:Load {i:i, w:$w})
+"""

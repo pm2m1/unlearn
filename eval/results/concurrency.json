@@ -1,0 +1,97 @@
+{
+  "graphs": [
+    "class_conc_a",
+    "class_conc_b"
+  ],
+  "students_per_graph": 30,
+  "rounds_per_student": 6,
+  "both_classes_wall_s": 0.17,
+  "per_graph": {
+    "class_conc_a": {
+      "n": 636,
+      "p50_ms": 2.09,
+      "p95_ms": 18.24,
+      "mean_ms": 7.33,
+      "reads": {
+        "n": 360,
+        "p50_ms": 1.61,
+        "p95_ms": 28.33,
+        "mean_ms": 3.86
+      },
+      "writes": {
+        "n": 276,
+        "p50_ms": 13.01,
+        "p95_ms": 17.09,
+        "mean_ms": 11.87
+      }
+    },
+    "class_conc_b": {
+      "n": 636,
+      "p50_ms": 2.06,
+      "p95_ms": 18.02,
+      "mean_ms": 7.03,
+      "reads": {
+        "n": 360,
+        "p50_ms": 1.56,
+        "p95_ms": 25.94,
+        "mean_ms": 3.54
+      },
+      "writes": {
+        "n": 276,
+        "p50_ms": 12.32,
+        "p95_ms": 17.31,
+        "mean_ms": 11.59
+      }
+    }
+  },
+  "isolation": {
+    "baseline": {
+      "n": 200,
+      "p50_ms": 0.33,
+      "p95_ms": 0.38,
+      "mean_ms": 0.33
+    },
+    "load_on_other_graph": {
+      "n": 200,
+      "p50_ms": 0.57,
+      "p95_ms": 28.29,
+      "mean_ms": 10.47
+    },
+    "load_on_same_graph": {
+      "n": 200,
+      "p50_ms": 293.69,
+      "p95_ms": 569.14,
+      "mean_ms": 316.37
+    },
+    "heavy_write": {
+      "writers": 4,
+      "rows_per_write": 20000,
+      "on_other_graph": {
+        "n": 141,
+        "p50_ms": 73.72,
+        "p95_ms": 116.23,
+        "mean_ms": 70.07
+      },
+      "on_same_graph": {
+        "n": 844,
+        "p50_ms": 282.17,
+        "p95_ms": 568.57,
+        "mean_ms": 302.79
+      }
+    },
+    "probes": 200,
+    "sessions_on_other_graph": {
+      "n": 200,
+      "p50_ms": 70.22,
+      "p95_ms": 79.43,
+      "mean_ms": 71.77
+    },
+    "sessions_on_same_graph": {
+      "n": 200,
+      "p50_ms": 69.79,
+      "p95_ms": 76.55,
+      "mean_ms": 70.58
+    }
+  },
+  "falkordb_image": "falkordb/falkordb:v4.20.7"
+}

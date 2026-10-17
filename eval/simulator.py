@@ -90,6 +90,10 @@ class Simulator:
         # A construct can be a planted root cause if something depends on it and its questions have distractors.
         self.candidates = sorted(c for c in self.g.nodes if self.g.in_degree(c) > 0 and by_construct.get(c))
 
+    def prerequisites_of(self, target: int) -> set[int]:
+        """Every construct the target depends on (its prerequisites, any depth)."""
+        return set(nx.descendants(self.g, target))
+
     def dependants(self, construct_id: int, max_hops: int | None = None) -> dict[int, int]:
         """Constructs that REQUIRE construct_id (directly or not), with their shortest hop count."""
         hops = nx.single_source_shortest_path_length(self.g.reverse(copy=False), construct_id, cutoff=max_hops)

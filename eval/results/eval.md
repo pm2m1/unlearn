@@ -9,8 +9,8 @@
 | Root-cause accuracy | not run | not run | 73% (67%–80%) |
 | Questions to diagnosis | not run | not run | 5.3 (5.2–5.4) |
 | Session-2 recall | not run | not run | 30% (27%–33%) |
-| p50 latency (ms) | not run | not run | 50.3 (50.1–50.6) |
-| p95 latency (ms) | not run | not run | 63.3 (58.5–66.5) |
+| p50 latency (ms) | not run | not run | 48.7 (48.7–48.8) |
+| p95 latency (ms) | not run | not run | 54.5 (50.4–60.1) |
 
 A. No memory not run: no LLM API key configured
 
