@@ -3,23 +3,12 @@
 from pathlib import Path
 
 import pandas as pd
-from redis.exceptions import ResponseError
-
 from unlearn import queries as Q
-from unlearn.db import run, run_batched
+from unlearn.db import create_indexes, run, run_batched
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
 GRAPH = "curriculum"
-
-
-def create_indexes(graph_name, statements):
-    for stmt in statements:
-        try:
-            run(graph_name, stmt)
-        except ResponseError as e:
-            if "already indexed" not in str(e):
-                raise
 
 
 def main():
