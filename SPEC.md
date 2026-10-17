@@ -145,10 +145,13 @@ Three kinds of graph live in one FalkorDB instance: a read-only `curriculum`, a 
 
 // Coordination (class graphs)
 (:Agent {name})                                                        // Diagnoser, Tutor, Teacher
-(:Task {id,kind,state,claimed_by,created_ts})-[:ABOUT]->(:Student)
+(:Task {id,kind,state,claimed_by,created_ts,construct_id,session})-[:ABOUT]->(:Student)   // construct and session: the task's context
 (:Task)-[:ASSIGNED_TO]->(:Agent)
 (:Task)-[:HANDED_OFF_FROM]->(:Task)
 (:Proposal {id,kind,state,payload})-[:FOR]->(:Student)                  // waits for teacher approval
+(:Proposal)-[:HAD_EVENT]->(:Event)                                     // logged when an approval is applied
+(:Group {id})-[:HAS_MEMBER]->(:Student)                                // applied regroup
+(:Assignment {id,ts,proposal})-[:FOR]->(:Student), (:Assignment)-[:PRACTICES]->(:Construct)   // applied assign_practice
 (:Student)-[:SHARES_GAP {miscs}]->(:Student)                            // derived for cohorts
 ```
 
@@ -342,7 +345,7 @@ RETURN [n IN nodes(p) | n.name] AS chain, [n IN nodes(p) | n.id] AS ids
 ORDER BY length(p) ASC LIMIT 1
 ```
 
-**`probe_frontier`** covers the case where `root_cause` returns nothing yet. It lists the deepest unmastered prerequisites with no evidence, so the Diagnoser asks about them next. This loop is what makes the diagnosis adaptive:
+**`probe_frontier`** lists the deepest unmastered prerequisites with no evidence. The Diagnoser uses it as a fallback when its top-down search (see "Agents and orchestration") has nothing left to ask:
 
 ```
 MATCH (s:Student {id:$sid}), (c:Construct {id:$cid})
@@ -448,11 +451,11 @@ RETURN t.id AS id, t.kind AS kind
 
 FalkorDB's `LIMIT` does not limit eager operations that come *before* it. Here it comes first, so it should hold, but write a test that fires two claims at once and asserts exactly one wins.
 
-**`handoff`** closes one task and opens the next, keeping the chain:
+**`handoff`** closes one task and opens the next, keeping the chain. The new task copies `construct_id` and `session` from `prev` in the same write, so a worker that claims it straight away never sees a task without its context:
 
 ```
 MATCH (prev:Task {id:$prev}), (s:Student {id:$sid}), (a:Agent {name:$to})
-CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts})
+CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts, construct_id:prev.construct_id, session:prev.session})
 CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a), (t)-[:HANDED_OFF_FROM]->(prev)
 SET prev.state = 'completed'
 RETURN t.id AS id
@@ -476,11 +479,32 @@ Three agents run as worker loops in plain Python (`asyncio`). Each one claims a 
 
 | Agent | Trigger | Steps | Stops when | Hands off to |
 | --- | --- | --- | --- | --- |
-| Diagnoser | `diagnose` task, created when a session starts | `recall` → loop: `probe_frontier` or `next_question` → `record_attempt` → `root_cause` | Top evidence ≥ 1.5 and leads the runner-up by ≥ 0.5, or 6 questions asked | Tutor (`remediate`) |
-| Tutor | `remediate` task | `root_cause` → `learning_path` → `pick_skill` → explain → 1 check question → `update_skill` | Check answered | Teacher (`review`) if confidence stays > 0.6, else done |
-| Teacher agent | `review` tasks, or the teacher's chat | `cohorts`, `keystones`, `bridges` → `propose` | Proposal written | Human teacher |
+| Diagnoser | `diagnose` task, created when a session starts | `recall` → loop: choose a construct (top-down search below) → `next_question` → `record_attempt` → `root_cause` | Top evidence ≥ 1.5 and leads the runner-up by ≥ 0.5, and the leader is the deepest suspect with nothing left to ask below it; or 6 questions asked | Tutor (`remediate`) |
+| Tutor | `remediate` task | `root_cause` → `learning_path` → `pick_skill` → explain → 1 check question → `update_skill` | Check answered | Teacher (`review`) if the check answer is wrong and the root's top misconception confidence is still > 0.6, else done |
+| Teacher agent | `review` tasks, or the teacher's chat | `cohorts`, `keystones`, `bridges`, `root_cause` → `propose` | Proposal written | Human teacher |
 
-**Approval gate.** The Teacher agent can only create `Proposal` nodes from an allowlist: `regroup`, `skip_ahead`, `assign_practice`. A human clicks approve or reject in the UI, which calls `decide`. Only then does an executor apply the change and log an `Event`.
+**Diagnoser search (top-down).** The Diagnoser picks which construct to ask about with a top-down search over `REQUIRES`, read through `learning_path`:
+- It starts under the target and asks about the closest prerequisite not yet asked this session.
+- A correct answer rules that construct out, together with everything it depends on: if you can do X, you can do what X needs.
+- A wrong answer makes the construct a suspect, and the search continues below it.
+- When nothing is left to ask below the deepest suspect, it asks that suspect again to confirm.
+- `probe_frontier` is the fallback once the search runs dry.
+
+On the rule-based simulator, deepest-first probing found the planted root top-1 in 8/30 students. It spent the 6-question budget on deep constructs the student already knew. The top-down search found 17–23/30.
+
+**Tutor check question.** The Tutor asks about the root cause if it has a question left in this session. Otherwise it asks about the closest construct above the root on the `root_cause` chain, which depends on the root. `SHOWED` confidence never goes down, so a correct check answer ends the chain. A wrong one escalates only while the misconception is still held with confidence > 0.6.
+
+**Teacher agent choice.** It proposes `regroup` when the student is in a WCC cohort (`cohorts` also returns student ids), and otherwise `assign_practice` on the student's root cause. It never proposes `skip_ahead` from a review task. That kind stays available through MCP and the teacher chat.
+
+**Approval gate.** The Teacher agent can only create `Proposal` nodes from an allowlist: `regroup`, `skip_ahead`, `assign_practice`. `propose` checks the payload:
+- `regroup` needs 2+ students;
+- `skip_ahead` and `assign_practice` need an integer `construct_id`.
+
+A human clicks approve or reject in the UI, which calls `decide`. Only then does an executor apply the change and log an `Event` on the Proposal. The executor reads which students to change from the Proposal's `FOR` edges in the graph, never from the caller's payload:
+- `regroup` → `MERGE (:Group {id})-[:HAS_MEMBER]->(:Student)`
+- `skip_ahead` → `MERGE (s)-[:MASTERED]->(c)`, with `ON CREATE SET evidence = 'teacher_override'`, so an earned mastery is never overwritten
+- `assign_practice` → `(:Assignment)-[:FOR]->(:Student)` and `(:Assignment)-[:PRACTICES]->(:Construct)`
+- rejected → only the Proposal's state changes
 
 **Receipt check.** Before any LLM reply is shown, a validator confirms that every construct or misconception it names appears in that turn's tool rows. If not, it retries once, then falls back to a template.
 
