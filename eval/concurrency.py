@@ -30,7 +30,7 @@ from falkordb.asyncio import FalkorDB
 
 from eval.simulator import Simulator
 from unlearn import queries as Q
-from unlearn.db import copy_graph, delete_graph, run_batched
+from unlearn.db import delete_graph, recreate_graph, run_batched
 
 OUT = Path(__file__).resolve().parent / "results" / "concurrency.json"
 GRAPHS = ("class_conc_a", "class_conc_b")
@@ -164,8 +164,7 @@ def main(argv=None) -> int:
     ap.add_argument("--rounds", type=int, default=6)
     a = ap.parse_args(argv)
     for g in GRAPHS:
-        delete_graph(g)
-        copy_graph("class_template", g)
+        recreate_graph("class_template", g)
         run_batched(g, Q.LOAD_STUDENTS, [{"id": f"s{i:02d}", "alias": f"s{i:02d}"} for i in range(1, a.students + 1)])
     global _POOL
     _POOL = concurrent.futures.ProcessPoolExecutor(max_workers=1)

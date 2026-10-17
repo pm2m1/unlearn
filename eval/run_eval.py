@@ -33,7 +33,7 @@ from unlearn import llm
 from unlearn import queries as Q
 from unlearn import tools as T
 from unlearn.agents import runner
-from unlearn.db import copy_graph, delete_graph, run_batched
+from unlearn.db import delete_graph, recreate_graph, run_batched
 
 RESULTS = Path(__file__).resolve().parent / "results"
 METRICS = ["top1_misconception", "top3_misconception", "root_cause_accuracy", "questions_to_diagnosis",
@@ -191,8 +191,7 @@ def eval_provider(which: str, model: str | None):
 def time_bplus(provider, seed: int, n: int) -> dict:
     """Time n real (uncached) B+ prompts on a scratch copy of the template: B+ prompts carry the whole graph."""
     g = T.graph_name(f"bplus_timing_s{seed}")
-    delete_graph(g)
-    copy_graph("class_template", g)
+    recreate_graph("class_template", g)
     try:
         judge, text = BL.Judge(g), BL.graph_as_text(g)
         sim = Simulator(seed=seed)
@@ -223,6 +222,31 @@ def calibrate(provider, sims: dict, n: int = 5) -> dict:
             "seconds_per_call": round(BL.STATS["seconds"] / calls, 2), "tokens_per_call": round(BL.STATS["tokens"] / calls, 1)}
 
 
+def merge(stems: list[str], out: str) -> int:
+    """Combine runs made seed by seed (same model, same code) into one result: per-seed rows kept as they are,
+    the summary and n per condition recomputed."""
+    parts = [json.loads((RESULTS / f"{stem}.json").read_text()) for stem in stems]
+    llms = {p["meta"]["llm"] for p in parts}
+    assert len(llms) == 1, f"runs used different A/B models: {llms}"
+    per_seed, students = {}, {}
+    for p in parts:
+        for seed, conds in p["per_seed"].items():
+            assert seed not in per_seed, f"seed {seed} appears in more than one run"
+            per_seed[seed], students[seed] = conds, p["students"][seed]
+    ran = [c for c in ORDER if any(c in v for v in per_seed.values())]
+    meta = {**parts[0]["meta"], "seeds": sorted(int(s_) for s_ in per_seed), "conditions_run": ran,
+            "n_per_condition": {c: sum(v[c]["n"] for v in per_seed.values() if c in v) for c in ran},
+            "seeds_per_condition": {c: sorted(int(s_) for s_, v in per_seed.items() if c in v) for c in ran},
+            "merged_from": stems, "calibration": [p["meta"].get("calibration") for p in parts],
+            "llm_calls": [p["meta"].get("llm_calls") for p in parts],
+            "not_run": {c: "not requested" for c in ORDER if c not in ran}}
+    result = {"meta": meta, "per_seed": per_seed, "summary": summarise(per_seed, ran), "students": students}
+    (RESULTS / f"{out}.json").write_text(json.dumps(result, indent=2, default=str) + "\n")
+    (RESULTS / f"{out}.md").write_text(markdown(result))
+    print(markdown(result))
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--students", type=int, default=30)
@@ -234,8 +258,11 @@ def main(argv=None) -> int:
     ap.add_argument("--max-calls", type=int, help="hard cap on uncached A/B LLM calls (free-tier quotas)")
     ap.add_argument("--out", default="eval", help="results file stem in eval/results (eval, crosscheck)")
     ap.add_argument("--no-calibrate", action="store_true", help="skip the 5 timing calls (quota-limited cross-checks)")
+    ap.add_argument("--merge", help="comma-separated result stems to combine into --out (e.g. eval_seed0,eval_seeds12)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
+    if a.merge:
+        return merge(a.merge.split(","), a.out)
     seeds = [int(s) for s in a.seeds.split(",")]
     conds = [c.strip().upper() for c in a.conditions.split(",")]
     needs_llm = any(c in ("A", "B", "B+") for c in conds)
@@ -288,8 +315,7 @@ def main(argv=None) -> int:
         students = {sid: sim.student(sid) for sid in sids}
         class_id = f"{a.out}_s{seed}"  # per output, so a cross-check can run alongside the main eval
         g = T.graph_name(class_id)
-        delete_graph(g)
-        copy_graph("class_template", g)
+        recreate_graph("class_template", g)
         run_batched(g, Q.LOAD_STUDENTS, [{"id": s, "alias": s} for s in sids])
         judge = BL.Judge(g)
         graph_text = BL.graph_as_text(g) if "B+" in conds else None

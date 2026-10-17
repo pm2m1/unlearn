@@ -15,7 +15,7 @@ import main
 from eval.simulator import Simulator
 from unlearn import queries as Q
 from unlearn import tools as T
-from unlearn.db import copy_graph, delete_graph, run, run_batched
+from unlearn.db import delete_graph, recreate_graph, run, run_batched
 from unlearn.heal import plan
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,8 +25,7 @@ CLASS_ID = "pytest_api"
 @pytest.fixture(scope="module")
 def client():
     g = f"class_{CLASS_ID}"
-    delete_graph(g)
-    copy_graph("class_template", g)
+    recreate_graph("class_template", g)
     run_batched(g, Q.LOAD_STUDENTS, [{"id": s, "alias": s.upper()} for s in ("h1", "h2", "h3")])
     with TestClient(main.app) as c:
         yield c

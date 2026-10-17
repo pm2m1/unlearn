@@ -13,7 +13,7 @@ import pytest
 playwright = pytest.importorskip("playwright.sync_api")
 
 from unlearn import queries as Q  # noqa: E402
-from unlearn.db import copy_graph, delete_graph, run_batched  # noqa: E402
+from unlearn.db import delete_graph, recreate_graph, run_batched  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CLASS_ID = "pytest_ui"
@@ -22,8 +22,7 @@ CLASS_ID = "pytest_ui"
 @pytest.fixture(scope="module")
 def server():
     g = f"class_{CLASS_ID}"
-    delete_graph(g)
-    copy_graph("class_template", g)
+    recreate_graph("class_template", g)
     run_batched(g, Q.LOAD_STUDENTS, [{"id": "s18", "alias": "Rosa"}])
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))

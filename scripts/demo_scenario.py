@@ -28,7 +28,7 @@ from eval.simulator import Simulator
 from unlearn import queries as Q
 from unlearn import tools as T
 from unlearn.agents import runner
-from unlearn.db import copy_graph, delete_graph, run_batched
+from unlearn.db import recreate_graph, run_batched
 
 CLASS_ID = "demo_video"
 TARGET = 429
@@ -56,8 +56,7 @@ def build() -> dict:
     g = T.graph_name(CLASS_ID)
     for attempt in (1, 2):
         try:
-            delete_graph(g)
-            copy_graph("class_template", g)
+            recreate_graph("class_template", g)  # retries the copy if a worker recreated the name meanwhile
             break
         except ConnectionError as e:  # FalkorDB v4.20.7 can segfault in GRAPH.COPY (README: known issues)
             if attempt == 2:
@@ -88,7 +87,10 @@ def play(sid: str, session: int) -> dict:
     if dx.get("next_task"):
         tut = runner.remediate(CLASS_ID, sess)
         if tut["kind"] == "check":
-            runner.answer(CLASS_ID, sess, tut["question"]["id"], student.answer(tut["question"]))
+            done = runner.answer(CLASS_ID, sess, tut["question"]["id"], student.answer(tut["question"]))
+            # Run the Teacher on an escalation here, as a full session does, so no task is left for another worker.
+            if done.get("next_task") and T.claim_task(CLASS_ID, done["next_task"], "Teacher", "demo-script")["rows"]:
+                runner.Teacher(CLASS_ID).handle(done["next_task"])
     return {"recall": recall, "root": dx["root"]["id"] if dx["root"] else None, "asked": dx["asked"],
             "score": f"{score['correct']}/{score['total']}", "chain": dx["root"]["chain"] if dx["root"] else []}
 

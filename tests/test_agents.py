@@ -12,7 +12,7 @@ from unlearn import llm
 from unlearn import queries as Q
 from unlearn import tools as T
 from unlearn.agents.runner import run_session_sync
-from unlearn.db import copy_graph, delete_graph, run, run_batched
+from unlearn.db import delete_graph, recreate_graph, run, run_batched
 
 CLASS_ID = "pytest_agents"
 PLANTED = {"p1": (408, 410, [18650]), "p2": (408, 419, [18650, 19773]), "p3": (3378, 411, [15384]),
@@ -27,8 +27,7 @@ def run_named(class_id, sid, student, session):
 @pytest.fixture(scope="module")
 def world():
     g = f"class_{CLASS_ID}"
-    delete_graph(g)
-    copy_graph("class_template", g)
+    recreate_graph("class_template", g)
     run_batched(g, Q.LOAD_STUDENTS, [{"id": s, "alias": s.upper()} for s in PLANTED])
     sim = Simulator(seed=0, noiseless=True)
     students = {sid: sim.student(sid, root, target, mids) for sid, (root, target, mids) in PLANTED.items()}

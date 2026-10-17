@@ -1,0 +1,71 @@
+{
+  "method": "    python eval/random_baseline.py [--seeds 0,1,2] [--students 30]",
+  "per_seed": {
+    "0": {
+      "A": {
+        "top1_misconception": 0.023,
+        "top3_misconception": 0.07,
+        "root_cause_accuracy": 0.19
+      },
+      "B_and_Bplus": {
+        "top1_misconception": 0.03,
+        "top3_misconception": 0.09,
+        "root_cause_accuracy": 0.19
+      },
+      "candidate_list_sizes": {
+        "prerequisites": 6.533,
+        "A_misconceptions": 9.667,
+        "B_misconceptions": 10
+      },
+      "planted_misconception_on_list": {
+        "A": 0.233,
+        "B_and_Bplus": 0.3
+      },
+      "n": 30
+    },
+    "1": {
+      "A": {
+        "top1_misconception": 0.023,
+        "top3_misconception": 0.068,
+        "root_cause_accuracy": 0.173
+      },
+      "B_and_Bplus": {
+        "top1_misconception": 0.01,
+        "top3_misconception": 0.03,
+        "root_cause_accuracy": 0.173
+      },
+      "candidate_list_sizes": {
+        "prerequisites": 6.7,
+        "A_misconceptions": 9.667,
+        "B_misconceptions": 10
+      },
+      "planted_misconception_on_list": {
+        "A": 0.2,
+        "B_and_Bplus": 0.1
+      },
+      "n": 30
+    },
+    "2": {
+      "A": {
+        "top1_misconception": 0.02,
+        "top3_misconception": 0.058,
+        "root_cause_accuracy": 0.165
+      },
+      "B_and_Bplus": {
+        "top1_misconception": 0.007,
+        "top3_misconception": 0.02,
+        "root_cause_accuracy": 0.165
+      },
+      "candidate_list_sizes": {
+        "prerequisites": 6.967,
+        "A_misconceptions": 9,
+        "B_misconceptions": 10
+      },
+      "planted_misconception_on_list": {
+        "A": 0.167,
+        "B_and_Bplus": 0.067
+      },
+      "n": 30
+    }
+  }
+}

@@ -6,7 +6,7 @@ Deletes and recreates class_<id> if it already exists.
 import argparse
 
 from unlearn import queries as Q
-from unlearn.db import copy_graph, create_indexes, delete_graph, list_graphs, run, run_batched
+from unlearn.db import create_indexes, list_graphs, recreate_graph, run, run_batched
 
 TEMPLATE = "class_template"
 
@@ -29,8 +29,7 @@ def new_class(class_id: str, students: int) -> dict:
     if students > len(ALIASES):
         raise SystemExit(f"at most {len(ALIASES)} students")
     name = f"class_{class_id}"
-    replaced = delete_graph(name)
-    copy_graph(TEMPLATE, name)
+    replaced = recreate_graph(TEMPLATE, name)
 
     # GRAPH.COPY should carry indexes; check, and recreate any that did not survive.
     expected, copied = index_set(TEMPLATE), index_set(name)

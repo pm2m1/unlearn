@@ -663,17 +663,19 @@ async function loadEval() {
   const { results } = await api("/eval/results");
   box.replaceChildren();
   if (!Object.keys(results).length) { box.append(el("p", { class: "empty", text: "No results yet." })); return; }
-  const order = ["eval", "concurrency", "latency", "crosscheck"];
+  const order = ["eval", "random_baseline", "concurrency", "latency", "crosscheck"];
   const names = Object.keys(results).sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99);
   for (const name of names) {
     const r = results[name];
     if (r.summary && r.meta && name === "eval") box.append(...evalTable(r, "Graph vs vector RAG vs no memory"));
-    else if (r.summary && r.meta) {
+    else if (name.startsWith("eval_")) continue;  // partial runs (one seed at a time), already merged into eval.json
+    else if (r.summary && r.meta && name.startsWith("crosscheck")) {
       const n = Object.entries(r.meta.n_per_condition || {}).map(([c, k]) => `${c}: ${k}`).join(", ");
       const foot = el("details", { class: "footnote" }, el("summary", { text: `Footnote: cross-check with ${r.meta.llm || "another LLM"} (n = ${n}). Indicative only, n too small to conclude.` }),
         ...evalTable(r, `Cross-check (${r.meta.llm}), indicative only`));
       box.append(foot);
     }
+    else if (name === "random_baseline" && r.per_seed) box.append(...randomView(r));
     else if (name === "concurrency" && r.isolation) box.append(...concurrencyView(r));
     else if (r.tools) box.append(...latencyTable(r));
     else box.append(el("h2", { text: name }), el("pre", { text: JSON.stringify(r, null, 2).slice(0, 4000) }));
@@ -690,15 +692,36 @@ function evalTable(r, title) {
     const v = r.summary[c]?.[m];
     if (!r.summary[c]) return el("td", { class: "muted", text: "not run" });
     if (!v) return el("td", { text: "–" });
+    if (v.min === v.max) return el("td", {}, el("strong", { text: fmt(v.mean, u) }));
     return el("td", {}, el("strong", { text: fmt(v.mean, u) }), el("span", { class: "muted", text: ` ${fmt(v.min, u)}–${fmt(v.max, u)}` }));
   };
   const m = r.meta;
   const notes = Object.entries(m.not_run || {}).map(([c, why]) => el("p", { class: "muted", text: `${c} not run: ${why}.` }));
   return [el("h2", { text: title }),
     el("p", { class: "muted", text: `${m.students} simulated students × seeds ${m.seeds.join(", ")} × ${m.sessions} sessions · mean, min–max across seeds · A/B model: ${m.llm || "none"} · C: template wording${m.stopped ? ` · stopped early: ${m.stopped}` : ""}` }),
-    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, el("th", { text: "Metric" }), conds.map(([, l]) => el("th", { text: l })))),
+    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, el("th", { text: "Metric" }), conds.map(([c, l]) => {
+      const n = r.meta.n_per_condition?.[c];
+      const seeds = (r.meta.seeds_per_condition || {})[c] || r.meta.seeds;
+      return el("th", {}, el("div", { text: l }), n ? el("div", { class: "muted", style: "font-weight:400;font-size:12px", text: `n=${n}, seed${seeds.length > 1 ? "s" : ""} ${seeds.join(", ")}` }) : null);
+    }))),
       el("tbody", {}, rows.map(([label, key, u]) => el("tr", {}, el("td", { text: label }), conds.map(([c]) => cell(c, key, u)))))),
     ...notes, el("p", { class: "muted", text: `Simulator bias: ${m.simulator_bias}.` })];
+}
+
+function randomView(r) {
+  const seeds = Object.keys(r.per_seed);
+  const avg = (f) => seeds.reduce((a, s) => a + f(r.per_seed[s]), 0) / seeds.length;
+  const pct = (x) => `${Math.round(100 * x)}%`;
+  const row = (label, key) => el("tr", {}, el("td", { text: label }),
+    el("td", { text: pct(avg((p) => p.A[key])) }), el("td", { text: pct(avg((p) => p.B_and_Bplus[key])) }));
+  const sz = (k) => avg((p) => p.candidate_list_sizes[k]).toFixed(1);
+  return [el("h2", { text: "Random guess from the same candidate lists" }),
+    el("p", { class: "muted", text: `Expected score of picking uniformly from what A and B/B+ are shown, over the same students (seeds ${seeds.join(", ")}). Lists: ${sz("prerequisites")} root-cause candidates, ${sz("A_misconceptions")} misconceptions for A, ${sz("B_misconceptions")} for B/B+. C has no list; it searches the whole graph.` }),
+    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, ["Metric", "A's lists", "B, B+ lists"].map((h) => el("th", { text: h })))),
+      el("tbody", {}, row("Top-1 misconception", "top1_misconception"), row("Top-3 misconception", "top3_misconception"),
+        row("Root-cause accuracy", "root_cause_accuracy"),
+        el("tr", {}, el("td", { text: "Planted misconception on the list" }), el("td", { text: pct(avg((p) => p.planted_misconception_on_list.A)) }),
+          el("td", { text: pct(avg((p) => p.planted_misconception_on_list.B_and_Bplus)) }))))];
 }
 
 function concurrencyView(r) {

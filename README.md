@@ -277,7 +277,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 ## Evaluation
 
 **Method** (`eval/run_eval.py`, per the build spec):
-- **Students:** 30 simulated students × 3 seeds × 2 sessions.
+- **Students:** 30 simulated students × 3 seeds × 2 sessions. All the data is synthetic: the students, their answers and their planted misconceptions.
 - **Planted state:** each student has one planted broken prerequisite and 1–3 planted misconceptions.
 - **Simulator:** rule-based and seeded (`eval/simulator.py`).
   - If an option shows a planted misconception, the student picks it with probability 0.85.
@@ -285,28 +285,59 @@ It walks up to four prerequisite hops back from the skill the student is working
   - Otherwise they pick a random wrong option.
   - There is a 10% guess rate everywhere.
 - **Conditions:**
-  - **A: no memory.** One LLM call per wrong answer, seeing only that question.
-  - **B: vector RAG.** The full attempt history as text, plus the top-10 misconceptions retrieved from FalkorDB's vector index by embedding each question with the chosen option.
+  - **A: no memory.** One LLM call per wrong answer. It sees only that question and the misconceptions retrieved for it.
+  - **B: vector RAG.** The full attempt history, plus the top-10 misconceptions retrieved from FalkorDB's vector index by embedding each question with the chosen option.
+  - **B+: LLM + graph as text.** B's prompt, plus every curated `REQUIRES` edge and every construct's misconceptions with their `SEEN_IN.w` weights, as plain text (about 22,000 tokens). B+ tests whether the graph's value is the *knowledge* in it, which can be pasted into a prompt, or the *traversal* Unlearn runs over it.
   - **C: Unlearn.** The agents, through the same step API the web UI uses.
-- **Same questions and LLM:** A and B ask a seeded sample of 6 questions from the same pool C draws from (the target and everything it depends on), and use the same LLM, with a disk cache.
-- **One judge for everyone:** guesses are mapped to misconceptions and skills by embedding similarity. Session-2 recall means the opening message names a planted misconception.
+- **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk, and cached diagnoses are left out of the latency figures.
+- **Same question pool.** A, B and B+ ask the same seeded 6 questions from the pool C draws from (the target and everything it depends on). C chooses its questions adaptively.
+- **Answers are IDs.** A, B and B+ choose from candidate lists with IDs and must reply with IDs. An ID that wasn't offered counts as wrong.
+  - Root-cause candidates are the target's prerequisites, taken from the curated graph. **That narrows their choice to about 7 skills and favours them.** A random pick is already right 17–19% of the time.
+  - Misconception candidates are the retrieved ones.
+- **Session-2 recall** means the opening message of session 2 names a planted misconception, as judged by embedding distance ≤ 0.35 for every condition. B+ opens exactly as B does, so the two share a recall score.
+- **The first run's scoring was replaced.** It asked for free text and snapped every answer to its nearest ID, so a vague answer was still scored as a specific skill. An audit of its cached outputs found no invalid JSON, but 8–14 of about 30 root-cause guesses per condition and seed weren't close to the skill they were scored as. Scoring by offered IDs roughly doubled A's and B's root-cause scores on seed 0 (13% → 27% and 10% → 27%).
+- **B+ ran on seed 0 only.** At about 115 s per call, all three seeds would have taken about three hours, against a 75-minute budget.
 
-**Results** (from [`eval/results/eval.json`](eval/results/eval.json); mean, with min–max across seeds):
+**Results** (generated from [`eval/results/eval.json`](eval/results/eval.json) and [`random_baseline.json`](eval/results/random_baseline.json) by `scripts/readme_eval.py`):
 
-| Metric | A. No memory | B. Vector RAG | C. Unlearn |
-| --- | --- | --- | --- |
-| Top-1 misconception | TODO | TODO | 47% (40–50%) |
-| Top-3 misconception | TODO | TODO | 78% (73–87%) |
-| Root-cause accuracy | TODO | TODO | 73% (67–80%) |
-| Questions to diagnosis | TODO | TODO | 5.3 (5.2–5.4) |
-| Session-2 recall | TODO | TODO | 30% (27–33%) |
-| p50 latency per diagnosis (ms) | TODO | TODO | 49 (49–49) |
+<!-- eval:start -->
+| Metric | A. No memory (n=90, seeds 0, 1, 2) | B. Vector RAG (n=90, seeds 0, 1, 2) | B+. LLM + graph as text (n=30, seeds 0) | C. Unlearn (n=90, seeds 0, 1, 2) | Random guess (A / B, B+ lists) |
+| --- | --- | --- | --- | --- | --- |
+| Top-1 misconception | 6% (0%–10%) | 8% (3%–17%) | 10% | 47% (40%–50%) | 2% / 2% |
+| Top-3 misconception | 6% (0%–10%) | 11% (3%–23%) | 20% | 78% (73%–87%) | 7% / 5% |
+| Root-cause accuracy | 28% (23%–33%) | 37% (27%–47%) | 37% | 73% (67%–80%) | 18% |
+| Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.3 (5.2–5.4) | – |
+| Session-2 recall | 0% | 10% | 10% | 56% (50%–63%) | – |
+| p50 latency per diagnosis | 12.6 s (9.4 s–17.8 s) | 7.6 s (7.0 s–8.6 s) | 114.1 s | 51 ms (50 ms–51 ms) | – |
+| p95 latency per diagnosis | 23.3 s (18.2 s–32.4 s) | 8.6 s (7.8 s–10.3 s) | 133.1 s | 73 ms (56 ms–92 ms) | – |
 
-TODO: A and B need an LLM API key and have not been run yet. Nothing in their columns is estimated.
+Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
 
-**Simulator bias, stated plainly.** The simulator picks wrong answers through the same option-to-misconception map Unlearn reads. That favours Unlearn: a real student's wrong answer is messier than the map. The noise above (a 10% guess rate, 15% of planted misconceptions not picked) is there to blunt that, not remove it.
+Candidate lists, averaged over the same students: 6.7 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B and B+. A planted misconception is on A's list for 20% of students and on B's for 16%, which caps their misconception scores whatever the model does.
 
-Session-2 recall depends on the `recall` rule; see the trade-off table under "Design decisions worth knowing".
+<sup>Footnote: cross-check with `gemini-3.6-flash` on seed 0 (A: n=3, B: n=2), first scoring method. **Indicative only, n too small to conclude.** The Gemini free tier allows 20 requests per model per day.</sup>
+
+| Cross-check metric | A. No memory (n=3) | B. Vector RAG (n=2) |
+| --- | --- | --- |
+| Top-1 misconception | 0% | 0% |
+| Top-3 misconception | 0% | 0% |
+| Root-cause accuracy | 0% | 50% |
+<!-- eval:end -->
+
+**What the table says.**
+- **C wins on every metric.**
+  - Root cause: 73% against 28–37% for the baselines and 18% for a random pick from their own lists.
+  - Misconceptions: 47% top-1 and 78% top-3, against at most 20% for any baseline.
+  - It asks fewer questions (5.3 against 6) and answers in about 50 ms instead of 7–114 s.
+- **B+ tests knowledge against traversal.** On seed 0, the only seed it ran on, B+ beats B on root cause (37% against 27%), so the graph's knowledge does help an LLM. It's still far from C (67% on seed 0). Pasting the graph into the prompt doesn't reproduce what traversing it does, and it makes each call about 15× slower.
+- **B+ is not close to C on any metric**, so no claim needs narrowing on that count.
+- **Session-2 recall** is 56% for C against 10% for B and B+ (whose openings are identical) and 0% for A.
+  - The eval's figure comes from the embedding judge applied to the real opening text.
+  - The 68% in the recall table under "Design decisions worth knowing" counts the named IDs exactly. The two measure slightly different things.
+
+**Simulator bias, stated plainly.**
+- **It favours Unlearn.** The simulator picks wrong answers through the same option-to-misconception map Unlearn reads, and a real student's wrong answers are messier than the map. The noise (a 10% guess rate, 15% of planted misconceptions not picked) blunts that bias without removing it.
+- **A stronger model may narrow the gap** on naming misconceptions. The baselines here run on a 27B local model.
 
 ### Concurrency (`eval/concurrency.py`, [`eval/results/concurrency.json`](eval/results/concurrency.json))
 
@@ -360,7 +391,7 @@ Eedi does not endorse this project. There are no real students, logins or person
 | `ORDER BY length(p)` on a path that isn't returned fails: "Unable to locate a value with alias p" | Return `length(p) AS hops` and order by `hops` (`ROOT_CAUSE_CHAIN`) |
 | `ORDER BY` a property not projected after an aggregation fails: "cannot reference variables not projected" | Project it first (`PROPOSALS` returns `created_ts`) |
 | `GRAPH.COPY` segfaulted once (signal 11) during rapid delete-and-copy cycles straight after heavy writes. It was not reproducible on its own, even with 60 back-to-back copies | Compose uses `restart: unless-stopped`; the data survived on the volume. `demo_scenario.py` retries the copy once |
-| A write query against a graph that was just deleted silently recreates it, empty. Our Teacher worker's polling `CLAIM` did this to test graphs | Poll with `GRAPH.RO_QUERY` first (`OPEN_TASKS_FOR`) and claim only when a task is waiting |
+| A write query against a graph that was just deleted silently recreates it, empty. Our Teacher worker's polling `CLAIM` did this to test graphs, and once, between a delete and a `GRAPH.COPY` onto that name, it made the copy fail with "key is already set" | Poll with `GRAPH.RO_QUERY` first (`OPEN_TASKS_FOR`) and claim only when a task is waiting. Scripts that rebuild a class run the Teacher themselves, so no task is left waiting, and retry the copy on "already set" |
 | The image's default `MAX_QUEUED_QUERIES 25` rejected 60 concurrent simulated students: "Max pending queries exceeded" | Compose sets `FALKORDB_ARGS=MAX_QUEUED_QUERIES 256 TIMEOUT 1000 RESULTSET_SIZE 10000`. It restates the other defaults, because setting the variable replaces them |
 | The vector query's `score` is a cosine **distance**: the exact text scores 0.0 | `ORDER BY score ASC`, checked by a test |
 | `LIMIT` doesn't limit eager operations that come before it | `CLAIM` limits before it writes; 20 rounds of 10 concurrent claims each have exactly one winner |

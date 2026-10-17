@@ -67,6 +67,26 @@ def copy_graph(src: str, dst: str) -> None:
     graph(src).copy(dst)
 
 
+def recreate_graph(src: str, dst: str, attempts: int = 3) -> bool:
+    """Delete dst (if any) and GRAPH.COPY src onto it. Returns True if dst existed before.
+
+    Any write to a deleted graph recreates it, so a worker polling class graphs (the API's Teacher) can bring dst
+    back between the delete and the copy, and the copy then fails with "key is already set". Delete and copy again.
+    """
+    from redis.exceptions import ResponseError
+
+    existed = False
+    for attempt in range(1, attempts + 1):
+        existed = delete_graph(dst) or existed
+        try:
+            copy_graph(src, dst)
+            return existed
+        except ResponseError as e:
+            if "already set" not in str(e) or attempt == attempts:
+                raise
+    return existed
+
+
 def create_indexes(graph_name: str, statements: list[str]) -> None:
     """Run CREATE INDEX statements, skipping ones that already exist."""
     from redis.exceptions import ResponseError
