@@ -10,11 +10,11 @@ from unlearn.curation import (
     PREREQ_CONSTRUCTS, SUBTOPICS, TOPIC, CurationError, load_questions, load_requires, load_skills,
 )
 from unlearn.db import create_indexes, delete_graph, run, run_batched
+from unlearn.embed import embed
 
 SOURCE = "curriculum"
 GRAPH = "class_template"
 AGENTS = ["Diagnoser", "Tutor", "Teacher"]
-EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBED_BATCH = 100  # 384 floats per row makes 500-row batches ~2 MB of query text
 
 
@@ -51,14 +51,6 @@ def validate(constructs, seen_in):
     if unknown:
         raise CurationError(f"skills remediate misconceptions not in the template: {sorted(unknown)}")
     return requires, questions, skills
-
-
-def embed(names: list[str]) -> list[list[float]]:
-    from sentence_transformers import SentenceTransformer
-
-    model = SentenceTransformer(EMBED_MODEL, device="cpu")
-    vectors = model.encode(names, batch_size=64, normalize_embeddings=True, show_progress_bar=False)
-    return [v.tolist() for v in vectors]
 
 
 def main():

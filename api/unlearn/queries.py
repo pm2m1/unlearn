@@ -181,3 +181,240 @@ UNWIND $rows AS r
 MERGE (s:Student {id:r.id})
 SET s.alias = r.alias
 """
+
+
+# ==============================================================================
+# Agent tools (SPEC "Agent tools"). Text is the SPEC's unless a comment says why not.
+# ==============================================================================
+
+# --- Diagnosis ----------------------------------------------------------------
+
+RECORD_ATTEMPT = """
+MATCH (s:Student {id:$sid}), (q:Question {id:$qid})
+MATCH (o:Option {qid:$qid, key:$key})
+CREATE (s)-[a:ATTEMPTED {ts:$ts, session:$sess, option:$key, correct:o.correct}]->(q)
+WITH o
+OPTIONAL MATCH (o)-[:INDICATES]->(m:Misconception)
+RETURN o.correct AS correct, m.id AS mid, m.name AS misconception
+"""
+
+UPDATE_SHOWED = """
+MATCH (s:Student {id:$sid}), (m:Misconception {id:$mid})
+MERGE (s)-[e:SHOWED]->(m)
+ON CREATE SET e.count = 1, e.confidence = 0.5, e.first_ts = $ts, e.last_ts = $ts
+ON MATCH SET e.count = e.count + 1, e.confidence = 1 - 0.5 ^ (e.count + 1), e.last_ts = $ts
+"""
+
+DIAGNOSE_TEXT = """
+CALL db.idx.vector.queryNodes('Misconception', 'embedding', 25, vecf32($v)) YIELD node, score
+MATCH (node)-[e:SEEN_IN]->(:Construct {id:$cid})
+RETURN node.id AS id, node.name AS name, score, e.pct AS pct
+ORDER BY score ASC LIMIT 3
+"""
+
+NEXT_QUESTION = """
+MATCH (s:Student {id:$sid})
+MATCH (q:Question)-[:ASSESSES]->(:Construct {id:$cid})
+WHERE NOT (s)-[:ATTEMPTED]->(q)
+MATCH (o:Option)-[:OPTION_OF]->(q)
+OPTIONAL MATCH (o)-[:INDICATES]->(m:Misconception)
+OPTIONAL MATCH (s)-[e:SHOWED]->(m)
+WITH q, count(DISTINCT m) AS probes, sum(CASE WHEN m IS NOT NULL AND e IS NULL THEN 1 ELSE 0 END) AS unprobed
+RETURN q.id AS id, q.text AS text, probes, unprobed
+ORDER BY unprobed DESC, probes DESC LIMIT 1
+"""
+
+QUESTION_OPTIONS = """
+MATCH (o:Option)-[:OPTION_OF]->(:Question {id:$qid})
+RETURN o.key AS key, o.text AS text ORDER BY key
+"""
+
+# MASTERED is decided in Python (SPEC): two correct answers on the construct's
+# questions and no SHOWED above 0.6 on that construct's misconceptions.
+MASTERY_EVIDENCE = """
+MATCH (q:Question {id:$qid})-[:ASSESSES]->(c:Construct)
+MATCH (s:Student {id:$sid})
+OPTIONAL MATCH (s)-[a:ATTEMPTED]->(:Question)-[:ASSESSES]->(c)
+WITH s, c, sum(CASE WHEN a.correct THEN 1 ELSE 0 END) AS correct
+OPTIONAL MATCH (s)-[e:SHOWED]->(:Misconception)-[:SEEN_IN]->(c)
+RETURN c.id AS cid, correct, max(e.confidence) AS max_confidence
+"""
+
+MARK_MASTERED = """
+MATCH (s:Student {id:$sid}), (c:Construct {id:$cid})
+MERGE (s)-[m:MASTERED]->(c)
+ON CREATE SET m.ts = $ts, m.evidence = $evidence
+"""
+
+# --- Root cause ---------------------------------------------------------------
+
+ROOT_CAUSE = """
+MATCH (s:Student {id:$sid}), (c:Construct {id:$cid})
+MATCH p = (c)-[:REQUIRES*1..4]->(pre:Construct)
+WHERE NOT (s)-[:MASTERED]->(pre)
+WITH s, pre, min(length(p)) AS depth
+OPTIONAL MATCH (s)-[e:SHOWED]->(m:Misconception)-[:SEEN_IN]->(pre)
+WITH pre, depth, sum(coalesce(e.count, 0) * coalesce(e.confidence, 0.0)) AS evidence, collect(DISTINCT m.name) AS miscs
+WHERE evidence > 0
+RETURN pre.id AS id, pre.name AS name, depth, evidence, miscs
+ORDER BY evidence DESC, depth DESC LIMIT 3
+"""
+
+# Changed from SPEC: v4.20.7 can't ORDER BY length(p) when p isn't projected
+# ("Unable to locate a value with alias p"), so the length is returned as hops.
+ROOT_CAUSE_CHAIN = """
+MATCH p = (c:Construct {id:$cid})-[:REQUIRES*1..4]->(:Construct {id:$pid})
+RETURN [n IN nodes(p) | n.name] AS chain, [n IN nodes(p) | n.id] AS ids, length(p) AS hops
+ORDER BY hops ASC LIMIT 1
+"""
+
+PROBE_FRONTIER = """
+MATCH (s:Student {id:$sid}), (c:Construct {id:$cid})
+MATCH p = (c)-[:REQUIRES*1..4]->(pre:Construct)
+WHERE NOT (s)-[:MASTERED]->(pre)
+AND NOT (s)-[:ATTEMPTED]->(:Question)-[:ASSESSES]->(pre)
+WITH pre, max(length(p)) AS depth
+RETURN pre.id AS id, pre.name AS name, depth
+ORDER BY depth DESC LIMIT 3
+"""
+
+# --- Teaching and memory ------------------------------------------------------
+
+LEARNING_PATH = """
+MATCH (s:Student {id:$sid}), (t:Construct {id:$tid})
+MATCH p = (t)-[:REQUIRES*0..6]->(pre:Construct)
+WHERE NOT (s)-[:MASTERED]->(pre)
+WITH pre, max(length(p)) AS depth
+RETURN pre.id AS id, pre.name AS name, depth
+ORDER BY depth DESC
+"""
+
+LEARNING_PATH_SP = """
+MATCH (t:Construct {id:$tid}), (m:Construct {id:$mid})
+CALL algo.SPpaths({sourceNode: t, targetNode: m, relTypes: ['REQUIRES'], weightProp: 'weight', relDirection: 'outgoing', maxLen: 6})
+YIELD path, pathWeight
+RETURN [n IN nodes(path) | n.name] AS chain, pathWeight
+"""
+
+RECALL = """
+MATCH (s:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
+WHERE e.confidence > 0.6
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(ev:Event)-[:ABOUT]->(m)
+WITH m, e, ev ORDER BY ev.ts DESC
+WITH m, e, collect(ev.summary) AS events
+RETURN m.name AS misconception, e.count AS times, e.last_ts AS last_seen, events[0..3] AS recent
+ORDER BY last_seen DESC LIMIT 5
+"""
+
+PICK_SKILL = """
+MATCH (k:Skill)-[:REMEDIATES]->(:Misconception {id:$mid})
+RETURN k.name AS skill, k.success_rate AS rate, k.uses AS uses
+ORDER BY rate DESC LIMIT 1
+"""
+
+UPDATE_SKILL = """
+MATCH (k:Skill {name:$name})
+SET k.success_rate = (k.success_rate * (k.uses + 2) + $ok) / (k.uses + 3)
+SET k.uses = k.uses + 1
+"""
+
+SKILL_BY_NAME = """
+MATCH (k:Skill {name:$name})
+RETURN k.name AS skill, k.success_rate AS rate, k.uses AS uses
+"""
+
+# Not one of the 16 tools: session/event writes the agents need for episodic memory.
+START_SESSION = """
+MATCH (s:Student {id:$sid})
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(old:Session)
+WITH s, count(old) AS k
+CREATE (s)-[:HAD_SESSION]->(se:Session {id:$sess, ts:$ts, n:k + 1})
+RETURN se.id AS id, se.n AS n
+"""
+
+LOG_EVENT = """
+MATCH (se:Session {id:$sess})
+CREATE (se)-[:HAD_EVENT]->(ev:Event {id:$id, type:$type, ts:$ts, summary:$summary})
+WITH ev
+OPTIONAL MATCH (m:Misconception {id:$mid})
+OPTIONAL MATCH (c:Construct {id:$cid})
+FOREACH (_ IN CASE WHEN m IS NULL THEN [] ELSE [1] END | CREATE (ev)-[:ABOUT]->(m))
+FOREACH (_ IN CASE WHEN c IS NULL THEN [] ELSE [1] END | CREATE (ev)-[:ABOUT]->(c))
+RETURN ev.id AS id
+"""
+
+# --- Teacher analytics --------------------------------------------------------
+
+COHORTS_CLEAR = """
+MATCH ()-[g:SHARES_GAP]->() DELETE g
+"""
+
+COHORTS_LINK = """
+MATCH (a:Student)-[e1:SHOWED]->(m:Misconception)<-[e2:SHOWED]-(b:Student)
+WHERE a.id < b.id AND e1.confidence > 0.6 AND e2.confidence > 0.6
+WITH a, b, collect(m.name) AS miscs
+CREATE (a)-[:SHARES_GAP {miscs: miscs}]->(b)
+"""
+
+COHORTS_WCC = """
+CALL algo.WCC({nodeLabels: ['Student'], relationshipTypes: ['SHARES_GAP']}) YIELD node, componentId
+WITH componentId, collect(node.alias) AS students
+WHERE size(students) > 1
+RETURN componentId, students ORDER BY size(students) DESC
+"""
+
+KEYSTONES = """
+CALL algo.pageRank('Construct', 'REQUIRES') YIELD node, score
+RETURN node.id AS id, node.name AS name, score ORDER BY score DESC LIMIT 10
+"""
+
+# SPEC: write scores back with a separate UNWIND rather than SET after YIELD.
+SET_PAGERANK = """
+UNWIND $rows AS r
+MATCH (c:Construct {id:r.id})
+SET c.pagerank = r.score
+"""
+
+# Runs on `curriculum`, not a class graph.
+BRIDGES = """
+CALL algo.betweenness({nodeLabels: ['Construct'], relationshipTypes: ['SHARES_MISCONCEPTION'], samplingSize: 256, samplingSeed: 42})
+YIELD node, score
+RETURN node.name AS name, score ORDER BY score DESC LIMIT 10
+"""
+
+# --- Coordination -------------------------------------------------------------
+
+CLAIM = """
+MATCH (t:Task {state:'submitted'})-[:ASSIGNED_TO]->(:Agent {name:$agent})
+WITH t ORDER BY t.created_ts LIMIT 1
+SET t.state = 'working', t.claimed_by = $worker
+RETURN t.id AS id, t.kind AS kind
+"""
+
+HANDOFF = """
+MATCH (prev:Task {id:$prev}), (s:Student {id:$sid}), (a:Agent {name:$to})
+CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts})
+CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a), (t)-[:HANDED_OFF_FROM]->(prev)
+SET prev.state = 'completed'
+RETURN t.id AS id
+"""
+
+PROPOSE = """
+CREATE (p:Proposal {id:$id, kind:$kind, state:'pending', payload:$json, created_ts:$ts})
+WITH p UNWIND $sids AS sid
+MATCH (s:Student {id:sid}) CREATE (p)-[:FOR]->(s)
+"""
+
+DECIDE = """
+MATCH (p:Proposal {id:$id, state:'pending'})
+SET p.state = $decision, p.decided_ts = $ts
+RETURN p.kind AS kind, p.payload AS payload
+"""
+
+# Not one of the 16 tools: the first task of a chain (handoff needs a previous task).
+CREATE_TASK = """
+MATCH (s:Student {id:$sid}), (a:Agent {name:$agent})
+CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts})
+CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a)
+RETURN t.id AS id
+"""
