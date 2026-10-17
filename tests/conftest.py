@@ -1,6 +1,10 @@
 """Fixture class graphs built with the production load queries and synthetic data."""
 
+import os
+
 import pytest
+
+os.environ["UNLEARN_LLM"] = "template"  # tests never call a provider
 
 from unlearn import queries as Q
 from unlearn.db import create_indexes, delete_graph, run, run_batched
