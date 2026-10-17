@@ -361,6 +361,17 @@ def reset_student(class_id: str, student_id: str) -> dict:
     return r.done([], _ids("Student", [student_id]))
 
 
+def has_open_tasks(class_id: str, agent: str) -> bool:
+    """Read-only: does any submitted task wait for this agent? False if the graph is gone."""
+    from redis.exceptions import ResponseError
+
+    try:
+        rows, _ = run(graph_name(class_id), Q.OPEN_TASKS_FOR, {"agent": agent}, read_only=True)
+    except ResponseError:
+        return False
+    return rows[0]["n"] > 0
+
+
 def claim_task(class_id: str, task_id: str, agent: str, worker: str) -> dict:
     """Claim one specific submitted task. Empty rows if someone else already has it."""
     r = _Receipt(graph_name(class_id))

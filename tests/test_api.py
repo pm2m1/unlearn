@@ -154,3 +154,9 @@ def test_self_heal_on_an_empty_falkordb():
         assert "nothing to seed" in again.stdout
     finally:
         subprocess.run(["docker", "rm", "-f", name], capture_output=True)
+
+
+def test_polling_a_deleted_class_does_not_recreate_it():
+    from unlearn.db import list_graphs
+    assert T.has_open_tasks("pytest_never_created", "Teacher") is False
+    assert "class_pytest_never_created" not in list_graphs()

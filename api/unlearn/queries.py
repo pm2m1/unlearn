@@ -613,6 +613,12 @@ MATCH (n) WHERE n:Group OR n:Assignment RETURN labels(n)[0] AS label, count(n) A
 # --- Steppable agents: per-session state lives on the Task and in this session's ATTEMPTED edges ----------
 
 # Claim one specific task (an HTTP request driving its own session). Race-safe like CLAIM.
+# Read-only check before a poller claims: cheap, and it never recreates a graph deleted under it.
+OPEN_TASKS_FOR = """
+MATCH (t:Task {state:'submitted'})-[:ASSIGNED_TO]->(:Agent {name:$agent})
+RETURN count(t) AS n
+"""
+
 CLAIM_TASK = """
 MATCH (t:Task {id:$id, state:'submitted'})-[:ASSIGNED_TO]->(:Agent {name:$agent})
 SET t.state = 'working', t.claimed_by = $worker

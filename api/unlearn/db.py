@@ -24,14 +24,17 @@ def graph(name: str):
     return client().select_graph(name)
 
 
-def run(graph_name: str, query: str, params: dict | None = None, timeout: int | None = None):
-    """Run a parameterised query. Returns (rows, receipt).
+def run(graph_name: str, query: str, params: dict | None = None, timeout: int | None = None,
+        read_only: bool = False):
+    """Run a parameterised query. Returns (rows, receipt). read_only uses GRAPH.RO_QUERY, which never writes
+    and never creates a graph that doesn't exist.
 
     rows is a list of dicts keyed by the RETURN aliases.
     receipt is {cypher, params, rows} so callers can show what proved a claim.
     """
     params = params or {}
-    result = graph(graph_name).query(query, params, timeout=timeout)
+    g = graph(graph_name)
+    result = g.ro_query(query, params, timeout=timeout) if read_only else g.query(query, params, timeout=timeout)
     columns = [h[1] for h in result.header]
     rows = [dict(zip(columns, record)) for record in result.result_set]
     receipt = {"cypher": query, "params": params, "rows": rows}

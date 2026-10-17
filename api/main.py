@@ -62,6 +62,9 @@ async def _teacher_loop(stop: asyncio.Event) -> None:
     while not stop.is_set():
         try:
             for cid in await asyncio.to_thread(class_ids):
+                # Read-only first: idle polling never writes, and never recreates a graph deleted under it.
+                if not await asyncio.to_thread(tools.has_open_tasks, cid, "Teacher"):
+                    continue
                 got = await asyncio.to_thread(tools.claim, cid, "Teacher", "api-teacher")
                 if got["rows"]:
                     task_id = got["rows"][0]["id"]
