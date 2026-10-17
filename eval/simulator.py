@@ -43,6 +43,9 @@ class SimStudent:
     unknown: set[int]               # root_cause plus every construct that depends on it
     bank: dict[str, dict] = field(repr=False)
     rng: random.Random = field(repr=False)
+    guess_rate: float = GUESS_RATE
+    pick_planted: float = PICK_PLANTED
+    known_correct: float = KNOWN_CORRECT
 
     def knows(self, construct_id: int) -> bool:
         return construct_id not in self.unknown
@@ -52,21 +55,25 @@ class SimStudent:
         q = self.bank[question if isinstance(question, str) else question["id"]]
         options = q["options"]
         wrong = [o for o in options if not o.get("correct")]
-        if self.rng.random() < GUESS_RATE:
+        if self.rng.random() < self.guess_rate:
             return self.rng.choice(options)["key"]
         planted = [o for o in wrong if o.get("misconception_id") in self.misconceptions]
-        if planted and self.rng.random() < PICK_PLANTED:
+        if planted and self.rng.random() < self.pick_planted:
             return self.rng.choice(planted)["key"]
-        if self.knows(q["construct_id"]) and self.rng.random() < KNOWN_CORRECT:
+        if self.knows(q["construct_id"]) and self.rng.random() < self.known_correct:
             return next(o for o in options if o.get("correct"))["key"]
         return self.rng.choice(wrong)["key"]
 
 
 class Simulator:
-    """Builds reproducible students: the same seed and ids always give the same students and answers."""
+    """Builds reproducible students: the same seed and ids always give the same students and answers.
 
-    def __init__(self, seed: int = 0):
+    noiseless=True drops the guess rate and makes the planted and known rules certain, for tests.
+    """
+
+    def __init__(self, seed: int = 0, noiseless: bool = False):
         self.seed = seed
+        self.rates = {"guess_rate": 0.0, "pick_planted": 1.0, "known_correct": 1.0} if noiseless else {}
         self.bank = load_bank()
         self.g = requires_graph(load_requires())  # edge a -> b means a REQUIRES b
         by_construct: dict[int, set[int]] = {}
@@ -83,7 +90,8 @@ class Simulator:
         hops.pop(construct_id, None)
         return hops
 
-    def student(self, student_id: str, root_cause: int | None = None, target: int | None = None) -> SimStudent:
+    def student(self, student_id: str, root_cause: int | None = None, target: int | None = None,
+                misconceptions: list[int] | None = None) -> SimStudent:
         rng = random.Random(f"{self.seed}:{student_id}")
         root = root_cause if root_cause is not None else rng.choice(self.candidates)
         reach = self.dependants(root, MAX_HOPS)
@@ -95,8 +103,12 @@ class Simulator:
             raise ValueError(f"target {target} does not depend on {root} within {MAX_HOPS} hops")
         pool = sorted(self.distractor_mids[root])
         planted = rng.sample(pool, k=min(len(pool), rng.randint(1, 3)))
+        if misconceptions is not None:
+            if not set(misconceptions) <= set(pool):
+                raise ValueError(f"misconceptions {misconceptions} are not distractors on {root}")
+            planted = list(misconceptions)
         unknown = {root} | set(self.dependants(root))
-        return SimStudent(student_id, root, planted, target, unknown, self.bank, rng)
+        return SimStudent(student_id, root, planted, target, unknown, self.bank, rng, **self.rates)
 
     def cohort(self, student_ids: list[str]) -> list[SimStudent]:
         return [self.student(sid) for sid in student_ids]
