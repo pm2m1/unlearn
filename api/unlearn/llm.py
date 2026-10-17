@@ -25,7 +25,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 CACHE_DIR = Path(os.getenv("UNLEARN_LLM_CACHE", Path(__file__).resolve().parents[2] / ".cache" / "llm"))
 TIMEOUT_S = 20

@@ -2,11 +2,13 @@
 
 import os
 from functools import lru_cache
+from pathlib import Path
 
 from dotenv import load_dotenv
 from falkordb import FalkorDB
 
-load_dotenv()
+# By path, so a server started from another directory (Claude Desktop) still finds the repo's .env.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 
 @lru_cache(maxsize=1)
