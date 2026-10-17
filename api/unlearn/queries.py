@@ -418,3 +418,12 @@ CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts})
 CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a)
 RETURN t.id AS id
 """
+
+TASK_STATE = """
+MATCH (t:Task {id:$id}) RETURN t.state AS state, t.claimed_by AS claimed_by
+"""
+
+REQUIRES_PROPS = """
+MATCH (:Construct)-[e:REQUIRES]->(:Construct)
+RETURN count(e) AS n, collect(DISTINCT e.weight) AS weights, collect(DISTINCT e.source) AS sources
+"""
