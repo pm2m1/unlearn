@@ -87,12 +87,16 @@ Root 345 after 5 questions, 2 levels down.
 - **The obvious objection:** "just paste the graph into the prompt." That is condition **B+**: B's prompt plus every `REQUIRES` edge and every construct's misconceptions with their weights (~22k tokens), on the same local model (qwen3.5 27B).
 - **Result:**
 
-  | | B+ | B | Unlearn (C) |
+  B+ ran on seed 0 only, so every comparison with it uses seed 0's 30 students (the same students in each column):
+
+  | Seed 0, n=30 each | B+ | B | Unlearn (C) |
   | --- | --- | --- | --- |
-  | Root cause, seed 0 | 37% | 27% | 67% |
-  | Top-3 misconception, seed 0 | 33% | 23% | 73% |
-  | Root cause, 3 seeds | — | 37% | 73% |
-  | Time per diagnosis | ~114 s | ~8 s | ~50 ms |
+  | Root cause | 37% | 27% | 67% |
+  | Top-1 misconception | 17% | 17% | 50% |
+  | Top-3 misconception | 33% | 23% | 73% |
+  | p50 time per diagnosis | 114 s | 8.6 s | 50 ms |
+
+  Over all three seeds (90 students), without B+: C scores 73% on root cause against 37% for B and 28% for A.
 
   The graph's *knowledge* helps an LLM a little. The *traversal* (rule out, descend, weigh evidence, remember) is what gets you to the root.
 - **What the graph does that a prompt can't:**

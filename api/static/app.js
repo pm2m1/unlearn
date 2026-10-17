@@ -705,8 +705,29 @@ function evalTable(r, title) {
       return el("th", {}, el("div", { text: l }), n ? el("div", { class: "muted", style: "font-weight:400;font-size:12px", text: `n=${n}, seed${seeds.length > 1 ? "s" : ""} ${seeds.join(", ")}` }) : null);
     }))),
       el("tbody", {}, rows.map(([label, key, u]) => el("tr", {}, el("td", { text: label }), conds.map(([c]) => cell(c, key, u)))))),
+    ...seedTables(r, conds, rows, fmt),
     ...notes, ...(m.bplus_rescored ? [el("p", { class: "muted", text: `Correction: ${m.bplus_rescored}.` })] : []),
     el("p", { class: "muted", text: `Simulator bias: ${m.simulator_bias}.` })];
+}
+
+// A condition that ran on fewer seeds (B+) is compared on those seeds only, where every condition faced the same students.
+function seedTables(r, conds, rows, fmt) {
+  const m = r.meta, per = m.seeds_per_condition || {};
+  const ran = conds.filter(([c]) => r.summary[c]);
+  const short = ran.filter(([c]) => per[c] && per[c].length < m.seeds.length);
+  if (!short.length || !r.per_seed) return [];
+  const seeds = per[short[0][0]];
+  const val = (c, key) => {
+    const xs = seeds.map((s) => r.per_seed[s]?.[c]?.[key]).filter((x) => x !== null && x !== undefined);
+    return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+  };
+  const n = (c) => seeds.reduce((a, s) => a + (r.per_seed[s]?.[c]?.n || 0), 0);
+  return [el("h3", { text: `Seed ${seeds.join(", ")} only: the same students for every condition` }),
+    el("p", { class: "muted", text: `${short.map(([c]) => c).join(", ")} ran on seed ${seeds.join(", ")} only, so compare ${short.length > 1 ? "them" : "it"} here, not with the three-seed means above.` }),
+    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, el("th", { text: "Metric" }), ran.map(([c, l]) => el("th", {}, el("div", { text: l }),
+      el("div", { class: "muted", style: "font-weight:400;font-size:12px", text: `n=${n(c)}` }))))),
+      el("tbody", {}, rows.slice(0, 6).map(([label, key, u]) => el("tr", {}, el("td", { text: label }),
+        ran.map(([c]) => { const v = val(c, key); return el("td", {}, el("strong", { text: v === null ? "–" : fmt(v, u) })); })))))];
 }
 
 function randomView(r) {

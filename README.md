@@ -331,6 +331,17 @@ It walks up to four prerequisite hops back from the skill the student is working
 
 Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
 
+**B+ ran on seed 0 only**, so its column above is not comparable with the other columns' three-seed means. On seed 0, the same 30 students for every condition:
+
+| Seed 0 | A. No memory (n=30) | B. Vector RAG (n=30) | B+. LLM + graph as text (n=30) | C. Unlearn (n=30) |
+| --- | --- | --- | --- | --- |
+| Top-1 misconception | 7% | 17% | 17% | 50% |
+| Top-3 misconception | 7% | 23% | 33% | 73% |
+| Root-cause accuracy | 27% | 27% | 37% | 67% |
+| Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.2 |
+| Session-2 recall | 0% | 10% | 10% | 50% |
+| p50 latency per diagnosis | 17.8 s | 8.6 s | 114.1 s | 50 ms |
+
 Candidate lists, averaged over the same students: 6.7 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B. A planted misconception is on A's list for 20% of students and on B's for 16%, which caps A's and B's misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was shown, B's lists plus its graph text (410 misconceptions and 40 constructs), and every planted misconception (100%) is in it. The random-guess column picks uniformly from those same sets.
 
 <sup>Footnote: cross-check with `gemini-3.6-flash` on seed 0 (A: n=3, B: n=2), first scoring method. **Indicative only, n too small to conclude.** The Gemini free tier allows 20 requests per model per day.</sup>
@@ -343,15 +354,15 @@ Candidate lists, averaged over the same students: 6.7 root-cause candidates (the
 <!-- eval:end -->
 
 **What the table says.**
-- **C wins on every metric.**
-  - Root cause: 73% against 28–37% for the baselines and 18% for a random pick from their own lists.
-  - Misconceptions: 47% top-1 and 78% top-3, against at most 17% and 33% for any baseline (B+).
-  - It asks fewer questions (5.3 against 6) and answers in about 50 ms instead of 7–114 s.
-- **B+ tests knowledge against traversal.** On seed 0, the only seed it ran on:
+- **C wins on every metric.** Against A and B, over the same 90 students (seeds 0–2):
+  - Root cause: 73% against 28% (A) and 37% (B), and 18% for a random pick from their own lists.
+  - Misconceptions: 47% top-1 and 78% top-3, against at most 8% and 11% (B).
+  - It asks fewer questions (5.3 against 6) and answers in about 50 ms instead of 8–13 s.
+- **B+ tests knowledge against traversal.** It ran on seed 0 only, so it is compared on seed 0's 30 students (the seed-0 table above), never with the three-seed means:
   - **Against B:** B+ beats B on root cause (37% against 27%) and top-3 misconception (33% against 23%), and ties it on top-1 (17%). So the graph's knowledge does help an LLM.
-  - **Against C:** it's still far behind (67% root cause, 50% top-1, 73% top-3 on seed 0). Pasting the graph into the prompt doesn't reproduce what traversing it does, and it makes each call about 15× slower than B.
-- **B+ is not close to C on any metric**, so no claim needs narrowing on that count.
-- **Session-2 recall** is 56% for C against 10% for B and B+ (whose openings are identical) and 0% for A.
+  - **Against C:** it's still far behind: 37% against 67% on root cause, 17% against 50% on top-1 and 33% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. Each B+ call takes 114 s, against 8.6 s for B and 50 ms for C on the same seed.
+- **B+ is not close to C on any seed-0 metric**, so no claim needs narrowing on that count.
+- **Session-2 recall.** Over seeds 0–2, C scores 56% against 10% for B and 0% for A. On seed 0, C scores 50% against 10% for both B and B+, whose openings are identical.
   - The eval's figure comes from the embedding judge applied to the real opening text.
   - The 68% in the recall table under "Design decisions worth knowing" counts the named IDs exactly. The two measure slightly different things.
 

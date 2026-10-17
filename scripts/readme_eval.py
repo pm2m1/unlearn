@@ -53,6 +53,29 @@ def rfmt(x):
     return "–" if x is None else f"{100 * x:.1f}%" if x < 0.1 else f"{100 * x:.0f}%"
 
 
+def seed_table(ev, conds, seeds_of) -> list[str]:
+    """A condition that ran on fewer seeds (B+) is compared on those seeds only: same students for every condition."""
+    short = sorted({tuple(seeds_of[c]) for c in conds if len(seeds_of[c]) < len(ev["meta"]["seeds"])})
+    out = []
+    for seeds in short:
+        partial = [c for c in conds if tuple(seeds_of[c]) == seeds]
+        label = ", ".join(map(str, seeds))
+        ps = ev["per_seed"]
+        n = {c: sum(ps[str(s)][c]["n"] for s in seeds) for c in conds}
+        out += ["", f"**{' and '.join(partial)} ran on seed {label} only**, so {'its' if len(partial) == 1 else 'their'} "
+                f"column above is not comparable with the other columns' three-seed means. On seed {label}, the same "
+                f"{n[partial[0]]} students for every condition:", "",
+                "| Seed " + label + " | " + " | ".join(f"{LABELS[c]} (n={n[c]})" for c in conds) + " |",
+                "|" + " --- |" * (len(conds) + 1)]
+        for row_label, m, unit in ROWS[:6]:
+            vals = []
+            for c in conds:
+                xs = [ps[str(s)][c][m] for s in seeds if ps[str(s)][c][m] is not None]
+                vals.append(fmt(sum(xs) / len(xs), unit) if xs else "–")
+            out.append(f"| {row_label} | " + " | ".join(vals) + " |")
+    return out
+
+
 def block() -> str:
     ev = json.loads((RESULTS / "eval.json").read_text())
     rb = json.loads((RESULTS / "random_baseline.json").read_text())
@@ -77,7 +100,9 @@ def block() -> str:
                for k in ("A", "B", "B+")}
     lines += ["", f"Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: "
               f"`{meta['llm'].split(' / ')[-1]}` (local, Ollama, thinking off), one model, no fallback. C: template wording; "
-              "its metrics come from the graph.", "",
+              "its metrics come from the graph."]
+    lines += seed_table(ev, conds, seeds_of)
+    lines += ["",
               f"Candidate lists, averaged over the same students: {sizes['prerequisites']:.1f} root-cause candidates "
               f"(the target's prerequisites), {sizes['A_misconceptions']:.1f} misconception candidates for A and "
               f"{sizes['B_misconceptions']:.0f} for B. A planted misconception is on A's list for "
