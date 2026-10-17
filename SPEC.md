@@ -177,7 +177,7 @@ CREATE INDEX FOR (t:Task) ON (t.state)
 CREATE VECTOR INDEX FOR (m:Misconception) ON (m.embedding) OPTIONS {dimension:384, similarityFunction:'cosine'}
 ```
 
-Use a 384-dimension local embedding model (for example `all-MiniLM-L6-v2` via sentence-transformers). It runs on CPU, costs nothing and has no rate limit.
+Use a 384-dimension local embedding model: `all-MiniLM-L6-v2`, run through fastembed (ONNX Runtime, no torch). It runs on CPU, costs nothing and has no rate limit. Its vectors match the sentence-transformers ones to cosine ≥ 0.9999998, and it keeps the API image at ~0.9 GB instead of ~2.2 GB.
 
 ## Data loading pipeline
 

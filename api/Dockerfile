@@ -9,23 +9,21 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     HF_HOME=/app/.cache/huggingface \
+    FASTEMBED_CACHE_PATH=/app/.cache/fastembed \
     PYTHONPATH=/app/api:/app
 
 # The app runs as an unprivileged user that owns /app from the start (no chown -R layer duplicating files).
 RUN useradd --create-home --uid 10001 unlearn && mkdir -p /app && chown unlearn /app
 WORKDIR /app
 
-# CPU-only torch: the default Linux wheel pulls ~2 GB of CUDA libraries the API never uses.
-RUN pip install --index-url https://download.pytorch.org/whl/cpu torch==2.14.1
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 USER unlearn
 
-# Bake the embedding model (all-MiniLM-L6-v2, 384-d) into the image.
+# Bake the embedding model (all-MiniLM-L6-v2, 384-d, ONNX via fastembed) into the image.
 COPY --chown=unlearn api/unlearn/embed.py /tmp/embed.py
-RUN python -c "import sys; sys.path.insert(0, '/tmp'); from embed import MODEL; \
-from sentence_transformers import SentenceTransformer; SentenceTransformer(MODEL, device='cpu')" \
+RUN python -c "import sys; sys.path.insert(0, '/tmp'); from embed import embed; embed(['warm up'])" \
  && rm /tmp/embed.py
 
 COPY --chown=unlearn api ./api

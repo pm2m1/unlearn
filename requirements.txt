@@ -4,7 +4,7 @@ huggingface_hub==1.33.0
 pytest==9.1.1
 python-dotenv==1.2.4
 networkx==3.7
-sentence-transformers==6.1.0
+fastembed==0.8.1
 openai==3.24.0
 mcp==1.30.0
 fastapi==0.142.2
