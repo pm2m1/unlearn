@@ -668,10 +668,10 @@ async function loadEval() {
   for (const name of names) {
     const r = results[name];
     if (r.summary && r.meta && name === "eval") box.append(...evalTable(r, "Graph vs vector RAG vs no memory"));
-    else if (name.startsWith("eval_")) continue;  // partial runs (one seed at a time), already merged into eval.json
+    else if (name.startsWith("eval_")) continue;  // partial or archived runs (eval_pre_review), not the current result
     else if (r.summary && r.meta && name.startsWith("crosscheck")) {
       const n = Object.entries(r.meta.n_per_condition || {}).map(([c, k]) => `${c}: ${k}`).join(", ");
-      const foot = el("details", { class: "footnote" }, el("summary", { text: `Footnote: cross-check with ${r.meta.llm || "another LLM"} (n = ${n}). Indicative only, n too small to conclude.` }),
+      const foot = el("details", { class: "footnote" }, el("summary", { text: `Footnote: cross-check with ${r.meta.llm || "another LLM"} (n = ${n}), on the pre-review data. Indicative only, n too small to conclude.` }),
         ...evalTable(r, `Cross-check (${r.meta.llm}), indicative only`));
       box.append(foot);
     }

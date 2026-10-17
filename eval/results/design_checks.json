@@ -1,0 +1,53 @@
+{
+  "recall": {
+    "spec": {
+      "recall": 0.278,
+      "precision": 0.781,
+      "empty": 58,
+      "n": 90
+    },
+    "strongest": {
+      "recall": 0.556,
+      "precision": 0.312,
+      "empty": 2,
+      "n": 90
+    },
+    "root_first": {
+      "recall": 0.678,
+      "precision": 0.449,
+      "empty": 2,
+      "n": 90
+    }
+  },
+  "thresholds": {
+    "1.5/0.5": {
+      "0": {
+        "top1": 102,
+        "pairs": 139
+      },
+      "1": {
+        "top1": 110,
+        "pairs": 139
+      },
+      "2": {
+        "top1": 113,
+        "pairs": 139
+      }
+    },
+    "1.0/0.33": {
+      "0": {
+        "top1": 104,
+        "pairs": 139
+      },
+      "1": {
+        "top1": 115,
+        "pairs": 139
+      },
+      "2": {
+        "top1": 119,
+        "pairs": 139
+      }
+    }
+  },
+  "method": "    python eval/design_checks.py                 # both, seeds 0-2; writes eval/results/design_checks.json\n    python eval/design_checks.py --only recall   # or --only thresholds"
+}

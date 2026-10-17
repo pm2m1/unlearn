@@ -388,9 +388,9 @@ The original rule kept only confidence > 0.6, meaning seen twice. That left 58 o
 
 | Rule | Recall of a planted misconception | Named misconceptions that were planted |
 | --- | --- | --- |
-| confidence > 0.6, newest first (original) | 29% | 81% |
-| seen once or more, strongest first | 53% | 30% |
-| seen once or more, last diagnosed root first (current) | 68% | 44% |
+| confidence > 0.6, newest first (original) | 28% | 78% |
+| seen once or more, strongest first | 56% | 31% |
+| seen once or more, last diagnosed root first (current) | 68% | 45% |
 
 ```
 MATCH (s:Student {id:$sid})

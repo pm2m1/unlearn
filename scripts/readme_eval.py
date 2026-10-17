@@ -83,7 +83,7 @@ def block() -> str:
     conds = [c for c in LABELS if c in summary]
     seeds_of = meta.get("seeds_per_condition") or {c: meta["seeds"] for c in conds}
     n = meta["n_per_condition"]
-    head = "| Metric | " + " | ".join(f"{LABELS[c]} (n={n[c]}, seeds {', '.join(map(str, seeds_of[c]))})" for c in conds) \
+    head = "| Metric | " + " | ".join(f"{LABELS[c]} (n={n[c]}, seed{'s' * (len(seeds_of[c]) > 1)} {', '.join(map(str, seeds_of[c]))})" for c in conds) \
            + " | Random guess (A / B / B+) |"
     lines = [head, "|" + " --- |" * (len(conds) + 2)]
     rnd = random_column(rb, seeds_of)
@@ -117,7 +117,8 @@ def block() -> str:
         cn = cc["meta"]["n_per_condition"]
         ccs = [c for c in ("A", "B") if c in cc["summary"]]
         lines += ["", f"<sup>Footnote: cross-check with `{cc['meta']['llm'].split(' / ')[-1]}` on seed 0 "
-                  f"({', '.join(f'{c}: n={cn[c]}' for c in ccs)}), first scoring method. **Indicative only, n too small to "
+                  f"({', '.join(f'{c}: n={cn[c]}' for c in ccs)}), first scoring method, **on the pre-review data** (before "
+                  "REVIEW.md's 2 edge deletions and 9 option removals). **Indicative only, n too small to "
                   "conclude.** The Gemini free tier allows 20 requests per model per day.</sup>", "",
                   "| Cross-check metric | " + " | ".join(f"{LABELS[c]} (n={cn[c]})" for c in ccs) + " |",
                   "|" + " --- |" * (len(ccs) + 1)]

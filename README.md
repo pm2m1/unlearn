@@ -58,17 +58,19 @@ flowchart TB
   - **Free-tier limit:** Gemini's free tier allows 20 requests per model per day. A busy demo uses that up within a few sessions, after which every reply is a template. Nothing breaks, but the wording becomes plainer.
 
 ### Design decisions worth knowing
-- **Stop thresholds.** The Diagnoser stops when the top root-cause evidence is ≥ 1.5 and leads the runner-up by ≥ 0.5. These are the SPEC's original values, and they follow from the evidence scale: the median prerequisite distractor has weight 1.0, so two hits score 1.5. Looser thresholds (1.0 / 0.33) named the planted root slightly more often on the simulator (109/126/126 of 151 against 103/121/121 on seeds 0–2). They were not adopted, so the thresholds aren't tuned to the simulator the eval scores against.
+- **Stop thresholds.** The Diagnoser stops when the top root-cause evidence is ≥ 1.5 and leads the runner-up by ≥ 0.5. These are the SPEC's original values, and they follow from the evidence scale: the median prerequisite distractor has weight 1.0, so two hits score 1.5. Looser thresholds (1.0 / 0.33) named the planted root slightly more often on the simulator: 104/115/119 against 102/110/113 of the 139 (root, target) pairs on seeds 0–2 (`eval/design_checks.py`, [`design_checks.json`](eval/results/design_checks.json)). They were not adopted, so the thresholds aren't tuned to the simulator the eval scores against. An earlier version of this note gave 109/126/126 against 103/121/121 of 151; those came from earlier code on the pre-review data.
 - **Recall.** `recall` returns every misconception the student has shown. It ranks those on the root cause the student was diagnosed with last session first, then the strongest, then the most recent.
   - **Why it changed:** the build spec kept only misconceptions seen at least twice. That left 58 of 90 simulated students with nothing to recall in session 2.
   - **Chosen after seeing the eval results, stated plainly:** I measured three rules on the same session-1 histories and picked "last diagnosed root first" afterwards. The tutor should open with what it diagnosed last session, and that rule does exactly that.
   - **The cost:** fewer of the named misconceptions are right than under the original rule, because one-off slips get named too.
 
+  Measured by `eval/design_checks.py` on the eval's 90 students ([`design_checks.json`](eval/results/design_checks.json)):
+
   | `recall` rule | Session-2 opening names a planted misconception | Named misconceptions that were planted |
   | --- | --- | --- |
-  | Seen twice (confidence > 0.6), newest first (build spec) | 29% | 81% |
-  | Seen once or more, strongest first | 53% | 30% |
-  | Seen once or more, last diagnosed root first (**current**) | 68% | 44% |
+  | Seen twice (confidence > 0.6), newest first (build spec) | 28% | 78% |
+  | Seen once or more, strongest first | 56% | 31% |
+  | Seen once or more, last diagnosed root first (**current**) | 68% | 45% |
 
 ## Graph data model
 
@@ -138,7 +140,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 ## Every query
 
 <!-- queries:start -->
-111 queries, all parameterised, all in [`api/unlearn/queries.py`](api/unlearn/queries.py).
+114 queries, all parameterised, all in [`api/unlearn/queries.py`](api/unlearn/queries.py).
 
 **Agent tools (the 16 tools and the queries they run)**
 
@@ -239,6 +241,9 @@ It walks up to four prerequisite hops back from the skill the student is working
 | `ALL_REQUIRES` | condition B+: every curated REQUIRES edge, as text in the prompt | pattern match |
 | `ALL_SEEN_IN` | condition B+: every construct's misconceptions with SEEN_IN.w, as text in the prompt | pattern match |
 | `CLASS_CONSTRUCTS` | the eval judge's construct names | label scan |
+| `RECALL_SPEC_RULE` | design check: the build spec's recall rule (seen twice, newest first) | pattern match |
+| `RECALL_STRONGEST_FIRST` | design check: recall seen once or more, strongest first | pattern match |
+| `MISCONCEPTION_NAMES` | design check: planted misconception names | range index lookup |
 | `CONC_PROBE_WRITE` | a small timed write (isolation probes) | MERGE |
 | `CONC_HEAVY_WRITE` | a deliberately heavy write that holds a graph's write lock | UNWIND + CREATE |
 
@@ -302,32 +307,33 @@ It walks up to four prerequisite hops back from the skill the student is working
   - **B: vector RAG.** The full attempt history, plus the top-10 misconceptions retrieved from FalkorDB's vector index by embedding each question with the chosen option.
   - **B+: LLM + graph as text.** B's prompt, plus every curated `REQUIRES` edge and every construct's misconceptions with their `SEEN_IN.w` weights, as plain text (about 22,000 tokens). B+ tests whether the graph's value is the *knowledge* in it, which can be pasted into a prompt, or the *traversal* Unlearn runs over it.
   - **C: Unlearn.** The agents, through the same step API the web UI uses.
-- **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk, and cached diagnoses are left out of the latency figures.
+- **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk. Cached diagnoses, and A's diagnoses that made no call (a student with no wrong answer), are left out of the latency figures. On the post-review re-run most A and B diagnoses were cache hits, so A's latency comes from 5 fresh diagnoses and B's from 30.
 - **Same question pool.** A, B and B+ ask the same seeded 6 questions from the pool C draws from (the target and everything it depends on). C chooses its questions adaptively.
 - **Answers are IDs.** A, B and B+ choose from candidate lists with IDs and must reply with IDs. An ID the condition wasn't shown counts as wrong.
-  - Root-cause candidates are the target's prerequisites, taken from the curated graph. **That narrows their choice to about 7 skills and favours them.** A random pick is already right 17–19% of the time.
+  - Root-cause candidates are the target's prerequisites, taken from the curated graph. **That narrows their choice to about 7 skills and favours them.** A random pick is already right 21–24% of the time.
   - Misconception candidates are the retrieved ones for A and B. B+ is scored on every ID it was shown: B's lists plus every misconception and construct in its graph text.
 - **Session-2 recall** means the opening message of session 2 names a planted misconception, as judged by embedding distance ≤ 0.35 for every condition. B+ opens exactly as B does, so the two share a recall score.
-- **The first run's scoring was replaced.** It asked for free text and snapped every answer to its nearest ID, so a vague answer was still scored as a specific skill. An audit of its cached outputs found no invalid JSON, but 8–14 of about 30 root-cause guesses per condition and seed weren't close to the skill they were scored as. Scoring by offered IDs roughly doubled A's and B's root-cause scores on seed 0 (13% → 27% and 10% → 27%).
-- **B+ ran on seed 0 only.** At about 115 s per call, all three seeds would have taken about three hours, against a 75-minute budget.
-- **Correction (Oct 18): B+ re-scored.** B+ was first scored only on IDs from B's retrieved list, although its prompt lists all 410 misconceptions with their IDs. Planted misconceptions it named from the graph text were counted wrong. It was re-scored on every ID it was shown, from the cached model outputs with no new LLM calls (`eval/rescore_bplus.py`). The replay reproduced A's and B's saved predictions exactly, and only B+'s scoring fields changed (14 of 30 students). Results:
+- **The first run's scoring was replaced** (pre-review data). It asked for free text and snapped every answer to its nearest ID, so a vague answer was still scored as a specific skill. An audit of its cached outputs found no invalid JSON, but 8–14 of about 30 root-cause guesses per condition and seed weren't close to the skill they were scored as. Scoring by offered IDs roughly doubled A's and B's root-cause scores on seed 0 (13% → 27% and 10% → 27%).
+- **B+ ran on seed 0 only.** At about 110 s per call, all three seeds would have taken nearly three hours (163 minutes projected), against a 75-minute budget.
+- **Correction (Oct 18, pre-review data): B+ re-scored.** B+ was first scored only on IDs from B's retrieved list, although its prompt lists all 410 misconceptions with their IDs. Planted misconceptions it named from the graph text were counted wrong. It was re-scored on every ID it was shown, from the cached model outputs with no new LLM calls (`eval/rescore_bplus.py`). The replay reproduced A's and B's saved predictions exactly, and only B+'s scoring fields changed (14 of 30 students). Results:
   - Top-1 misconception went from 10% to 17%.
   - Top-3 misconception went from 20% to 33%.
   - Root cause stayed at 37%: every planted root is one of the prerequisites B+ was offered anyway.
   - A, B, C, latency and recall are unchanged.
+- **Re-run after the human review (Oct 18).** Parth's review of the curated data ([REVIEW.md](REVIEW.md), section 0) deleted 2 `REQUIRES` edges and removed 9 options. Every condition was then re-run on the new data on the same students, so all the numbers below are post-review. The pre-review run is kept in [`eval/results/eval_pre_review.json`](eval/results/eval_pre_review.json).
 
 **Results** (generated from [`eval/results/eval.json`](eval/results/eval.json) and [`random_baseline.json`](eval/results/random_baseline.json) by `scripts/readme_eval.py`):
 
 <!-- eval:start -->
-| Metric | A. No memory (n=90, seeds 0, 1, 2) | B. Vector RAG (n=90, seeds 0, 1, 2) | B+. LLM + graph as text (n=30, seeds 0) | C. Unlearn (n=90, seeds 0, 1, 2) | Random guess (A / B / B+) |
+| Metric | A. No memory (n=90, seeds 0, 1, 2) | B. Vector RAG (n=90, seeds 0, 1, 2) | B+. LLM + graph as text (n=30, seed 0) | C. Unlearn (n=90, seeds 0, 1, 2) | Random guess (A / B / B+) |
 | --- | --- | --- | --- | --- | --- |
-| Top-1 misconception | 6% (0%–10%) | 8% (3%–17%) | 17% | 47% (40%–50%) | 2.2% / 1.6% / 0.5% |
-| Top-3 misconception | 6% (0%–10%) | 11% (3%–23%) | 33% | 78% (73%–87%) | 6.5% / 4.7% / 1.5% |
-| Root-cause accuracy | 28% (23%–33%) | 37% (27%–47%) | 37% | 73% (67%–80%) | 18% / 18% / 2.5% |
-| Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.3 (5.2–5.4) | – |
-| Session-2 recall | 0% | 10% | 10% | 56% (50%–63%) | – |
-| p50 latency per diagnosis | 12.6 s (9.4 s–17.8 s) | 7.6 s (7.0 s–8.6 s) | 114.1 s | 51 ms (50 ms–51 ms) | – |
-| p95 latency per diagnosis | 23.3 s (18.2 s–32.4 s) | 8.6 s (7.8 s–10.3 s) | 133.1 s | 73 ms (56 ms–92 ms) | – |
+| Top-1 misconception | 7% (0%–10%) | 7% (3%–13%) | 23% | 48% (43%–50%) | 2.6% / 2.3% / 0.5% |
+| Top-3 misconception | 7% (0%–10%) | 13% (7%–27%) | 47% | 79% (73%–90%) | 7.5% / 6.8% / 1.5% |
+| Root-cause accuracy | 32% (27%–37%) | 37% (30%–50%) | 40% | 72% (63%–83%) | 23% / 23% / 2.5% |
+| Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.2 (5.1–5.2) | – |
+| Session-2 recall | 0% | 9% (7%–10%) | 7% | 57% (50%–70%) | – |
+| p50 latency per diagnosis | 17.1 s (9.8 s–24.4 s) | 7.6 s (7.3 s–7.9 s) | 113.4 s | 50 ms (49 ms–50 ms) | – |
+| p95 latency per diagnosis | 23.8 s (15.8 s–31.7 s) | 8.4 s (8.0 s–8.6 s) | 122.0 s | 61 ms (57 ms–66 ms) | – |
 
 Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
 
@@ -335,16 +341,16 @@ Mean (min–max across seeds) where a condition ran on more than one seed. Model
 
 | Seed 0 | A. No memory (n=30) | B. Vector RAG (n=30) | B+. LLM + graph as text (n=30) | C. Unlearn (n=30) |
 | --- | --- | --- | --- | --- |
-| Top-1 misconception | 7% | 17% | 17% | 50% |
-| Top-3 misconception | 7% | 23% | 33% | 73% |
-| Root-cause accuracy | 27% | 27% | 37% | 67% |
+| Top-1 misconception | 10% | 13% | 23% | 50% |
+| Top-3 misconception | 10% | 27% | 47% | 73% |
+| Root-cause accuracy | 33% | 30% | 40% | 63% |
 | Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.2 |
-| Session-2 recall | 0% | 10% | 10% | 50% |
-| p50 latency per diagnosis | 17.8 s | 8.6 s | 114.1 s | 50 ms |
+| Session-2 recall | 0% | 7% | 7% | 50% |
+| p50 latency per diagnosis | 24.4 s | 7.7 s | 113.4 s | 50 ms |
 
-Candidate lists, averaged over the same students: 6.7 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B. A planted misconception is on A's list for 20% of students and on B's for 16%, which caps A's and B's misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was shown, B's lists plus its graph text (410 misconceptions and 40 constructs), and every planted misconception (100%) is in it. The random-guess column picks uniformly from those same sets.
+Candidate lists, averaged over the same students: 6.6 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B. A planted misconception is on A's list for 23% of students and on B's for 20%, which caps A's and B's misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was shown, B's lists plus its graph text (410 misconceptions and 40 constructs), and every planted misconception (100%) is in it. The random-guess column picks uniformly from those same sets.
 
-<sup>Footnote: cross-check with `gemini-3.6-flash` on seed 0 (A: n=3, B: n=2), first scoring method. **Indicative only, n too small to conclude.** The Gemini free tier allows 20 requests per model per day.</sup>
+<sup>Footnote: cross-check with `gemini-3.6-flash` on seed 0 (A: n=3, B: n=2), first scoring method, **on the pre-review data** (before REVIEW.md's 2 edge deletions and 9 option removals). **Indicative only, n too small to conclude.** The Gemini free tier allows 20 requests per model per day.</sup>
 
 | Cross-check metric | A. No memory (n=3) | B. Vector RAG (n=2) |
 | --- | --- | --- |
@@ -355,14 +361,14 @@ Candidate lists, averaged over the same students: 6.7 root-cause candidates (the
 
 **What the table says.**
 - **C wins on every metric.** Against A and B, over the same 90 students (seeds 0–2):
-  - Root cause: 73% against 28% (A) and 37% (B), and 18% for a random pick from their own lists.
-  - Misconceptions: 47% top-1 and 78% top-3, against at most 8% and 11% (B).
-  - It asks fewer questions (5.3 against 6) and answers in about 50 ms instead of 8–13 s.
+  - Root cause: 72% against 32% (A) and 37% (B), and 23% for a random pick from their own lists.
+  - Misconceptions: 48% top-1 and 79% top-3, against at most 7% and 13% (B).
+  - It asks fewer questions (5.2 against 6) and answers in about 50 ms instead of 8–17 s.
 - **B+ tests knowledge against traversal.** It ran on seed 0 only, so it is compared on seed 0's 30 students (the seed-0 table above), never with the three-seed means:
-  - **Against B:** B+ beats B on root cause (37% against 27%) and top-3 misconception (33% against 23%), and ties it on top-1 (17%). So the graph's knowledge does help an LLM.
-  - **Against C:** it's still far behind: 37% against 67% on root cause, 17% against 50% on top-1 and 33% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. Each B+ call takes 114 s, against 8.6 s for B and 50 ms for C on the same seed.
+  - **Against B:** B+ beats B on root cause (40% against 30%), top-1 misconception (23% against 13%) and top-3 (47% against 27%). So the graph's knowledge does help an LLM.
+  - **Against C:** it's still far behind: 40% against 63% on root cause, 23% against 50% on top-1 and 47% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. Each B+ call takes 113 s, against 7.7 s for B and 50 ms for C on the same seed.
 - **B+ is not close to C on any seed-0 metric**, so no claim needs narrowing on that count.
-- **Session-2 recall.** Over seeds 0–2, C scores 56% against 10% for B and 0% for A. On seed 0, C scores 50% against 10% for both B and B+, whose openings are identical.
+- **Session-2 recall.** Over seeds 0–2, C scores 57% against 9% for B and 0% for A. On seed 0, C scores 50% against 7% for both B and B+, whose openings are identical.
   - The eval's figure comes from the embedding judge applied to the real opening text.
   - The 68% in the recall table under "Design decisions worth knowing" counts the named IDs exactly. The two measure slightly different things.
 
@@ -404,8 +410,8 @@ Atrium won FalkorDB's own "Memory Meets Motion" hackathon by grouping students b
 | Source | What | Status | Licence |
 | --- | --- | --- | --- |
 | [Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph), pinned to commit `2ae0839debf73c0ce7dd6578d8ea8b99e7be8631` | 2,258 constructs (Subject → Topic → SubTopic hierarchy), 8,117 misconceptions, 19,294 weighted misconception↔construct edges | Real | CC BY 4.0 |
-| `data/curated/requires.csv` | 59 prerequisite edges between 40 constructs | Authored (AI draft, human review) | MIT (this repo) |
-| `data/curated/questions.json` | 120 multiple-choice questions, each wrong option tied to an Eedi misconception, maths checked with `fractions.Fraction` | Authored (AI draft, human review) | MIT |
+| `data/curated/requires.csv` | 57 prerequisite edges between 40 constructs (10 of 57 marked medium or low confidence) | Authored (AI draft, human review: 2 edges deleted, see [REVIEW.md](REVIEW.md)) | MIT (this repo) |
+| `data/curated/questions.json` | 120 multiple-choice questions, each wrong option tied to an Eedi misconception, maths checked with `fractions.Fraction` | Authored (AI draft, human review: 9 options removed, see [REVIEW.md](REVIEW.md)) | MIT |
 | `data/curated/skills.json` | 8 remediation skills | Authored (AI draft, human review) | MIT |
 | Students, attempts, sessions | 30 simulated students in `class_demo`, Asha and Ben in `class_demo_video` | Synthetic | MIT |
 
@@ -422,6 +428,7 @@ Eedi does not endorse this project. There are no real students, logins or person
 | `ORDER BY length(p)` on a path that isn't returned fails: "Unable to locate a value with alias p" | Return `length(p) AS hops` and order by `hops` (`ROOT_CAUSE_CHAIN`) |
 | `ORDER BY` a property not projected after an aggregation fails: "cannot reference variables not projected" | Project it first (`PROPOSALS` returns `created_ts`) |
 | `GRAPH.COPY` segfaulted once (signal 11) during rapid delete-and-copy cycles straight after heavy writes. It was not reproducible on its own, even with 60 back-to-back copies | Compose uses `restart: unless-stopped`; the data survived on the volume. `demo_scenario.py` retries the copy once |
+| `GRAPH.COPY` failed once with "could not fork" while a script was copying a class graph many times in a row. The server was healthy straight after (no save or fork in progress) and the same copy succeeded on retry | `recreate_graph` waits and retries the copy on "could not fork", as it does on "already set" |
 | A write query against a graph that was just deleted silently recreates it, empty. Our Teacher worker's polling `CLAIM` did this to test graphs, and once, between a delete and a `GRAPH.COPY` onto that name, it made the copy fail with "key is already set" | Poll with `GRAPH.RO_QUERY` first (`OPEN_TASKS_FOR`) and claim only when a task is waiting. Scripts that rebuild a class run the Teacher themselves, so no task is left waiting, and retry the copy on "already set" |
 | The image's default `MAX_QUEUED_QUERIES 25` rejected 60 concurrent simulated students: "Max pending queries exceeded" | Compose sets `FALKORDB_ARGS=MAX_QUEUED_QUERIES 256 TIMEOUT 1000 RESULTSET_SIZE 10000`. It restates the other defaults, because setting the variable replaces them |
 | The vector query's `score` is a cosine **distance**: the exact text scores 0.0 | `ORDER BY score ASC`, checked by a test |

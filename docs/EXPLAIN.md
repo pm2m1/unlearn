@@ -6,7 +6,7 @@
 
 - **Three kinds of graph in one FalkorDB instance:**
   - `curriculum`: all of Eedi, read-only. 8,117 misconceptions.
-  - `class_template`: the Fractions slice. 40 constructs, 410 misconceptions, 59 curated `REQUIRES` edges, 120 questions.
+  - `class_template`: the Fractions slice. 40 constructs, 410 misconceptions, 57 curated `REQUIRES` edges, 120 questions.
   - `class_<id>`: one per classroom, made with `GRAPH.COPY`. The copy carries all 9 indexes, the vector index included.
 - **Four layers:**
   - **Curriculum:** `Construct`, `Misconception -[:SEEN_IN {pct, w}]-> Construct`, and `Construct -[:REQUIRES]-> Construct` (needs → prerequisite).
@@ -76,9 +76,9 @@ Root 345 after 5 questions, 2 levels down.
 
   | Rule | Session-2 opening names a planted misconception | Named misconceptions that were planted |
   | --- | --- | --- |
-  | SPEC rule | 29% | 81% |
-  | Strongest first | 53% | 30% |
-  | **Root first (current)** | **68%** | **44%** |
+  | SPEC rule | 28% | 78% |
+  | Strongest first | 56% | 31% |
+  | **Root first (current)** | **68%** | **45%** |
 
 - **Say it plainly:** the rule was chosen after seeing these numbers. The cost is precision, because one-off slips get named too.
 
@@ -91,12 +91,12 @@ Root 345 after 5 questions, 2 levels down.
 
   | Seed 0, n=30 each | B+ | B | Unlearn (C) |
   | --- | --- | --- | --- |
-  | Root cause | 37% | 27% | 67% |
-  | Top-1 misconception | 17% | 17% | 50% |
-  | Top-3 misconception | 33% | 23% | 73% |
-  | p50 time per diagnosis | 114 s | 8.6 s | 50 ms |
+  | Root cause | 40% | 30% | 63% |
+  | Top-1 misconception | 23% | 13% | 50% |
+  | Top-3 misconception | 47% | 27% | 73% |
+  | p50 time per diagnosis | 113 s | 7.7 s | 50 ms |
 
-  Over all three seeds (90 students), without B+: C scores 73% on root cause against 37% for B and 28% for A.
+  Over all three seeds (90 students), without B+: C scores 72% on root cause against 37% for B and 32% for A.
 
   The graph's *knowledge* helps an LLM a little. The *traversal* (rule out, descend, weigh evidence, remember) is what gets you to the root.
 - **What the graph does that a prompt can't:**
@@ -113,13 +113,14 @@ Root 345 after 5 questions, 2 levels down.
   - A 10% guess rate and planted misconceptions picked only 85% of the time blunt that bias but don't remove it.
   - No real student has used it.
 - **Curated prerequisites.**
-  - The 59 `REQUIRES` edges were drafted with AI help. 12 are marked medium or low confidence in `REVIEW.md`.
+  - The 57 `REQUIRES` edges were drafted with AI help and reviewed by hand. The review deleted 2 edges and removed 9 question options (`REVIEW.md`, section 0). 10 of the 57 are still marked medium or low confidence.
+  - Logged but not changed: 429, 437 and 3241 probably also need the multiple-case skill (425 or 433), and 3328's negative-numbers prerequisite is outside the slice.
   - `root_cause` is only as good as those edges.
   - Place value was left out on purpose.
 - **Baselines are capped by retrieval.**
-  - A planted misconception is on A's candidate list for 20% of students and on B's for 16%, so their misconception scores can't go higher whatever the model does.
-  - B+ is not capped: it is scored on every ID in its prompt (410 misconceptions, 40 constructs). It was first scored on B's list only, which was corrected on Oct 18 from the cached outputs. Its top-3 went from 20% to 33%; its root cause was unchanged.
-  - Root-cause candidates (the target's ~7 prerequisites) favour the baselines: a random pick is right 18% of the time.
+  - A planted misconception is on A's candidate list for 23% of students and on B's for 20%, so their misconception scores can't go higher whatever the model does.
+  - B+ is not capped: it is scored on every ID in its prompt (410 misconceptions, 40 constructs). It was first scored on B's list only, which was corrected on Oct 18 from the cached outputs (on the pre-review data). Its top-3 went from 20% to 33%; its root cause was unchanged.
+  - Root-cause candidates (the target's ~7 prerequisites) favour the baselines: a random pick is right 23% of the time.
 - **Model size.** The baselines ran on a 27B local model. A stronger model may narrow the gap on naming misconceptions.
 - **Questions run out.** There are only 3 questions per construct and `next_question` never repeats one, so session 2 sometimes can't re-ask the root.
 - **Free-tier LLMs.** Gemini allows 20 requests per model per day. After that the words come from templates (the facts never change, because they come from the graph).

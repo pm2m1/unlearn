@@ -1,11 +1,12 @@
 """Re-score B+ in a saved eval run on every id it was shown, from the LLM disk cache only (no LLM calls).
 
-    python eval/rescore_bplus.py [--stem eval_seed0]     # then: python eval/run_eval.py --merge eval_seed0,eval_seeds12
+    python eval/rescore_bplus.py [--stem eval]
 
 The first B+ run kept only ids from B's retrieved list, although its prompt lists every misconception and construct
 with its id. This replays each seed B+ ran on in the eval's order (A, B, B+ share one simulator per seed), with every
 completion served from the cache; a cache miss stops the script. A and B must reproduce their saved predictions.
 Only B+'s scoring fields change (predicted, root, json_ok, *_unmapped). Its latency and openings are the saved ones.
+It was run on the pre-review data (merged into eval/results/eval_pre_review.json); run_eval.py now scores B+ this way.
 """
 
 import argparse
@@ -34,7 +35,7 @@ def cache_only():
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--stem", default="eval_seed0")
+    ap.add_argument("--stem", default="eval")
     a = ap.parse_args(argv)
     cache_only()
     path = RE.RESULTS / f"{a.stem}.json"

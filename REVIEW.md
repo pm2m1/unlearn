@@ -1,7 +1,72 @@
 # Review for Parth — Phase 2 drafts
 
-Everything in `data/curated/` is a **DRAFT** written by Claude Code. Nothing here has been reviewed by a person yet.
+Everything in `data/curated/` is a **DRAFT** written by Claude Code. **Parth reviewed sections 1–3 on Oct 18, 2026.** His decisions and reasons are in section 0. They were **applied on Oct 18**: `scripts/author_questions.py` and `requires.csv` were edited, the graphs rebuilt, and the eval re-run on the new data.
 Suggested order: REQUIRES edges (they drive `root_cause`), then the stretch distractors, then the 10-question spot check.
+
+## 0. Decisions (Parth, Oct 18, 2026, applied)
+
+**Summary:**
+- **Edges:** 10 KEEP, 2 DELETE.
+- **Distractors:** 6 OK, 8 REMOVE.
+- **Spot checks:** 9 PASS, 1 FAIL, fixed by removing one option.
+- **Applied:** 2 edges deleted (59 → 57; 10 of 57 are not "high") and 9 options removed (8 REMOVEs plus the FAIL fix). The 9 questions were reshuffled by `author_questions.py` as usual.
+
+### REQUIRES edges (section 1)
+
+| # | Edge (needs → prerequisite) | Decision | Reason |
+| --- | --- | --- | --- |
+| 1 | 3587 → 408 | KEEP | 408's square question only works because the wholes are the same size, which is the same idea 3587 tests. |
+| 2 | 409 → 408 | KEEP | Concrete before abstract is the standard teaching order; a student who can't see 1/4 = 2/8 in a square has nothing to anchor the numeric rule to. |
+| 3 | 410 → 338 | KEEP | Distractor 2/6 is exactly an HCF failure (divided by 2, not the highest common factor 4), and 411 already has the same edge at high confidence. |
+| 4 | 426 → 425 | KEEP | 426 is 425 plus renaming both fractions; the easier case is the standard step before the general one, and without it 426 loses its path to equivalence errors. |
+| 5 | 429 → 427 | KEEP | Adding the fraction parts of mixed numbers with unlike denominators is unlike-fraction addition, and 427 is the general case. |
+| 6 | 434 → 433 | KEEP | Same reasoning as item 4 (subtraction mirror). It's also 434's only route to the equivalence error that distractor A tests. |
+| 7 | 437 → 435 | KEEP | Same reasoning as item 5 (subtraction mirror); it's 437's only route to LCM and equivalence. |
+| 8 | 3118 → 421 | KEEP | Reading a dash between labelled values builds directly on knowing that n equal gaps from 0 to 1 make n-ths, which is 421's skill. |
+| 9 | 3193 → 164 | **DELETE** | 164 tests integer mental-division fluency, not division as sharing. A student failing 3 ÷ 4 = 3/4 has a conceptual gap, not a fluency gap, so the edge would blame the wrong skill. |
+| 10 | 3241 → 432 | KEEP | Subtraction is how you solve a missing addend; 432 is the base of the subtraction chain. |
+| 11 | 3328 → 432 | KEEP | Writing 2 as 8/4 and subtracting same-denominator fractions is a real step. |
+| 12 | 3632 → 415 | **DELETE** | Comparing with 0, 1/2 or 1 is much easier than ordering arbitrary unlike fractions; 415 isn't needed for benchmark estimation, so the edge would blame the wrong skill. |
+
+### Distractors (section 2)
+
+| # | Question, option | Misconception | Decision | Reason |
+| --- | --- | --- | --- | --- |
+| 13 | q-3342-2 "2 1/9" | 14121 | OK | This misconception is tied to 3342 in Eedi's own data; a student unsure what "numerator" means can plausibly put the 2 as a whole part. |
+| 14 | q-411-3 "3/7" | 22306 | **REMOVE** | It takes two steps (round, then simplify correctly); too contrived to be real evidence of the approximating misconception. |
+| 15 | q-413-1 "5/9, 2/9, 7/9" | 18234 | OK | Keeping the first number first and ordering the rest is exactly what "first in the list is smallest" predicts. |
+| 16 | q-3320-3 "You can't compare them without making the denominators the same" | 19731 | **REMOVE** | The option uses equivalence, the opposite of the tagged misconception, and it's arguably not false. A distractor that might be true is a bad distractor. |
+| 17 | q-418-3 "2/3" | 15438 | OK | "Largest denominator means smallest" is the same belief as "smallest denominator means largest"; removing it would leave only 2 options. |
+| 18 | q-414-3 "1/6, 1/12, 1/3" | 18234 | OK | Same pattern as 15. |
+| 19 | q-3632-3 "-3/5" | 24501 | **REMOVE** | A subtraction-rule error in an estimation question, with a negative denominator; option C already covers students who calculate instead of estimating. |
+| 20 | q-3839-1 "17 and 18" | 19360 | **REMOVE** | The error is plausible, but the tag (converting a mixed number to an improper fraction) is the wrong misconception, so evidence would go to the wrong node. |
+| 21 | q-3839-2 "11 and 12" | 19360 | **REMOVE** | Same as 20. |
+| 22 | q-3839-3 "23 and 24" | 19360 | **REMOVE** | Same as 20. |
+| 23 | q-420-2 "2" | 18904 | OK | Generic, but the tag is accurate: 2 gaps for thirds is exactly "doesn't split into the correct number of parts". |
+| 24 | q-435-1 "-1/2" | 24501 | OK | This is a subtraction question, so mechanically applying "subtract tops and bottoms" is believable here, unlike in 19. |
+| 25 | q-3378-3 "288" | 22345 | **REMOVE** | Right error, wrong tag: a unit-rate word-problem misconception on bare division. |
+| 26 | q-3193-3 "2" | 22991 | **REMOVE** | A real-life rounding misconception on a question with no real-life context, and the option isn't a fraction. |
+
+### Spot checks (section 3)
+
+| # | Question | Decision | Reason |
+| --- | --- | --- | --- |
+| 27 | q-428-1 | PASS | |
+| 28 | q-415-2 | PASS | Close values, but correct, and the distractors are distinct errors. |
+| 29 | q-434-1 | PASS | |
+| 30 | q-425-2 | PASS | |
+| 31 | q-434-2 | PASS | |
+| 32 | q-3118-3 | PASS | C is exactly the error that makes a 0-to-2 scale hard. |
+| 33 | q-417-1 | **FAIL** | B and C are logically the same statement, so a careful student can rule both out. **Fix:** remove option C "3/8 > 5/8" (22129). |
+| 34 | q-420-1 | PASS | |
+| 35 | q-3342-2 | PASS | Follows from item 13 being OK. |
+| 36 | q-421-3 | PASS | |
+
+### Known issues and future work (logged, no data change)
+- **429 should probably also require 425** (item 5). Two of 429's three questions use the one-denominator-is-a-multiple case: q-429-2 (quarters and halves) and q-429-3 (thirds and sixths).
+- **437 should probably also require 433** (item 7). Two of 437's three questions use the multiple case: q-437-1 (quarters and halves) and q-437-3 (thirds and sixths).
+- **3241 should probably also require 433** (item 10). All three 3241 questions have different denominators, one a multiple of the other.
+- **3328 is missing a negative-numbers prerequisite** (item 11). The skill (subtracting past zero) is outside the slice, and 3328's three distractors are all errors about crossing zero.
 
 Regenerate after edits:
 ```

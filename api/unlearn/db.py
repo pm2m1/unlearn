@@ -72,7 +72,10 @@ def recreate_graph(src: str, dst: str, attempts: int = 3) -> bool:
 
     Any write to a deleted graph recreates it, so a worker polling class graphs (the API's Teacher) can bring dst
     back between the delete and the copy, and the copy then fails with "key is already set". Delete and copy again.
+    GRAPH.COPY also forks the server, and once failed with "could not fork" (README: known issues): wait, retry.
     """
+    import time
+
     from redis.exceptions import ResponseError
 
     existed = False
@@ -82,8 +85,10 @@ def recreate_graph(src: str, dst: str, attempts: int = 3) -> bool:
             copy_graph(src, dst)
             return existed
         except ResponseError as e:
-            if "already set" not in str(e) or attempt == attempts:
+            if not ("already set" in str(e) or "could not fork" in str(e)) or attempt == attempts:
                 raise
+            if "could not fork" in str(e):
+                time.sleep(attempt)
     return existed
 
 

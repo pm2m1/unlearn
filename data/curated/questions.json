@@ -498,27 +498,20 @@
   "options": [
    {
     "key": "A",
-    "text": "14/35",
-    "misconception_id": 15267,
-    "why": "Does not see that 14/35 can be simplified."
+    "text": "1.4/3.5",
+    "misconception_id": 14110,
+    "why": "Divides by 10, leaving decimals in the fraction."
    },
    {
     "key": "B",
-    "text": "3/7",
-    "misconception_id": 22306,
-    "why": "Approximates 14/35 as 15/35 and simplifies that.",
-    "stretch": true
-   },
-   {
-    "key": "C",
     "text": "2/5",
     "correct": true
    },
    {
-    "key": "D",
-    "text": "1.4/3.5",
-    "misconception_id": 14110,
-    "why": "Divides by 10, leaving decimals in the fraction."
+    "key": "C",
+    "text": "14/35",
+    "misconception_id": 15267,
+    "why": "Does not see that 14/35 can be simplified."
    }
   ]
  },
@@ -640,21 +633,15 @@
    },
    {
     "key": "B",
-    "text": "5/8 < 3/8",
-    "misconception_id": 18657,
-    "why": "Believes a smaller numerator means a larger fraction."
-   },
-   {
-    "key": "C",
-    "text": "3/8 > 5/8",
-    "misconception_id": 22129,
-    "why": "Confuses the greater than and less than symbols."
-   },
-   {
-    "key": "D",
     "text": "5/8 = 3/8",
     "misconception_id": 14089,
     "why": "Believes fractions with the same denominator are equal."
+   },
+   {
+    "key": "C",
+    "text": "5/8 < 3/8",
+    "misconception_id": 18657,
+    "why": "Believes a smaller numerator means a larger fraction."
    }
   ]
  },
@@ -814,14 +801,6 @@
     "misconception_id": 14090,
     "why": "Believes fractions with larger denominators are larger.",
     "claim": ">"
-   },
-   {
-    "key": "D",
-    "text": "You can't compare them without making the denominators the same",
-    "misconception_id": 19731,
-    "why": "Does not see other ways (like equal numerators) to compare.",
-    "stretch": true,
-    "claim": "?"
    }
   ]
  },
@@ -1282,27 +1261,20 @@
   "options": [
    {
     "key": "A",
-    "text": "1/2",
-    "correct": true
-   },
-   {
-    "key": "B",
-    "text": "-3/5",
-    "misconception_id": 24501,
-    "why": "Subtracts numerators and denominators: (4-1)/(7-12).",
-    "stretch": true
-   },
-   {
-    "key": "C",
     "text": "41/84",
     "misconception_id": 22411,
     "why": "Works out the exact answer instead of estimating."
    },
    {
-    "key": "D",
+    "key": "B",
     "text": "3/19",
     "misconception_id": 15931,
     "why": "Subtracts the numerators and adds the denominators."
+   },
+   {
+    "key": "C",
+    "text": "1/2",
+    "correct": true
    }
   ]
  },
@@ -1317,18 +1289,11 @@
   "options": [
    {
     "key": "A",
-    "text": "17 and 18",
-    "misconception_id": 19360,
-    "why": "Reads the numerator as the number of wholes.",
-    "stretch": true
-   },
-   {
-    "key": "B",
     "text": "3 and 4",
     "correct": true
    },
    {
-    "key": "C",
+    "key": "B",
     "text": "0 and 1",
     "misconception_id": 16966,
     "why": "Does not see that an improper fraction is greater than 1."
@@ -1354,13 +1319,6 @@
     "text": "0 and 1",
     "misconception_id": 16966,
     "why": "Does not see that an improper fraction is greater than 1."
-   },
-   {
-    "key": "C",
-    "text": "11 and 12",
-    "misconception_id": 19360,
-    "why": "Reads the numerator as the number of wholes.",
-    "stretch": true
    }
   ]
  },
@@ -1383,13 +1341,6 @@
     "key": "B",
     "text": "3 and 4",
     "correct": true
-   },
-   {
-    "key": "C",
-    "text": "23 and 24",
-    "misconception_id": 19360,
-    "why": "Reads the numerator as the number of wholes.",
-    "stretch": true
    }
   ]
  },
@@ -3301,19 +3252,12 @@
    },
    {
     "key": "B",
-    "text": "288",
-    "misconception_id": 22345,
-    "why": "Multiplies instead of dividing.",
-    "stretch": true
-   },
-   {
-    "key": "C",
     "text": "42",
     "misconception_id": 15384,
     "why": "Reads the division sign as subtract."
    },
    {
-    "key": "D",
+    "key": "C",
     "text": "8",
     "correct": true
    }
@@ -3904,27 +3848,20 @@
   "options": [
    {
     "key": "A",
-    "text": "2",
-    "misconception_id": 22991,
-    "why": "Rounds the answer to the nearest whole number.",
-    "stretch": true
+    "text": "3/7",
+    "misconception_id": 15150,
+    "why": "Believes a fraction means dividing the denominator by the numerator."
    },
    {
     "key": "B",
-    "text": "7/3",
-    "correct": true
-   },
-   {
-    "key": "C",
     "text": "4",
     "misconception_id": 14839,
     "why": "Subtracts instead of dividing: 7 - 3."
    },
    {
-    "key": "D",
-    "text": "3/7",
-    "misconception_id": 15150,
-    "why": "Believes a fraction means dividing the denominator by the numerator."
+    "key": "C",
+    "text": "7/3",
+    "correct": true
    }
   ]
  }

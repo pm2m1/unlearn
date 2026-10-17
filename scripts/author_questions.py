@@ -120,7 +120,6 @@ BANK = [
     (411, "Simplify 14/35 fully.", {"kind": "simplest", "expr": "F(14,35)"}, C("2/5"), [
         D("1.4/3.5", 14110, "Divides by 10, leaving decimals in the fraction."),
         D("14/35", 15267, "Does not see that 14/35 can be simplified."),
-        D("3/7", 22306, "Approximates 14/35 as 15/35 and simplifies that.", stretch=True),
     ]),
     # --- 413 Order fractions with the same denominator -----------------------
     (413, "Put these fractions in order from smallest to largest: 5/9, 7/9, 2/9",
@@ -142,7 +141,6 @@ BANK = [
     (417, "Compare 5/8 and 3/8. Which statement is true?", {"kind": "statement", "words": True}, C("5/8 > 3/8"), [
         D("5/8 < 3/8", 18657, "Believes a smaller numerator means a larger fraction."),
         D("5/8 = 3/8", 14089, "Believes fractions with the same denominator are equal."),
-        D("3/8 > 5/8", 22129, "Confuses the greater than and less than symbols."),
     ]),
     (417, "Which symbol makes this true? 2/9 ? 7/9", {"kind": "symbol", "a": "F(2,9)", "b": "F(7,9)"}, C("<"), [
         D(">", 15852, "Thinks the greater than symbol means less than."),
@@ -166,7 +164,6 @@ BANK = [
     (3320, "Which is true about 4/9 and 4/5?", {"kind": "claim", "a": "F(4,9)", "b": "F(4,5)"}, C("4/9 is smaller than 4/5", "<"), [
         D("4/9 is bigger, because 9 is bigger than 5", 14090, "Believes fractions with larger denominators are larger.", claim=">"),
         D("They are equal, because the numerators are the same", 15439, "Believes equal numerators mean equal fractions.", claim="="),
-        D("You can't compare them without making the denominators the same", 19731, "Does not see other ways (like equal numerators) to compare.", stretch=True, claim="?"),
     ]),
     # --- 418 Inequality notation, denominators are multiples ------------------
     (418, "Which symbol makes this true? 2/3 ? 5/6", {"kind": "symbol", "a": "F(2,3)", "b": "F(5,6)"}, C("<"), [
@@ -241,20 +238,16 @@ BANK = [
     (3632, "Estimate 4/7 - 1/12 by rounding each fraction to 0, 1/2 or 1.", val("F(1,2)-0"), C("1/2"), [
         D("3/19", 15931, "Subtracts the numerators and adds the denominators."),
         D("41/84", 22411, "Works out the exact answer instead of estimating."),
-        D("-3/5", 24501, "Subtracts numerators and denominators: (4-1)/(7-12).", stretch=True),
     ]),
     # --- 3839 Two whole numbers a fraction lies between ----------------------
     (3839, "Which two whole numbers does 17/5 lie between?", {"kind": "between", "expr": "F(17,5)"}, C("3 and 4"), [
         D("0 and 1", 16966, "Does not see that an improper fraction is greater than 1."),
-        D("17 and 18", 19360, "Reads the numerator as the number of wholes.", stretch=True),
     ]),
     (3839, "Which two whole numbers does 11/4 lie between?", {"kind": "between", "expr": "F(11,4)"}, C("2 and 3"), [
         D("0 and 1", 16966, "Does not see that an improper fraction is greater than 1."),
-        D("11 and 12", 19360, "Reads the numerator as the number of wholes.", stretch=True),
     ]),
     (3839, "Which two whole numbers does 23/6 lie between?", {"kind": "between", "expr": "F(23,6)"}, C("3 and 4"), [
         D("0 and 1", 16966, "Does not see that an improper fraction is greater than 1."),
-        D("23 and 24", 19360, "Reads the numerator as the number of wholes.", stretch=True),
     ]),
     # --- 3118 Read a fraction on a scale --------------------------------------
     (3118, "A number line goes from 0 to 1. It is split into 5 equal gaps by 4 dashes. An arrow points to the 3rd dash after 0. What number is at the arrow?",
@@ -562,7 +555,6 @@ BANK = [
     (3378, "48 / 6 = ?", val("F(48,6)"), C("8"), [
         D("42", 15384, "Reads the division sign as subtract."),
         D("54", 22436, "Reads the division sign as add."),
-        D("288", 22345, "Multiplies instead of dividing.", stretch=True),
     ]),
     # --- 342 Multiples ----------------------------------------------------------
     (342, "Which of these numbers is a multiple of 3?", {"kind": "predicate", "pred": "x % 3 == 0", "words": True}, C("27"), [
@@ -657,7 +649,6 @@ BANK = [
     (3193, "Which fraction is equal to 7 / 3?", val("F(7,3)"), C("7/3"), [
         D("3/7", 15150, "Believes a fraction means dividing the denominator by the numerator."),
         D("4", 14839, "Subtracts instead of dividing: 7 - 3."),
-        D("2", 22991, "Rounds the answer to the nearest whole number.", stretch=True),
     ]),
 ]
 

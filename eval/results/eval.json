@@ -21,50 +21,6 @@
       "B+": 30,
       "C": 90
     },
-    "llm_calls": [
-      {
-        "calls": 146,
-        "cached": 99,
-        "seconds": 4349.6,
-        "tokens": 5398,
-        "json_failures": 0,
-        "limit": null
-      },
-      {
-        "calls": 196,
-        "cached": 148,
-        "seconds": 1133.1,
-        "tokens": 7547,
-        "json_failures": 0,
-        "limit": null
-      }
-    ],
-    "calibration": [
-      {
-        "calls": 5,
-        "cached": 0,
-        "json_valid": "5/5",
-        "seconds_per_call": 8.52,
-        "tokens_per_call": 98.6,
-        "bplus": {
-          "calls": 2,
-          "seconds_per_call": 114.7,
-          "prompt_tokens": 22056
-        },
-        "bplus_seeds": [
-          0
-        ]
-      },
-      null
-    ],
-    "stopped": null,
-    "not_run": {},
-    "judge": {
-      "recall_max_distance": 0.35,
-      "pool_questions": 6
-    },
-    "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C",
-    "bplus_rescored": "B+ re-scored from the LLM cache on every id it was shown (eval/rescore_bplus.py); the first scoring kept only ids on B's retrieved list",
     "seeds_per_condition": {
       "A": [
         0,
@@ -85,49 +41,75 @@
         2
       ]
     },
-    "merged_from": [
-      "eval_seed0",
-      "eval_seeds12"
-    ]
+    "llm_calls": {
+      "calls": 115,
+      "cached": 485,
+      "seconds": 4035.3,
+      "tokens": 5111,
+      "json_failures": 0,
+      "limit": null
+    },
+    "calibration": {
+      "calls": 5,
+      "cached": 0,
+      "json_valid": "5/5",
+      "seconds_per_call": 8.57,
+      "tokens_per_call": 99.2,
+      "bplus": {
+        "calls": 2,
+        "seconds_per_call": 108.7,
+        "prompt_tokens": 21988
+      },
+      "bplus_seeds": [
+        0
+      ]
+    },
+    "stopped": null,
+    "not_run": {},
+    "judge": {
+      "recall_max_distance": 0.35,
+      "pool_questions": 6
+    },
+    "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C"
   },
   "per_seed": {
     "0": {
       "A": {
-        "top1_misconception": 0.067,
-        "top3_misconception": 0.067,
-        "root_cause_accuracy": 0.267,
+        "top1_misconception": 0.1,
+        "top3_misconception": 0.1,
+        "root_cause_accuracy": 0.333,
         "questions_to_diagnosis": 6,
         "session2_recall": 0,
-        "latency_p50_ms": 17770.4,
-        "latency_p95_ms": 32440.9,
-        "latency_n": 24,
+        "latency_p50_ms": 24429.6,
+        "latency_p95_ms": 31739.0,
+        "latency_n": 2,
         "invalid_json": 0,
-        "misconceptions_unmapped": 6,
+        "misconceptions_unmapped": 5,
         "root_unmapped": 1,
         "n": 30
       },
       "B": {
-        "top1_misconception": 0.167,
-        "top3_misconception": 0.233,
-        "root_cause_accuracy": 0.267,
+        "top1_misconception": 0.133,
+        "top3_misconception": 0.267,
+        "root_cause_accuracy": 0.3,
         "questions_to_diagnosis": 6,
-        "session2_recall": 0.1,
-        "latency_p50_ms": 8559.5,
-        "latency_p95_ms": 10250.5,
-        "latency_n": 30,
+        "session2_recall": 0.067,
+        "latency_p50_ms": 7652.7,
+        "latency_p95_ms": 8027.7,
+        "latency_n": 6,
         "invalid_json": 0,
         "misconceptions_unmapped": 1,
         "root_unmapped": 1,
         "n": 30
       },
       "B+": {
-        "top1_misconception": 0.167,
-        "top3_misconception": 0.333,
-        "root_cause_accuracy": 0.367,
+        "top1_misconception": 0.233,
+        "top3_misconception": 0.467,
+        "root_cause_accuracy": 0.4,
         "questions_to_diagnosis": 6,
-        "session2_recall": 0.1,
-        "latency_p50_ms": 114076.3,
-        "latency_p95_ms": 133112.7,
+        "session2_recall": 0.067,
+        "latency_p50_ms": 113417.2,
+        "latency_p95_ms": 122024.9,
         "latency_n": 30,
         "invalid_json": 0,
         "misconceptions_unmapped": 1,
@@ -137,11 +119,11 @@
       "C": {
         "top1_misconception": 0.5,
         "top3_misconception": 0.733,
-        "root_cause_accuracy": 0.667,
+        "root_cause_accuracy": 0.633,
         "questions_to_diagnosis": 5.233,
         "session2_recall": 0.5,
-        "latency_p50_ms": 50.1,
-        "latency_p95_ms": 92.5,
+        "latency_p50_ms": 49.6,
+        "latency_p95_ms": 57.2,
         "latency_n": 30,
         "invalid_json": 0,
         "misconceptions_unmapped": 0,
@@ -153,26 +135,26 @@
       "A": {
         "top1_misconception": 0,
         "top3_misconception": 0,
-        "root_cause_accuracy": 0.333,
+        "root_cause_accuracy": 0.367,
         "questions_to_diagnosis": 6,
         "session2_recall": 0,
-        "latency_p50_ms": 10579.8,
-        "latency_p95_ms": 18165.9,
-        "latency_n": 15,
+        "latency_p50_ms": 9826.2,
+        "latency_p95_ms": 15845.0,
+        "latency_n": 3,
         "invalid_json": 0,
-        "misconceptions_unmapped": 5,
-        "root_unmapped": 2,
+        "misconceptions_unmapped": 3,
+        "root_unmapped": 1,
         "n": 30
       },
       "B": {
         "top1_misconception": 0.033,
         "top3_misconception": 0.067,
-        "root_cause_accuracy": 0.467,
+        "root_cause_accuracy": 0.5,
         "questions_to_diagnosis": 6,
         "session2_recall": 0.1,
-        "latency_p50_ms": 7272.5,
-        "latency_p95_ms": 7832.5,
-        "latency_n": 30,
+        "latency_p50_ms": 7323.5,
+        "latency_p95_ms": 8430.0,
+        "latency_n": 10,
         "invalid_json": 0,
         "misconceptions_unmapped": 1,
         "root_unmapped": 1,
@@ -180,12 +162,12 @@
       },
       "C": {
         "top1_misconception": 0.5,
-        "top3_misconception": 0.867,
-        "root_cause_accuracy": 0.8,
-        "questions_to_diagnosis": 5.267,
-        "session2_recall": 0.633,
-        "latency_p50_ms": 50.7,
-        "latency_p95_ms": 56.4,
+        "top3_misconception": 0.9,
+        "root_cause_accuracy": 0.833,
+        "questions_to_diagnosis": 5.1,
+        "session2_recall": 0.7,
+        "latency_p50_ms": 48.7,
+        "latency_p95_ms": 60.9,
         "latency_n": 30,
         "invalid_json": 0,
         "misconceptions_unmapped": 0,
@@ -197,39 +179,39 @@
       "A": {
         "top1_misconception": 0.1,
         "top3_misconception": 0.1,
-        "root_cause_accuracy": 0.233,
+        "root_cause_accuracy": 0.267,
         "questions_to_diagnosis": 6,
         "session2_recall": 0,
-        "latency_p50_ms": 9395.4,
-        "latency_p95_ms": 19321.8,
-        "latency_n": 11,
+        "latency_p50_ms": null,
+        "latency_p95_ms": null,
+        "latency_n": 0,
         "invalid_json": 0,
-        "misconceptions_unmapped": 4,
+        "misconceptions_unmapped": 5,
         "root_unmapped": 3,
         "n": 30
       },
       "B": {
         "top1_misconception": 0.033,
-        "top3_misconception": 0.033,
-        "root_cause_accuracy": 0.367,
+        "top3_misconception": 0.067,
+        "root_cause_accuracy": 0.3,
         "questions_to_diagnosis": 6,
         "session2_recall": 0.1,
-        "latency_p50_ms": 6976.0,
-        "latency_p95_ms": 7799.3,
-        "latency_n": 30,
+        "latency_p50_ms": 7909.3,
+        "latency_p95_ms": 8631.0,
+        "latency_n": 14,
         "invalid_json": 0,
-        "misconceptions_unmapped": 4,
+        "misconceptions_unmapped": 3,
         "root_unmapped": 3,
         "n": 30
       },
       "C": {
-        "top1_misconception": 0.4,
+        "top1_misconception": 0.433,
         "top3_misconception": 0.733,
-        "root_cause_accuracy": 0.733,
-        "questions_to_diagnosis": 5.367,
-        "session2_recall": 0.533,
-        "latency_p50_ms": 50.8,
-        "latency_p95_ms": 69.1,
+        "root_cause_accuracy": 0.7,
+        "questions_to_diagnosis": 5.233,
+        "session2_recall": 0.5,
+        "latency_p50_ms": 50.3,
+        "latency_p95_ms": 65.7,
         "latency_n": 30,
         "invalid_json": 0,
         "misconceptions_unmapped": 0,
@@ -241,19 +223,19 @@
   "summary": {
     "A": {
       "top1_misconception": {
-        "mean": 0.056,
+        "mean": 0.067,
         "min": 0,
         "max": 0.1
       },
       "top3_misconception": {
-        "mean": 0.056,
+        "mean": 0.067,
         "min": 0,
         "max": 0.1
       },
       "root_cause_accuracy": {
-        "mean": 0.278,
-        "min": 0.233,
-        "max": 0.333
+        "mean": 0.322,
+        "min": 0.267,
+        "max": 0.367
       },
       "questions_to_diagnosis": {
         "mean": 6,
@@ -266,31 +248,31 @@
         "max": 0
       },
       "latency_p50_ms": {
-        "mean": 12581.867,
-        "min": 9395.4,
-        "max": 17770.4
+        "mean": 17127.9,
+        "min": 9826.2,
+        "max": 24429.6
       },
       "latency_p95_ms": {
-        "mean": 23309.533,
-        "min": 18165.9,
-        "max": 32440.9
+        "mean": 23792.0,
+        "min": 15845.0,
+        "max": 31739.0
       }
     },
     "B": {
       "top1_misconception": {
-        "mean": 0.078,
+        "mean": 0.066,
         "min": 0.033,
-        "max": 0.167
+        "max": 0.133
       },
       "top3_misconception": {
-        "mean": 0.111,
-        "min": 0.033,
-        "max": 0.233
+        "mean": 0.134,
+        "min": 0.067,
+        "max": 0.267
       },
       "root_cause_accuracy": {
         "mean": 0.367,
-        "min": 0.267,
-        "max": 0.467
+        "min": 0.3,
+        "max": 0.5
       },
       "questions_to_diagnosis": {
         "mean": 6,
@@ -298,36 +280,36 @@
         "max": 6
       },
       "session2_recall": {
-        "mean": 0.1,
-        "min": 0.1,
+        "mean": 0.089,
+        "min": 0.067,
         "max": 0.1
       },
       "latency_p50_ms": {
-        "mean": 7602.667,
-        "min": 6976.0,
-        "max": 8559.5
+        "mean": 7628.5,
+        "min": 7323.5,
+        "max": 7909.3
       },
       "latency_p95_ms": {
-        "mean": 8627.433,
-        "min": 7799.3,
-        "max": 10250.5
+        "mean": 8362.9,
+        "min": 8027.7,
+        "max": 8631.0
       }
     },
     "B+": {
       "top1_misconception": {
-        "mean": 0.167,
-        "min": 0.167,
-        "max": 0.167
+        "mean": 0.233,
+        "min": 0.233,
+        "max": 0.233
       },
       "top3_misconception": {
-        "mean": 0.333,
-        "min": 0.333,
-        "max": 0.333
+        "mean": 0.467,
+        "min": 0.467,
+        "max": 0.467
       },
       "root_cause_accuracy": {
-        "mean": 0.367,
-        "min": 0.367,
-        "max": 0.367
+        "mean": 0.4,
+        "min": 0.4,
+        "max": 0.4
       },
       "questions_to_diagnosis": {
         "mean": 6,
@@ -335,56 +317,56 @@
         "max": 6
       },
       "session2_recall": {
-        "mean": 0.1,
-        "min": 0.1,
-        "max": 0.1
+        "mean": 0.067,
+        "min": 0.067,
+        "max": 0.067
       },
       "latency_p50_ms": {
-        "mean": 114076.3,
-        "min": 114076.3,
-        "max": 114076.3
+        "mean": 113417.2,
+        "min": 113417.2,
+        "max": 113417.2
       },
       "latency_p95_ms": {
-        "mean": 133112.7,
-        "min": 133112.7,
-        "max": 133112.7
+        "mean": 122024.9,
+        "min": 122024.9,
+        "max": 122024.9
       }
     },
     "C": {
       "top1_misconception": {
-        "mean": 0.467,
-        "min": 0.4,
+        "mean": 0.478,
+        "min": 0.433,
         "max": 0.5
       },
       "top3_misconception": {
-        "mean": 0.778,
+        "mean": 0.789,
         "min": 0.733,
-        "max": 0.867
+        "max": 0.9
       },
       "root_cause_accuracy": {
-        "mean": 0.733,
-        "min": 0.667,
-        "max": 0.8
+        "mean": 0.722,
+        "min": 0.633,
+        "max": 0.833
       },
       "questions_to_diagnosis": {
-        "mean": 5.289,
-        "min": 5.233,
-        "max": 5.367
+        "mean": 5.189,
+        "min": 5.1,
+        "max": 5.233
       },
       "session2_recall": {
-        "mean": 0.555,
+        "mean": 0.567,
         "min": 0.5,
-        "max": 0.633
+        "max": 0.7
       },
       "latency_p50_ms": {
-        "mean": 50.533,
-        "min": 50.1,
-        "max": 50.8
+        "mean": 49.533,
+        "min": 48.7,
+        "max": 50.3
       },
       "latency_p95_ms": {
-        "mean": 72.667,
-        "min": 56.4,
-        "max": 92.5
+        "mean": 61.267,
+        "min": 57.2,
+        "max": 65.7
       }
     }
   },
@@ -398,7 +380,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 31458.62758299336,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -419,7 +401,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 19485.12029199628,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -439,7 +421,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 23804.567332961597,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -460,7 +442,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 7181.987209012732,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -479,7 +461,7 @@
           "predicted": [],
           "root": 164,
           "asked": 6,
-          "latency_ms": 17986.96920799557,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -503,7 +485,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 28523.801458009984,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -514,18 +496,18 @@
             "misconceptions": [
               15627,
               14138,
-              22345
+              18289
             ]
           }
         },
         {
           "sid": "s07",
           "predicted": [
-            15969
+            15341
           ],
-          "root": 342,
+          "root": 345,
           "asked": 6,
-          "latency_ms": 21672.84891603049,
+          "latency_ms": 16308.07987501612,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -534,7 +516,7 @@
           "planted": {
             "root": 345,
             "misconceptions": [
-              24069
+              15341
             ]
           }
         },
@@ -543,7 +525,7 @@
           "predicted": [],
           "root": 436,
           "asked": 6,
-          "latency_ms": 10725.298375007696,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -567,7 +549,7 @@
           ],
           "root": 420,
           "asked": 6,
-          "latency_ms": 22640.221792040393,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -582,21 +564,23 @@
         },
         {
           "sid": "s10",
-          "predicted": [],
-          "root": 164,
+          "predicted": [
+            24071
+          ],
+          "root": 3193,
           "asked": 6,
-          "latency_ms": 16582.54616695922,
+          "latency_ms": 32551.1331250309,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
-          "misconceptions_unmapped": true,
+          "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 3193,
             "misconceptions": [
-              26992,
-              26147,
-              15004
+              15636,
+              15004,
+              15150
             ]
           }
         },
@@ -607,7 +591,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 5666.3853749632835,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -627,7 +611,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 17174.847916990984,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -648,7 +632,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 12365.95408298308,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -669,7 +653,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 24892.705083009787,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -690,7 +674,7 @@
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 10954.730207973626,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -736,7 +720,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 17553.840832959395,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -757,7 +741,7 @@
           ],
           "root": 414,
           "asked": 6,
-          "latency_ms": 33643.31083395518,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -781,7 +765,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 32216.53170901118,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -800,9 +784,9 @@
           "predicted": [
             15582
           ],
-          "root": 414,
+          "root": 409,
           "asked": 6,
-          "latency_ms": 11118.62312501762,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -841,7 +825,7 @@
           "predicted": [],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 9897.025999962352,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -881,7 +865,7 @@
           "predicted": [],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 32480.55162501987,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -899,13 +883,11 @@
         {
           "sid": "s25",
           "predicted": [
-            17019,
-            15423,
-            13990
+            21713
           ],
-          "root": 331,
+          "root": 338,
           "asked": 6,
-          "latency_ms": 24761.870665999595,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -914,8 +896,7 @@
           "planted": {
             "root": 164,
             "misconceptions": [
-              22595,
-              16794
+              18384
             ]
           }
         },
@@ -970,7 +951,7 @@
           ],
           "root": 428,
           "asked": 6,
-          "latency_ms": 11385.729999979958,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -987,9 +968,11 @@
         {
           "sid": "s29",
           "predicted": [
-            15150
+            13957,
+            13991,
+            22410
           ],
-          "root": 432,
+          "root": 342,
           "asked": 6,
           "latency_ms": null,
           "recalled": false,
@@ -1000,9 +983,9 @@
           "planted": {
             "root": 345,
             "misconceptions": [
+              15500,
               15969,
-              15341,
-              15424
+              15341
             ]
           }
         },
@@ -1011,7 +994,7 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 0.0019170111045241356,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -1037,7 +1020,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 8694.85608395189,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Ready to tackle fractions? Last time, we saw you mastered finding HCFs, but struggled with simplifying mixed numbers, identifying equivalents, and visualizing parts of a whole. Today, we'll focus on these areas to build your confidence. Let's start by reviewing how to simplify 2 4/8 together!",
           "json_ok": true,
@@ -1059,7 +1042,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 8634.271083050407,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Great job on those fraction additions! However, we need to review adding mixed numbers and equivalent fractions. You missed questions where improper fractions needed simplifying or where different denominators represented the same value. Let's tackle those concepts first to build your confidence. Ready to start?",
           "json_ok": true,
@@ -1081,7 +1064,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 8598.779499996454,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on the rectangle and first multiple questions today. However, we need to review fractions, multiples, and adding fractions, as there were some errors there. Specifically, let's clarify numerator/denominator positions and finding common denominators. Ready to tackle these concepts again?",
           "json_ok": true,
@@ -1103,7 +1086,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 8525.865792005789,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Great job on fractions and multiplication! However, we need to revisit multiples. You selected 12 as the first multiple of 6, but it's actually 6 itself. Let's clarify this concept together before moving on to more complex problems. Ready to start?",
           "json_ok": true,
@@ -1124,7 +1107,7 @@
           ],
           "root": 331,
           "asked": 6,
-          "latency_ms": 6283.764624968171,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on those fraction questions today. I noticed we need to review factors and division, as there were a few slips there. Let's start by listing all factors of 16 together to build confidence before tackling the next problem. Ready?",
           "json_ok": true,
@@ -1143,14 +1126,14 @@
           "sid": "s06",
           "predicted": [
             24069,
-            15341,
-            15985
+            15985,
+            15341
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 8200.93720802106,
+          "latency_ms": 7501.618082984351,
           "recalled": false,
-          "opening": "Hi! Ready to tackle more maths? Last time, you nailed 7\u00d78, but we saw some confusion with division, multiples, and finding the lowest common multiple. Let's review these concepts together so you feel confident solving them next time. What would you like to start with?",
+          "opening": "Hi! Ready to tackle some maths? Last time, you nailed 7 x 8, but we need to review division and multiples. You mixed up LCMs and identifying multiples of 4 and 6. Let's clear those up together so you feel confident with these concepts today!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -1159,7 +1142,7 @@
             "misconceptions": [
               15627,
               14138,
-              22345
+              18289
             ]
           }
         },
@@ -1171,16 +1154,16 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 8487.578375032172,
-          "recalled": true,
-          "opening": "Hello! Great job on fractions and multiplication last time. Today, let's focus on Lowest Common Multiples (LCM). You found 2/9 and equivalent fractions easily, but LCMs like 8 & 12 or 6 & 9 were tricky. We'll break down the steps to find them confidently. Ready to start?",
+          "latency_ms": 7091.299249965232,
+          "recalled": false,
+          "opening": "Hello! Great job on fractions and multiplication last time. Today, we'll focus on finding the Lowest Common Multiple (LCM), where you made a few slips with 8/12 and 6/9. Let's review the method together to ensure you get those right next time. Ready to start?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 345,
             "misconceptions": [
-              24069
+              15341
             ]
           }
         },
@@ -1191,7 +1174,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 7752.481292001903,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job mastering equivalent fractions and mixed numbers last time. However, we need to review subtracting fractions with different denominators, as you chose 5/6 instead of 1/6 for 1/2 - 1/3. Let's focus on finding common denominators today to fix this!",
           "json_ok": true,
@@ -1215,7 +1198,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 9433.93537501106,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job identifying fractions like 2/9 and converting 7/3 to a mixed number. However, we need to review reading number lines. You often confused the total parts (denominator) or missed the whole number part on lines starting after zero. Let's practice visualizing those gaps together today!",
           "json_ok": true,
@@ -1231,24 +1214,24 @@
         {
           "sid": "s10",
           "predicted": [
-            18903,
-            15636,
-            14059
+            14092,
+            15150,
+            19056
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 8748.801875044592,
+          "latency_ms": 6965.782750048675,
           "recalled": false,
-          "opening": "Hi! Great job on your division and multiplication today. Let's review where you got stuck: estimating fractions like 11/4 and sharing pizzas. We'll also tackle dividing by multiples of ten, like 240 \u00f7 40, to clear up that confusion. Ready to start?",
+          "opening": "Hi! I noticed you found converting improper fractions and placing them on a number line tricky last time. We'll start by reviewing how division creates fractions, then practice visualizing where numbers like 23/6 actually sit between whole numbers. Ready to tackle this together?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 3193,
             "misconceptions": [
-              26992,
-              26147,
-              15004
+              15636,
+              15004,
+              15150
             ]
           }
         },
@@ -1259,7 +1242,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 7197.398457967211,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your multiplication and LCM questions last time. I noticed you mixed up \"four sevenths\" by choosing 7/4 instead of 4/7. Let's start today by reviewing how to correctly write fractions so the numerator and denominator are in the right order. Ready?",
           "json_ok": true,
@@ -1281,7 +1264,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 9216.269708005711,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on adding fractions with common denominators and finding equivalent fractions like 3/4 = ?/20. Today, let's focus on converting improper fractions to mixed numbers (like 7/3) and simplifying your final answers, since 3 2/6 can be reduced. Ready to tackle some practice?",
           "json_ok": true,
@@ -1303,7 +1286,7 @@
           ],
           "root": 414,
           "asked": 6,
-          "latency_ms": 8196.548209001776,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your multiplication and equivalent fractions today. I noticed you mixed up the order of unit fractions like 1/3 and 1/6, and selected 3/2 instead of 8/12 for equivalence. Let's start by reviewing why larger denominators mean smaller pieces to clear that up!",
           "json_ok": true,
@@ -1326,7 +1309,7 @@
           ],
           "root": 420,
           "asked": 6,
-          "latency_ms": 8480.57037498802,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hello! Let's review fractions and number lines. You correctly converted 7/3, but we need to practice reading number lines and identifying fraction notation. Specifically, let's clarify how denominators determine gaps on a line and distinguish between mixed numbers and decimals. Ready to try some examples together?",
           "json_ok": true,
@@ -1349,7 +1332,7 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 8713.96491699852,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on those fraction questions today. I noticed a few tricky spots with multiplication and finding the highest common factor. Let's start by reviewing how to solve \"? x 6 = 42\" and finding factors of 16 and 24 together. Ready to dive in?",
           "json_ok": true,
@@ -1370,7 +1353,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 8024.2618339834735,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Ready to tackle fractions? Last time, you nailed mixed numbers but found number lines tricky. You often confused the total gaps with the denominator or miscounted the dashes. Today, we'll practice identifying the correct fraction by carefully counting intervals. Let's get started!",
           "json_ok": true,
@@ -1394,7 +1377,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 8442.995292018168,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on equivalent fractions and identifying numerators/denominators. Today, we'll focus on subtracting fractions with different denominators and understanding multiples of 4, as these were tricky last time. Let's review those concepts together to build your confidence!",
           "json_ok": true,
@@ -1417,7 +1400,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 8299.490083998535,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Today we'll tackle fractions. Last time, you found comparing sizes and spotting equivalents tricky. We'll practice finding common denominators to order them correctly and understand what numerators and denominators really mean. Let's get those concepts clear! Ready to start?",
           "json_ok": true,
@@ -1441,7 +1424,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 9054.840874974616,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Today we'll tackle fraction ordering and LCMs. I noticed you found comparing fractions tricky\u2014remember, different denominators mean parts are different sizes! We also need to review finding the lowest common multiple carefully. Ready to master these concepts together? Let's start with a quick warm-up question!",
           "json_ok": true,
@@ -1464,9 +1447,9 @@
           ],
           "root": 414,
           "asked": 6,
-          "latency_ms": 8593.21462502703,
+          "latency_ms": 7803.801541973371,
           "recalled": false,
-          "opening": "Hello! Great job on your division and equivalent fractions last time. However, we need to review comparing fractions with different denominators, as you mixed up those questions. Today, we'll focus on finding common denominators to accurately compare values like 3/4 and 7/12. Ready to dive in?",
+          "opening": "Hello! Great job on your division and equivalent fractions last time. However, we need to review comparing fractions with different denominators, as you mixed up 3/4 vs 7/12 and 4/7 vs 2/7. Let's start today by mastering how to find common denominators to make these comparisons easier!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -1487,7 +1470,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 8235.182375006843,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hello! Today we'll focus on number lines and fractions. I noticed you mixed up the denominator (total gaps) with the numerator or other numbers in previous questions. We'll practice identifying exactly how many equal parts a line is split into to find the correct fraction. Ready to try again?",
           "json_ok": true,
@@ -1509,7 +1492,7 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 9364.732042013202,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your fractions and multiples last time. Today, let's focus on two areas: mastering times tables (like 7x8) and correctly identifying fraction notation versus decimals. Ready to tackle some practice problems to build confidence? Let's get started!",
           "json_ok": true,
@@ -1532,7 +1515,7 @@
           ],
           "root": 427,
           "asked": 6,
-          "latency_ms": 7954.800166015048,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your fractions and multiplication yesterday. I noticed you found adding mixed numbers tricky in questions 2 and 4. Today, we'll focus specifically on finding common denominators for those problems to boost your confidence. Ready to give it another try?",
           "json_ok": true,
@@ -1554,7 +1537,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 10906.393542012665,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Today we'll review multiplication facts like 7\u00d78 and solving missing number problems. We'll also practice ordering fractions and understanding their notation. Don't worry about yesterday's mistakes; let's work through them together to build your confidence! Ready to start?",
           "json_ok": true,
@@ -1572,23 +1555,22 @@
         {
           "sid": "s25",
           "predicted": [
-            17605,
-            17611,
-            17019
+            14092,
+            14121,
+            15150
           ],
-          "root": 331,
+          "root": 3342,
           "asked": 6,
-          "latency_ms": 8009.428749966901,
+          "latency_ms": 7923.837249982171,
           "recalled": false,
-          "opening": "Hi! Great job on your division and multiplication questions today. However, we need to review \"factors\" since you found those tricky. Remember, factors are whole numbers that divide evenly into another number. Let's practice identifying them together to build your confidence! Ready to start?",
+          "opening": "Hello! Great job identifying that Bar A is larger and solving the multiplication problem. Today, we'll focus on simplifying fractions and finding the Highest Common Factor, as these were tricky last time. We'll also clarify how to write fractions correctly versus mixed numbers. Ready to tackle some practice?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 164,
             "misconceptions": [
-              22595,
-              16794
+              18384
             ]
           }
         },
@@ -1601,7 +1583,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 8641.329707985278,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on the mixed number and first-gap questions. However, we need to review identifying fractions when a line is split into *n* parts. You often added 1 to the denominator (like choosing 7/11 instead of 7/10). Let's practice counting gaps versus dashes to fix this! Ready to start?",
           "json_ok": true,
@@ -1623,7 +1605,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 9717.639834037982,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job converting fractions and spotting equivalent parts last time. However, we need to review subtracting mixed numbers and finding missing factors in multiplication. Let's tackle those tricky bits together today to build your confidence. Ready to start?",
           "json_ok": true,
@@ -1645,7 +1627,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 10206.342999998014,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Great job on your fractions and multiplication! However, we need to review adding mixed numbers. In questions like $1\\frac{3}{8} + \\frac{2}{8}$, remember to keep the whole number separate while adding the fractions. Let's practice this together to ensure you get it right next time!",
           "json_ok": true,
@@ -1663,23 +1645,23 @@
           "sid": "s29",
           "predicted": [
             19086,
-            24739,
+            20492,
             15501
           ],
-          "root": 435,
+          "root": 345,
           "asked": 6,
-          "latency_ms": 10286.542124988046,
+          "latency_ms": 8062.287541979458,
           "recalled": false,
-          "opening": "Hi! Great job on those multiplication and multiple questions today. However, we need to review finding the Lowest Common Multiple and subtracting fractions, as you missed a few there. Let's start by clarifying these concepts so you feel confident tackling them next time. Ready to begin?",
+          "opening": "Hello! Ready to tackle some math? Last time, you nailed multiplication and simple fractions, but we need to review finding the lowest common multiple and subtracting mixed numbers. Let's start by clearing up those tricky concepts so you feel confident for our next practice problems!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 345,
             "misconceptions": [
+              15500,
               15969,
-              15341,
-              15424
+              15341
             ]
           }
         },
@@ -1688,7 +1670,7 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 5890.606041008141,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Great job last time! You aced all six questions on LCMs, fractions, and multiples. Since you didn't struggle with anything specific, we'll build on this strong foundation by tackling slightly harder problems involving mixed numbers and fraction word problems. Ready to dive in?",
           "json_ok": true,
@@ -1708,13 +1690,13 @@
         {
           "sid": "s01",
           "predicted": [
-            14092,
             14121,
-            24739
+            15004,
+            17669
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 129371.13683403004,
+          "latency_ms": 121128.88949998887,
           "recalled": false,
           "opening": "Hello! Ready to tackle fractions? Last time, we saw you mastered finding HCFs, but struggled with simplifying mixed numbers, identifying equivalents, and visualizing parts of a whole. Today, we'll focus on these areas to build your confidence. Let's start by reviewing how to simplify 2 4/8 together!",
           "json_ok": true,
@@ -1732,12 +1714,12 @@
           "sid": "s02",
           "predicted": [
             26193,
-            18650,
-            14092
+            18151,
+            14059
           ],
           "root": 428,
           "asked": 6,
-          "latency_ms": 122996.64029100677,
+          "latency_ms": 122963.34825002123,
           "recalled": false,
           "opening": "Great job on those fraction additions! However, we need to review adding mixed numbers and equivalent fractions. You missed questions where improper fractions needed simplifying or where different denominators represented the same value. Let's tackle those concepts first to build your confidence. Ready to start?",
           "json_ok": true,
@@ -1754,12 +1736,12 @@
           "sid": "s03",
           "predicted": [
             14092,
-            15150,
-            15341
+            15341,
+            15150
           ],
-          "root": 3342,
+          "root": 3378,
           "asked": 6,
-          "latency_ms": 134162.51049999846,
+          "latency_ms": 120280.0437080441,
           "recalled": false,
           "opening": "Hello! Great job on the rectangle and first multiple questions today. However, we need to review fractions, multiples, and adding fractions, as there were some errors there. Specifically, let's clarify numerator/denominator positions and finding common denominators. Ready to tackle these concepts again?",
           "json_ok": true,
@@ -1781,7 +1763,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 131829.7008749796,
+          "latency_ms": 118818.35479201982,
           "recalled": false,
           "opening": "Great job on fractions and multiplication! However, we need to revisit multiples. You selected 12 as the first multiple of 6, but it's actually 6 itself. Let's clarify this concept together before moving on to more complex problems. Ready to start?",
           "json_ok": true,
@@ -1798,13 +1780,13 @@
         {
           "sid": "s05",
           "predicted": [
-            16249,
             18617,
-            13957
+            21793,
+            15384
           ],
           "root": 331,
           "asked": 6,
-          "latency_ms": 128985.51337502431,
+          "latency_ms": 117110.72987504303,
           "recalled": false,
           "opening": "Hello! Great job on those fraction questions today. I noticed we need to review factors and division, as there were a few slips there. Let's start by listing all factors of 16 together to build confidence before tackling the next problem. Ready?",
           "json_ok": true,
@@ -1828,9 +1810,9 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 137273.74533301918,
+          "latency_ms": 115175.9339160053,
           "recalled": false,
-          "opening": "Hi! Ready to tackle more maths? Last time, you nailed 7\u00d78, but we saw some confusion with division, multiples, and finding the lowest common multiple. Let's review these concepts together so you feel confident solving them next time. What would you like to start with?",
+          "opening": "Hi! Ready to tackle some maths? Last time, you nailed 7 x 8, but we need to review division and multiples. You mixed up LCMs and identifying multiples of 4 and 6. Let's clear those up together so you feel confident with these concepts today!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -1839,7 +1821,7 @@
             "misconceptions": [
               15627,
               14138,
-              22345
+              18289
             ]
           }
         },
@@ -1848,20 +1830,20 @@
           "predicted": [
             24069,
             15341,
-            26183
+            18628
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 130702.75320898509,
-          "recalled": true,
-          "opening": "Hello! Great job on fractions and multiplication last time. Today, let's focus on Lowest Common Multiples (LCM). You found 2/9 and equivalent fractions easily, but LCMs like 8 & 12 or 6 & 9 were tricky. We'll break down the steps to find them confidently. Ready to start?",
+          "latency_ms": 114493.67450003047,
+          "recalled": false,
+          "opening": "Hello! Great job on fractions and multiplication last time. Today, we'll focus on finding the Lowest Common Multiple (LCM), where you made a few slips with 8/12 and 6/9. Let's review the method together to ensure you get those right next time. Ready to start?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 345,
             "misconceptions": [
-              24069
+              15341
             ]
           }
         },
@@ -1870,11 +1852,11 @@
           "predicted": [
             24501,
             18628,
-            15521
+            26989
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 124080.69508295739,
+          "latency_ms": 116843.90033397358,
           "recalled": false,
           "opening": "Hi! Great job mastering equivalent fractions and mixed numbers last time. However, we need to review subtracting fractions with different denominators, as you chose 5/6 instead of 1/6 for 1/2 - 1/3. Let's focus on finding common denominators today to fix this!",
           "json_ok": true,
@@ -1892,13 +1874,13 @@
         {
           "sid": "s09",
           "predicted": [
-            15004,
             14092,
-            15150
+            15150,
+            18647
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 122320.43108297512,
+          "latency_ms": 115367.74458299624,
           "recalled": false,
           "opening": "Hello! Great job identifying fractions like 2/9 and converting 7/3 to a mixed number. However, we need to review reading number lines. You often confused the total parts (denominator) or missed the whole number part on lines starting after zero. Let's practice visualizing those gaps together today!",
           "json_ok": true,
@@ -1914,37 +1896,36 @@
         {
           "sid": "s10",
           "predicted": [
-            15636,
-            26147,
-            18903
+            15150,
+            14092,
+            19056
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 119502.2723749862,
+          "latency_ms": 113045.34645896638,
           "recalled": false,
-          "opening": "Hi! Great job on your division and multiplication today. Let's review where you got stuck: estimating fractions like 11/4 and sharing pizzas. We'll also tackle dividing by multiples of ten, like 240 \u00f7 40, to clear up that confusion. Ready to start?",
+          "opening": "Hi! I noticed you found converting improper fractions and placing them on a number line tricky last time. We'll start by reviewing how division creates fractions, then practice visualizing where numbers like 23/6 actually sit between whole numbers. Ready to tackle this together?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 3193,
             "misconceptions": [
-              26992,
-              26147,
-              15004
+              15636,
+              15004,
+              15150
             ]
           }
         },
         {
           "sid": "s11",
           "predicted": [
-            14092,
             16784,
-            18648
+            14092
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 124661.11504199216,
+          "latency_ms": 113773.01287499722,
           "recalled": false,
           "opening": "Hello! Great job on your multiplication and LCM questions last time. I noticed you mixed up \"four sevenths\" by choosing 7/4 instead of 4/7. Let's start today by reviewing how to correctly write fractions so the numerator and denominator are in the right order. Ready?",
           "json_ok": true,
@@ -1960,13 +1941,13 @@
         {
           "sid": "s12",
           "predicted": [
-            14059,
             24739,
-            14121
+            14059,
+            18669
           ],
-          "root": 3342,
+          "root": 409,
           "asked": 6,
-          "latency_ms": 126552.32462496497,
+          "latency_ms": 113929.68341702363,
           "recalled": false,
           "opening": "Hello! Great job on adding fractions with common denominators and finding equivalent fractions like 3/4 = ?/20. Today, let's focus on converting improper fractions to mixed numbers (like 7/3) and simplifying your final answers, since 3 2/6 can be reduced. Ready to tackle some practice?",
           "json_ok": true,
@@ -1989,7 +1970,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 128891.10783301294,
+          "latency_ms": 114032.88379200967,
           "recalled": false,
           "opening": "Hello! Great job on your multiplication and equivalent fractions today. I noticed you mixed up the order of unit fractions like 1/3 and 1/6, and selected 3/2 instead of 8/12 for equivalence. Let's start by reviewing why larger denominators mean smaller pieces to clear that up!",
           "json_ok": true,
@@ -2012,7 +1993,7 @@
           ],
           "root": 420,
           "asked": 6,
-          "latency_ms": 115769.1508330172,
+          "latency_ms": 112918.11083303764,
           "recalled": true,
           "opening": "Hello! Let's review fractions and number lines. You correctly converted 7/3, but we need to practice reading number lines and identifying fraction notation. Specifically, let's clarify how denominators determine gaps on a line and distinguish between mixed numbers and decimals. Ready to try some examples together?",
           "json_ok": true,
@@ -2029,13 +2010,13 @@
         {
           "sid": "s15",
           "predicted": [
-            15004,
-            14092,
-            17669
+            15642,
+            17609,
+            18290
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 112375.98258402431,
+          "latency_ms": 113061.41791702248,
           "recalled": false,
           "opening": "Hello! Great job on those fraction questions today. I noticed a few tricky spots with multiplication and finding the highest common factor. Let's start by reviewing how to solve \"? x 6 = 42\" and finding factors of 16 and 24 together. Ready to dive in?",
           "json_ok": true,
@@ -2051,13 +2032,13 @@
         {
           "sid": "s16",
           "predicted": [
-            18805,
             18904,
-            15304
+            15632,
+            18805
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 111854.93224998936,
+          "latency_ms": 112135.76133403694,
           "recalled": false,
           "opening": "Hi! Ready to tackle fractions? Last time, you nailed mixed numbers but found number lines tricky. You often confused the total gaps with the denominator or miscounted the dashes. Today, we'll practice identifying the correct fraction by carefully counting intervals. Let's get started!",
           "json_ok": true,
@@ -2075,13 +2056,13 @@
         {
           "sid": "s17",
           "predicted": [
-            15931,
             24501,
-            18628
+            18628,
+            19220
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 112182.46566696325,
+          "latency_ms": 111747.25912499707,
           "recalled": false,
           "opening": "Hello! Great job on equivalent fractions and identifying numerators/denominators. Today, we'll focus on subtracting fractions with different denominators and understanding multiples of 4, as these were tricky last time. Let's review those concepts together to build your confidence!",
           "json_ok": true,
@@ -2098,13 +2079,13 @@
         {
           "sid": "s18",
           "predicted": [
+            14089,
             17669,
-            14068,
-            24739
+            15438
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 113052.46241699206,
+          "latency_ms": 111846.77962498972,
           "recalled": false,
           "opening": "Hi! Today we'll tackle fractions. Last time, you found comparing sizes and spotting equivalents tricky. We'll practice finding common denominators to order them correctly and understand what numerators and denominators really mean. Let's get those concepts clear! Ready to start?",
           "json_ok": true,
@@ -2124,11 +2105,11 @@
           "predicted": [
             15438,
             19086,
-            24069
+            14068
           ],
-          "root": 345,
+          "root": 415,
           "asked": 6,
-          "latency_ms": 112321.95416698232,
+          "latency_ms": 112130.80008298857,
           "recalled": false,
           "opening": "Hi! Today we'll tackle fraction ordering and LCMs. I noticed you found comparing fractions tricky\u2014remember, different denominators mean parts are different sizes! We also need to review finding the lowest common multiple carefully. Ready to master these concepts together? Let's start with a quick warm-up question!",
           "json_ok": true,
@@ -2146,14 +2127,14 @@
           "sid": "s20",
           "predicted": [
             14092,
-            15436,
-            17669
+            17669,
+            15436
           ],
           "root": 414,
           "asked": 6,
-          "latency_ms": 111419.6200830047,
+          "latency_ms": 111363.64354100078,
           "recalled": false,
-          "opening": "Hello! Great job on your division and equivalent fractions last time. However, we need to review comparing fractions with different denominators, as you mixed up those questions. Today, we'll focus on finding common denominators to accurately compare values like 3/4 and 7/12. Ready to dive in?",
+          "opening": "Hello! Great job on your division and equivalent fractions last time. However, we need to review comparing fractions with different denominators, as you mixed up 3/4 vs 7/12 and 4/7 vs 2/7. Let's start today by mastering how to find common denominators to make these comparisons easier!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -2172,9 +2153,9 @@
             15304,
             14092
           ],
-          "root": 421,
+          "root": 420,
           "asked": 6,
-          "latency_ms": 111898.50433397805,
+          "latency_ms": 111184.783625009,
           "recalled": true,
           "opening": "Hello! Today we'll focus on number lines and fractions. I noticed you mixed up the denominator (total gaps) with the numerator or other numbers in previous questions. We'll practice identifying exactly how many equal parts a line is split into to find the correct fraction. Ready to try again?",
           "json_ok": true,
@@ -2191,12 +2172,12 @@
           "sid": "s22",
           "predicted": [
             14092,
-            15515,
-            16057
+            15004,
+            15150
           ],
-          "root": 3378,
+          "root": 3342,
           "asked": 6,
-          "latency_ms": 112506.48524996359,
+          "latency_ms": 111414.5389169571,
           "recalled": false,
           "opening": "Hello! Great job on your fractions and multiples last time. Today, let's focus on two areas: mastering times tables (like 7x8) and correctly identifying fraction notation versus decimals. Ready to tackle some practice problems to build confidence? Let's get started!",
           "json_ok": true,
@@ -2220,7 +2201,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 113118.02008299856,
+          "latency_ms": 111784.61412497563,
           "recalled": false,
           "opening": "Hello! Great job on your fractions and multiplication yesterday. I noticed you found adding mixed numbers tricky in questions 2 and 4. Today, we'll focus specifically on finding common denominators for those problems to boost your confidence. Ready to give it another try?",
           "json_ok": true,
@@ -2236,13 +2217,13 @@
         {
           "sid": "s24",
           "predicted": [
-            18661,
-            14092,
-            15515
+            14068,
+            15438,
+            14092
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 113394.60795803461,
+          "latency_ms": 112539.15824997239,
           "recalled": false,
           "opening": "Hello! Today we'll review multiplication facts like 7\u00d78 and solving missing number problems. We'll also practice ordering fractions and understanding their notation. Don't worry about yesterday's mistakes; let's work through them together to build your confidence! Ready to start?",
           "json_ok": true,
@@ -2260,36 +2241,35 @@
         {
           "sid": "s25",
           "predicted": [
-            17605,
-            17611,
-            17019
+            15267,
+            14539,
+            15438
           ],
-          "root": 331,
+          "root": 338,
           "asked": 6,
-          "latency_ms": 111499.8578329687,
+          "latency_ms": 111254.24470799044,
           "recalled": false,
-          "opening": "Hi! Great job on your division and multiplication questions today. However, we need to review \"factors\" since you found those tricky. Remember, factors are whole numbers that divide evenly into another number. Let's practice identifying them together to build your confidence! Ready to start?",
+          "opening": "Hello! Great job identifying that Bar A is larger and solving the multiplication problem. Today, we'll focus on simplifying fractions and finding the Highest Common Factor, as these were tricky last time. We'll also clarify how to write fractions correctly versus mixed numbers. Ready to tackle some practice?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 164,
             "misconceptions": [
-              22595,
-              16794
+              18384
             ]
           }
         },
         {
           "sid": "s26",
           "predicted": [
-            18805,
             18904,
-            15635
+            15999,
+            15304
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 113487.73891699966,
+          "latency_ms": 112382.4821250164,
           "recalled": false,
           "opening": "Hello! Great job on the mixed number and first-gap questions. However, we need to review identifying fractions when a line is split into *n* parts. You often added 1 to the denominator (like choosing 7/11 instead of 7/10). Let's practice counting gaps versus dashes to fix this! Ready to start?",
           "json_ok": true,
@@ -2307,11 +2287,12 @@
           "sid": "s27",
           "predicted": [
             15635,
-            24739
+            24739,
+            14059
           ],
-          "root": 3378,
+          "root": 436,
           "asked": 6,
-          "latency_ms": 113820.03141695168,
+          "latency_ms": 112955.18154196907,
           "recalled": false,
           "opening": "Hi! Great job converting fractions and spotting equivalent parts last time. However, we need to review subtracting mixed numbers and finding missing factors in multiplication. Let's tackle those tricky bits together today to build your confidence. Ready to start?",
           "json_ok": true,
@@ -2328,13 +2309,13 @@
         {
           "sid": "s28",
           "predicted": [
-            15333,
+            26193,
             26058,
             14121
           ],
           "root": 428,
           "asked": 6,
-          "latency_ms": 114332.50820805551,
+          "latency_ms": 115469.72699998878,
           "recalled": false,
           "opening": "Great job on your fractions and multiplication! However, we need to review adding mixed numbers. In questions like $1\\frac{3}{8} + \\frac{2}{8}$, remember to keep the whole number separate while adding the fractions. Let's practice this together to ensure you get it right next time!",
           "json_ok": true,
@@ -2351,24 +2332,24 @@
         {
           "sid": "s29",
           "predicted": [
-            19086,
-            24501,
+            15341,
+            20492,
             15501
           ],
-          "root": 345,
+          "root": 342,
           "asked": 6,
-          "latency_ms": 113170.16995802987,
+          "latency_ms": 122757.99045804888,
           "recalled": false,
-          "opening": "Hi! Great job on those multiplication and multiple questions today. However, we need to review finding the Lowest Common Multiple and subtracting fractions, as you missed a few there. Let's start by clarifying these concepts so you feel confident tackling them next time. Ready to begin?",
+          "opening": "Hello! Ready to tackle some math? Last time, you nailed multiplication and simple fractions, but we need to review finding the lowest common multiple and subtracting mixed numbers. Let's start by clearing up those tricky concepts so you feel confident for our next practice problems!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 345,
             "misconceptions": [
+              15500,
               15969,
-              15341,
-              15424
+              15341
             ]
           }
         },
@@ -2377,7 +2358,7 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 111331.4498749678,
+          "latency_ms": 116328.00150004914,
           "recalled": false,
           "opening": "Great job last time! You aced all six questions on LCMs, fractions, and multiples. Since you didn't struggle with anything specific, we'll build on this strong foundation by tackling slightly harder problems involving mixed numbers and fraction word problems. Ready to dive in?",
           "json_ok": true,
@@ -2404,7 +2385,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 114.91912498604506,
+          "latency_ms": 70.05325000500306,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Thinks dimensions are needed to compare fractions (1 times) and Believes larger sections in fraction diagrams represent greater proportions (1 times). Let's check whether that has changed."
         },
@@ -2416,7 +2397,7 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 65.18133397912607,
+          "latency_ms": 38.29329099971801,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When adding mixed numbers believes they only need to add the integers (2 times) and Believes you add the whole to the numerators, ignoring denominators, when adding a mixed number to a proper fraction with the same denominator (1 times). Let's check whether that has changed."
         },
@@ -2429,7 +2410,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 53.04895801236853,
+          "latency_ms": 53.0783329741098,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When shading fractions of shapes, believes the denominator always means the number of sections that are not shaded (1 times) and Thinks adding the same number to numerator and denominator creates equivalent fractions (1 times). Let's check whether that has changed."
         },
@@ -2442,7 +2423,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 52.278832998126745,
+          "latency_ms": 51.02420900948346,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes the denominator of the result is always the larger denominator when adding or subtracting fractions (1 times) and Believes numerators stay the same when finding common denominators (1 times). Let's check whether that has changed."
         },
@@ -2455,36 +2436,37 @@
           ],
           "root": 164,
           "asked": 6,
-          "latency_ms": 50.82887498429045,
+          "latency_ms": 41.349791979882866,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Thinks the division sign means to subtract (4 times) and Counts repeated factors as two separate factors (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Thinks the division sign means to subtract (3 times) and Believes factors do not have to be integers (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s06",
           "predicted": [
-            18618,
+            22410,
             22136,
-            13957,
-            22345
+            14138,
+            15384,
+            15627
           ],
           "root": 342,
-          "asked": 5,
-          "latency_ms": 46.95645900210366,
+          "asked": 6,
+          "latency_ms": 52.03874997096136,
           "recalled": false,
-          "opening": "Welcome back. Last time you showed: Believes a number is always a multiple of its final digit (1 times) and Confuses the terms 'power' and 'multiple' (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Believes that the presence of a digit in a number means it must be a multiple of that number (2 times) and Confuses the terms 'power' and 'multiple' (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s07",
           "predicted": [
+            15341,
             24069,
-            15500,
-            22639
+            18159
           ],
           "root": 345,
           "asked": 5,
-          "latency_ms": 42.77620796347037,
+          "latency_ms": 49.53983298037201,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Believes the lowest common multiple is found by multiplying the numbers together (2 times) and Believes finding the product of two numbers gives their lowest common multiple (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Finds a common multiple but not the lowest common multiple (2 times) and Believes the lowest common multiple is found by multiplying the numbers together (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s08",
@@ -2494,7 +2476,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 54.008208971936256,
+          "latency_ms": 56.42570904456079,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes the lowest common multiple is found by multiplying the numbers together (1 times) and Confuses the calculations for HCF and LCM (1 times). Let's check whether that has changed."
         },
@@ -2509,22 +2491,22 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 48.886624979786575,
+          "latency_ms": 57.897666993085295,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Assumes every dash on a scale represents an increase of 1 (1 times) and Believes that x/y is equivalent to y/x in all cases (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s10",
           "predicted": [
-            14839,
             26147,
-            15004
+            15004,
+            15150
           ],
           "root": 3193,
-          "asked": 4,
-          "latency_ms": 39.50908296974376,
-          "recalled": false,
-          "opening": "Welcome back. Last time you showed: Subtracts instead of divides when division is written as a fraction (1 times) and Believes the amount being shared is the denominator and the number of sharers is the numerator when writing a division as a fraction (1 times). Let's check whether that has changed."
+          "asked": 3,
+          "latency_ms": 34.99404195463285,
+          "recalled": true,
+          "opening": "Welcome back. Last time you showed: Believes the amount being shared is the denominator and the number of sharers is the numerator when writing a division as a fraction (1 times) and Assumes the denominator is divided by the numerator (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s11",
@@ -2535,7 +2517,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 50.12937501305714,
+          "latency_ms": 48.857874993700534,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes smaller numerator means smaller fraction, regardless of denominator (1 times) and Mixes up smallest and largest when ordering fractions (2 times). Let's check whether that has changed."
         },
@@ -2548,7 +2530,7 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 42.00995800783858,
+          "latency_ms": 41.5452920133248,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When adding mixed numbers believes they only need to add the integers (1 times) and Believes you add the whole to the numerators, ignoring denominators, when adding a mixed number to a proper fraction with the same denominator (1 times). Let's check whether that has changed."
         },
@@ -2561,7 +2543,7 @@
           ],
           "root": 414,
           "asked": 5,
-          "latency_ms": 45.59991700807586,
+          "latency_ms": 46.767166000790894,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When comparing unit fractions believes that fractions with larger denominators are greater in size (1 times) and Believes larger denominator means smaller fraction, regardless of numerator (1 times). Let's check whether that has changed."
         },
@@ -2573,7 +2555,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 52.21570801222697,
+          "latency_ms": 50.20712502300739,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Assumes every dash on a scale represents an increase of 1 (1 times) and When finding the difference between two marks on a scale, counts lines instead of gaps (5 times). Let's check whether that has changed."
         },
@@ -2586,7 +2568,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 37.89658297318965,
+          "latency_ms": 39.32425001403317,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (1 times) and Believes the smallest number in a set of numbers is always their highest common factor (1 times). Let's check whether that has changed."
         },
@@ -2598,7 +2580,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 189.7261249832809,
+          "latency_ms": 49.22904196428135,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Assumes every dash on a scale represents an increase of 1 (1 times) and When finding the difference between two marks on a scale, counts lines instead of gaps (3 times). Let's check whether that has changed."
         },
@@ -2612,7 +2594,7 @@
           ],
           "root": 432,
           "asked": 6,
-          "latency_ms": 49.09250000491738,
+          "latency_ms": 53.73741697985679,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes subtraction of fractions involves multiplication of numerators (1 times) and When subtracting fractions, believes they add the numerators (1 times). Let's check whether that has changed."
         },
@@ -2627,7 +2609,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 49.13395899347961,
+          "latency_ms": 51.24841700308025,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes the number of shaded parts determines fraction equivalence regardless of total parts (1 times) and Thinks dimensions are needed to compare fractions (1 times). Let's check whether that has changed."
         },
@@ -2640,7 +2622,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 51.5918749733828,
+          "latency_ms": 51.05108401039615,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes smaller numerator means smaller fraction, regardless of denominator (1 times) and Mixes up smallest and largest when ordering fractions (2 times). Let's check whether that has changed."
         },
@@ -2654,7 +2636,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 51.519540953449905,
+          "latency_ms": 50.839750037994236,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks the first number in an unordered list must be the smallest (2 times) and Believes the last number of an unordered list must be the largest (2 times). Let's check whether that has changed."
         },
@@ -2669,7 +2651,7 @@
           ],
           "root": 420,
           "asked": 6,
-          "latency_ms": 50.1637919805944,
+          "latency_ms": 53.43708302825689,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes a fraction can be converted to a place value representation by writing the digits of the denominator directly after the decimal point, ignoring the numerator (1 times) and Believes the first mark on a number line is always 1 (1 times). Let's check whether that has changed."
         },
@@ -2678,7 +2660,7 @@
           "predicted": [],
           "root": null,
           "asked": 1,
-          "latency_ms": 18.19462497951463,
+          "latency_ms": 16.910166013985872,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -2692,7 +2674,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 50.614708045031875,
+          "latency_ms": 52.30020795715973,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes that the presence of a digit in a number means it must be a multiple of that number (1 times) and Confuses the terms 'power' and 'multiple' (1 times). Let's check whether that has changed."
         },
@@ -2707,24 +2689,24 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 49.981624993961304,
+          "latency_ms": 49.88316702656448,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: If given two numbers in a multiplication equation, believes the task is to find their product (1 times) and Thinks the multiplication sign means to add (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s25",
           "predicted": [
-            18519,
-            22595,
-            15384,
-            13957,
-            14892
+            15515,
+            22436,
+            14892,
+            15424,
+            18518
           ],
-          "root": 164,
+          "root": 3378,
           "asked": 6,
-          "latency_ms": 49.30058302124962,
-          "recalled": true,
-          "opening": "Welcome back. Last time you showed: When splitting a divisor into factors, does not realise they need to divide by all the factors (1 times) and Assumes that when dividing by a multiple of 10, you only need to divide by the significant digits (1 times). Let's check whether that has changed."
+          "latency_ms": 49.42333296639845,
+          "recalled": false,
+          "opening": "Welcome back. Last time you showed: Thinks the multiplication sign means to add (1 times) and Thinks the division sign represents addition (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s26",
@@ -2734,7 +2716,7 @@
           ],
           "root": 421,
           "asked": 4,
-          "latency_ms": 41.994750034064054,
+          "latency_ms": 36.25879198079929,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (2 times) and When finding the difference between two marks on a scale, counts lines instead of gaps (1 times). Let's check whether that has changed."
         },
@@ -2747,7 +2729,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 52.90279199834913,
+          "latency_ms": 49.74783305078745,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes that division should be used when asked to find the difference in a word problem (1 times) and When subtracting fractions, believes that if the numerators are the same then you subtract the denominators (1 times). Let's check whether that has changed."
         },
@@ -2760,23 +2742,23 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 37.51387499505654,
+          "latency_ms": 37.309582985471934,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes the integers are multiplied and the fractions of mixed numbers are multiplied rather than added when adding mixed numbers (1 times) and When adding mixed numbers believes they only need to add the integers (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s29",
           "predicted": [
-            15969,
+            15341,
             24069,
-            15424,
-            18158
+            15985,
+            18159
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 51.23033298877999,
+          "latency_ms": 49.202291993424296,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Believes the lowest common multiple is found by multiplying the numbers together (1 times) and Believes the largest number in a set of numbers is always their lowest common multiple (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Believes finding the product of two numbers gives their lowest common multiple (1 times) and Believes the lowest common multiple is found by multiplying the numbers together (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s30",
@@ -2785,7 +2767,7 @@
           ],
           "root": 436,
           "asked": 3,
-          "latency_ms": 31.047541997395456,
+          "latency_ms": 30.127333011478186,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When subtracting a fraction from a mixed number, assumes they just subtract the numerator from the integer of the mixed number (3 times). Let's check whether that has changed."
         }
@@ -2844,7 +2826,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 5611.400790978223,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -2865,7 +2847,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 15563.260458002333,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -2885,7 +2867,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 8423.976916994434,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -2905,7 +2887,7 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 0.00204198295250535,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -2942,11 +2924,11 @@
         {
           "sid": "s08",
           "predicted": [
-            18666
+            18085
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 17584.20312497765,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -2955,8 +2937,8 @@
           "planted": {
             "root": 3193,
             "misconceptions": [
-              22991,
-              15636
+              17978,
+              26992
             ]
           }
         },
@@ -2967,7 +2949,7 @@
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 17482.4632909731,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3032,7 +3014,7 @@
           "predicted": [],
           "root": 435,
           "asked": 6,
-          "latency_ms": 12848.334666981827,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3054,7 +3036,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 13758.157291973475,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3070,20 +3052,23 @@
         },
         {
           "sid": "s14",
-          "predicted": [],
-          "root": 415,
+          "predicted": [
+            17763
+          ],
+          "root": 409,
           "asked": 6,
-          "latency_ms": null,
+          "latency_ms": 16513.72591702966,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
-          "misconceptions_unmapped": true,
+          "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 345,
             "misconceptions": [
-              15424,
-              15969
+              15969,
+              15501,
+              15500
             ]
           }
         },
@@ -3094,7 +3079,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 8694.436833029613,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3112,9 +3097,9 @@
         {
           "sid": "s16",
           "predicted": [
-            18666
+            18806
           ],
-          "root": 164,
+          "root": 3193,
           "asked": 6,
           "latency_ms": null,
           "recalled": false,
@@ -3125,8 +3110,8 @@
           "planted": {
             "root": 3193,
             "misconceptions": [
-              17978,
-              22991,
+              15150,
+              26147,
               14839
             ]
           }
@@ -3140,7 +3125,7 @@
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 5653.39574997779,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3177,8 +3162,7 @@
         {
           "sid": "s19",
           "predicted": [
-            15004,
-            15150
+            25830
           ],
           "root": 3193,
           "asked": 6,
@@ -3192,7 +3176,7 @@
             "root": 3193,
             "misconceptions": [
               26147,
-              14839
+              26992
             ]
           }
         },
@@ -3227,7 +3211,7 @@
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 10579.805916990153,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3267,7 +3251,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 15006.361749954522,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3287,7 +3271,7 @@
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 19523.178500006907,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3345,11 +3329,11 @@
         {
           "sid": "s27",
           "predicted": [
-            19079
+            15245
           ],
-          "root": 408,
+          "root": 342,
           "asked": 6,
-          "latency_ms": 5308.829958958086,
+          "latency_ms": 4729.269250005018,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -3358,8 +3342,7 @@
           "planted": {
             "root": 345,
             "misconceptions": [
-              15424,
-              15501
+              15500
             ]
           }
         },
@@ -3385,20 +3368,22 @@
         },
         {
           "sid": "s29",
-          "predicted": [],
-          "root": null,
+          "predicted": [
+            26986
+          ],
+          "root": 432,
           "asked": 6,
-          "latency_ms": 8457.539625000209,
+          "latency_ms": 9826.219375012442,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
-          "misconceptions_unmapped": true,
-          "root_unmapped": true,
+          "misconceptions_unmapped": false,
+          "root_unmapped": false,
           "planted": {
             "root": 342,
             "misconceptions": [
               20492,
-              22410
+              18618
             ]
           }
         },
@@ -3432,7 +3417,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 6387.401707994286,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job on identifying fractions and mixed numbers yesterday. However, we noticed some confusion when reading number lines, especially counting gaps versus dashes. Today, let's focus on visualizing those equal parts clearly so you can pinpoint the correct fraction every time. Ready to dive in?",
           "json_ok": true,
@@ -3454,7 +3439,7 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 7224.105458008125,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hello! Ready to tackle some math? Last time, we saw you understand factors well, but let's review multiplication tables and equivalent fractions, as those were tricky. We'll also revisit finding the highest common factor together. Let's get started!",
           "json_ok": true,
@@ -3475,7 +3460,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 5825.938375026453,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job mastering fractions and equivalent values last time. However, we missed the lowest common multiple of 4 and 6 (it's 12, not 24). Today, let's focus on finding LCMs correctly before tackling more complex fraction problems. Ready to start?",
           "json_ok": true,
@@ -3498,7 +3483,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 6941.669374995399,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Ready to tackle some maths? Last time, you nailed fractions and multiplication, but we need to review multiples of 4 and finding the lowest common multiple. We'll also double-check adding fractions with different denominators. Let's start by clearing up those tricky spots!",
           "json_ok": true,
@@ -3519,7 +3504,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 6907.215166953392,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job ordering fractions and spotting equivalents last time. However, we need to review writing fractions correctly (numerator over denominator) and comparing them when denominators differ. Let's tackle those tricky bits together today! Ready?",
           "json_ok": true,
@@ -3539,9 +3524,9 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 5144.515833992045,
+          "latency_ms": 5014.818249968812,
           "recalled": false,
-          "opening": "Great job last time! You answered all six questions correctly, showing strong skills in comparing fractions, understanding equivalent parts, and basic multiplication. Since you didn't struggle with anything, we'll build on this confidence by tackling slightly more challenging problems today. Ready to get started?",
+          "opening": "Great job last time! You answered every question correctly, showing a strong grasp of fractions and multiplication. Since you didn't struggle with anything specific, we'll build on this momentum today by tackling slightly more challenging problems involving equivalent fractions and multi-step word problems. Ready to dive in?",
           "json_ok": true,
           "misconceptions_unmapped": true,
           "root_unmapped": true,
@@ -3559,7 +3544,7 @@
           ],
           "root": 331,
           "asked": 6,
-          "latency_ms": 5526.088749989867,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job mastering fractions and multiplication last time. I noticed you found listing factors of 16 tricky; we'll start by reviewing how to find all factors systematically. Ready to tackle that together?",
           "json_ok": true,
@@ -3576,23 +3561,23 @@
         {
           "sid": "s08",
           "predicted": [
-            14092,
             15150,
-            19870
+            14092,
+            14014
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 6830.320417007897,
+          "latency_ms": 6421.755832969211,
           "recalled": false,
-          "opening": "Hi! Great job on those multiplication facts today. However, we need to review fractions, as you often confused the numerator and denominator or misidentified which whole numbers a fraction falls between. Let's start by visualizing these concepts to build your confidence before tackling more problems. Ready?",
+          "opening": "Hi! I noticed you found fractions tricky last time, especially identifying values between whole numbers and sharing scenarios. Let's start by visualizing these concepts together so they feel much clearer. Ready to tackle some practice problems?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 3193,
             "misconceptions": [
-              22991,
-              15636
+              17978,
+              26992
             ]
           }
         },
@@ -3605,7 +3590,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 7301.626457949169,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job identifying fractions and scaling them correctly. However, we need to review subtracting fractions with different denominators and finding the Lowest Common Multiple. Your errors suggest we missed a step in making denominators match before subtracting. Let's tackle these together today!",
           "json_ok": true,
@@ -3628,7 +3613,7 @@
           ],
           "root": 420,
           "asked": 6,
-          "latency_ms": 6865.238333004527,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hi! Great job converting improper fractions like 7/3. However, we need to review number lines. You often confused the total gaps with the denominator or miscounted the dashes. Let's practice identifying fractions on a line together to build your confidence there! Ready to start?",
           "json_ok": true,
@@ -3652,7 +3637,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 7073.580666037742,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your LCM and fraction shading questions last time. However, we saw some confusion adding fractions with different denominators and identifying basic fraction notation. Today, let's focus on mastering these areas to build your confidence. Ready to dive in?",
           "json_ok": true,
@@ -3675,7 +3660,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 7464.157667011023,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your LCM and multiplication questions today. However, we need to review equivalent fractions, identifying first multiples, and subtracting mixed numbers, as those were tricky last time. Shall we start by breaking down how to find the lowest common denominator for subtraction?",
           "json_ok": true,
@@ -3699,9 +3684,9 @@
           ],
           "root": 436,
           "asked": 6,
-          "latency_ms": 7791.907791979611,
+          "latency_ms": 7944.8730839649215,
           "recalled": false,
-          "opening": "Hi! Great job on the division and fraction concepts you got right. Today, let's focus on mixed number subtraction and converting improper fractions. You made some small errors there last time, so we'll practice those specific steps together to build your confidence. Ready to dive in?",
+          "opening": "Hello! Great job on visualizing fractions and basic division today. We'll focus on improving mixed number operations, as you found subtracting mixed numbers and converting improper fractions tricky last time. Let's review those steps together to build your confidence! Ready to start?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -3716,23 +3701,24 @@
         {
           "sid": "s14",
           "predicted": [
-            14068,
-            19086,
-            15438
+            24069,
+            15520,
+            15341
           ],
-          "root": 415,
+          "root": 345,
           "asked": 6,
-          "latency_ms": 7780.848750029691,
+          "latency_ms": 7719.032540975604,
           "recalled": false,
-          "opening": "Hello! Ready for our next math session? Last time, you aced equivalent fractions and visualizing parts of a whole. However, we need to review finding the Lowest Common Multiple and ordering fractions accurately. Let's tackle these concepts together to build your confidence. What would you like to start with?",
+          "opening": "Hi! Ready to tackle some maths? Last time, you nailed equivalent fractions and simple subtractions. However, we need to review finding the Lowest Common Multiple and subtracting mixed numbers with different denominators. Let's start by clearing up those tricky steps so you feel confident next time!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 345,
             "misconceptions": [
-              15424,
-              15969
+              15969,
+              15501,
+              15500
             ]
           }
         },
@@ -3745,7 +3731,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 7437.759124964941,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on those equivalent fractions and multiples today. I noticed some tricky spots with subtracting mixed numbers and simple fraction differences, like in questions 2 and 3. Let's review finding common denominators together to clear up those errors before we move forward. Ready?",
           "json_ok": true,
@@ -3763,23 +3749,23 @@
         {
           "sid": "s16",
           "predicted": [
-            14092,
             15004,
-            14121
+            19056,
+            14092
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 6919.625083042774,
+          "latency_ms": 6802.0354170002975,
           "recalled": false,
-          "opening": "Hello! Great job on those division and simple fraction questions. However, we need to review improper fractions and how to place them between whole numbers. You often confused the numerator with the answer itself. Let's practice converting fractions like 11/4 into mixed numbers today to build your confidence!",
+          "opening": "Hi! Great job on the pizza problem. However, we need to review identifying equivalent fractions and placing improper fractions between whole numbers. You often chose \"0 and 1\" or incorrect values. Let's practice converting these fractions to mixed numbers today to build your confidence!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 3193,
             "misconceptions": [
-              17978,
-              22991,
+              15150,
+              26147,
               14839
             ]
           }
@@ -3791,7 +3777,7 @@
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 5759.855833020993,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on most of your last questions. However, we need to review finding the Highest Common Factor (HCF). You selected 36 for the HCF of 12 and 18, but remember the HCF must be a factor of *both* numbers. Let's tackle that concept together today!",
           "json_ok": true,
@@ -3813,7 +3799,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 7492.596334021073,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on identifying multiples and equivalent fractions today. However, we need to review subtracting fractions with different denominators and converting improper fractions to mixed numbers. Let's tackle those tricky concepts together now. Ready to start?",
           "json_ok": true,
@@ -3829,15 +3815,15 @@
         {
           "sid": "s19",
           "predicted": [
-            15004,
-            15150,
-            19870
+            14014,
+            13863,
+            14125
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 7865.797250007745,
+          "latency_ms": 6927.875082998071,
           "recalled": false,
-          "opening": "Hello! Ready to tackle some math? Last time, you nailed multiplication and simple division, but we saw some confusion with fractions\u2014specifically estimating where they lie on a number line and identifying equivalent values. Let's focus on building that intuition today so those concepts click!",
+          "opening": "Hi! Today we'll focus on fractions. Last time, you correctly found that 11/4 is between 2 and 3, but struggled with others like 17/5 or sharing pizzas. Let's review how to convert improper fractions to mixed numbers so you can confidently identify which whole numbers they fall between. Ready to start?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -3845,7 +3831,7 @@
             "root": 3193,
             "misconceptions": [
               26147,
-              14839
+              26992
             ]
           }
         },
@@ -3858,7 +3844,7 @@
           ],
           "root": 414,
           "asked": 6,
-          "latency_ms": 7745.400667015929,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job on visualizing equivalent fractions and mixed numbers last time. However, we need to practice comparing fractions with different denominators, like 2/3 versus 5/6. Let's start by finding common denominators so you can confidently identify the largest values today. Ready?",
           "json_ok": true,
@@ -3882,7 +3868,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 7721.356541966088,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hello! Great job on your LCM and simple fraction subtraction. However, we need to review subtracting fractions with different denominators, like 5/6 - 3/4 and 1/2 - 1/4. Let's practice finding common denominators together today to master this skill!",
           "json_ok": true,
@@ -3904,7 +3890,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 7780.825624999125,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Ready to tackle fractions? Last time, you nailed equivalent fractions and mixed numbers, but comparing sizes like 2/3 vs 3/5 was tricky. We'll focus on finding common denominators today to make those comparisons easy. Let's get started!",
           "json_ok": true,
@@ -3921,14 +3907,13 @@
           "sid": "s23",
           "predicted": [
             18669,
-            24739,
-            15500
+            24739
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 7281.156999990344,
+          "latency_ms": 6927.788875007536,
           "recalled": false,
-          "opening": "Hello! Ready to tackle some math? Last time, you aced multiplication and LCMs, but we saw some confusion adding fractions and identifying fraction notation. Today, let's focus on finding common denominators and writing fractions correctly to build your confidence. Let's get started!",
+          "opening": "Hello! Great job on those multiplication and LCM questions today. I noticed some tricky moments with adding fractions and writing them correctly. Let's start by reviewing how to find common denominators and properly express fractions like \"four sevenths.\" Ready to tackle a few practice problems together?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -3948,9 +3933,9 @@
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 7233.3386249956675,
+          "latency_ms": 8004.031874996144,
           "recalled": false,
-          "opening": "Hi! Ready to tackle fractions? Last time, you nailed equivalent fractions but found simplifying and finding the Highest Common Factor tricky. We'll focus on spotting common factors correctly to simplify fully. Let's start by revisiting 14/35 together\u2014what do you think is the right way to reduce it?",
+          "opening": "Hello! Ready for our next math session? Last time, you nailed equivalent fractions but struggled with simplifying fully and finding the Highest Common Factor. We'll focus on mastering those areas today to build your confidence. Let's get started!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -3970,7 +3955,7 @@
           ],
           "root": 331,
           "asked": 6,
-          "latency_ms": 7498.846416012384,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Ready to tackle some maths? Last time, we saw you grasped equivalent fractions well, but struggled with finding factors and simplifying mixed numbers. Today, let's focus on mastering HCF and fully reducing fractions to build your confidence. Let's get started!",
           "json_ok": true,
@@ -3992,7 +3977,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 7263.77300004242,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job identifying fractions like 2/9 and 4/7 correctly. However, we need to revisit number lines. You often confused the total gaps with the denominator or miscounted the position. Today, let's practice dividing lines into equal parts to find the correct fraction at each dash. Ready to try?",
           "json_ok": true,
@@ -4010,23 +3995,22 @@
         {
           "sid": "s27",
           "predicted": [
-            19079,
-            17669,
-            16005
+            24681,
+            15436,
+            17669
           ],
-          "root": 408,
+          "root": 342,
           "asked": 6,
-          "latency_ms": 7516.943333030213,
+          "latency_ms": 8260.98775002174,
           "recalled": false,
-          "opening": "Great job on your last session! You nailed mixed numbers and equivalent fractions. However, we need to revisit comparing fractions with different denominators. Remember, having the same number of shaded parts doesn't mean equal amounts if the part sizes differ. Let's tackle that concept first today!",
+          "opening": "Great job on most questions! However, we need to review finding missing numbers in equivalent fractions, like 3/4 = ?/20. You chose 19, but remember to multiply both the top and bottom by the same number. Let's practice this concept together today to build your confidence!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 345,
             "misconceptions": [
-              15424,
-              15501
+              15500
             ]
           }
         },
@@ -4039,7 +4023,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 7984.307957987767,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on those fraction comparisons and simple subtractions. I noticed you found subtracting mixed numbers tricky when borrowing was needed, like in $3\\frac{1}{4} - 1\\frac{1}{2}$. Let's review that strategy today to build your confidence before tackling more complex problems!",
           "json_ok": true,
@@ -4057,14 +4041,15 @@
         {
           "sid": "s29",
           "predicted": [
-            14068,
-            15438
+            15004,
+            18647,
+            14092
           ],
-          "root": 415,
+          "root": 3342,
           "asked": 6,
-          "latency_ms": 7292.604917020071,
+          "latency_ms": 8568.2517089881,
           "recalled": false,
-          "opening": "Hello! Great job mastering basic fractions and equivalent parts last time. Today, we'll tackle your tricky spots: ordering fractions with different denominators and estimating sums by rounding. Let's start with a quick strategy for comparing 2/5, 1/3, and 3/7 to get that order right!",
+          "opening": "Hi! Great job identifying equivalent fractions and comparing parts last time. However, we need to review subtracting fractions with different denominators (like 1/2 - 1/3) and handling common denominators correctly (like 7/10 - 2/10). Let's tackle those tricky subtractions together today!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -4072,7 +4057,7 @@
             "root": 342,
             "misconceptions": [
               20492,
-              22410
+              18618
             ]
           }
         },
@@ -4085,7 +4070,7 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 7091.980625002179,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Ready to tackle fractions and multiplication? Last time, we saw some tricky spots with equivalent fractions (like 3/4 = ?/20), simplifying fully, and solving missing number equations. Let's review those concepts together to build your confidence before moving on!",
           "json_ok": true,
@@ -4108,7 +4093,7 @@
           ],
           "root": 421,
           "asked": 3,
-          "latency_ms": 47.49237501528114,
+          "latency_ms": 43.44408301403746,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (3 times). Let's check whether that has changed."
         },
@@ -4120,7 +4105,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 55.294583027716726,
+          "latency_ms": 41.34024999802932,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (2 times) and Believes that if there is no common factor other than 1, the answer is 0 (1 times). Let's check whether that has changed."
         },
@@ -4134,7 +4119,7 @@
           ],
           "root": 342,
           "asked": 5,
-          "latency_ms": 50.97762501100078,
+          "latency_ms": 47.60195896960795,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes all multiples of 3 must end in 3 (1 times) and Believes a number is always a multiple of its final digit (1 times). Let's check whether that has changed."
         },
@@ -4149,7 +4134,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 56.24275002628565,
+          "latency_ms": 50.57600000873208,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that the presence of a digit in a number means it must be a multiple of that number (1 times) and Believes the first multiple of a is 2a (1 times). Let's check whether that has changed."
         },
@@ -4162,7 +4147,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 56.53058300958946,
+          "latency_ms": 50.71516701718792,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes smaller numerator means smaller fraction, regardless of denominator (1 times) and Mixes up smallest and largest when ordering fractions (1 times). Let's check whether that has changed."
         },
@@ -4175,7 +4160,7 @@
           ],
           "root": 414,
           "asked": 5,
-          "latency_ms": 48.447833978571,
+          "latency_ms": 44.72862504189834,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes larger denominator means larger fraction, regardless of numerator (1 times) and Thinks the first number in an unordered list must be the smallest (1 times). Let's check whether that has changed."
         },
@@ -4189,22 +4174,20 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 50.52758299279958,
+          "latency_ms": 47.26887500146404,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes 1 cannot be a factor of any number, rather than cannot be a prime factor (1 times) and Believes factors do not have to be integers (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s08",
           "predicted": [
-            17978,
-            22991,
-            26147
+            26992
           ],
           "root": 3193,
-          "asked": 4,
-          "latency_ms": 39.33933301595971,
+          "asked": 2,
+          "latency_ms": 26.905749982688576,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Believes all fractions have 1 in the numerator (1 times) and Believes answers to real life problems should always be rounded to the nearest integer (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Thinks dividing by a larger number always results in zero (2 times) and Subtracts instead of divides when division is written as a fraction (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s09",
@@ -4216,7 +4199,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 52.66945803305134,
+          "latency_ms": 51.88883299706504,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes finding the product of two numbers gives their lowest common multiple (1 times) and Believes the lowest common multiple is found by multiplying the numbers together (1 times). Let's check whether that has changed."
         },
@@ -4228,7 +4211,7 @@
           ],
           "root": 421,
           "asked": 4,
-          "latency_ms": 36.40683297999203,
+          "latency_ms": 39.044959004968405,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (2 times) and Believes that x/y is equivalent to y/x in all cases (1 times). Let's check whether that has changed."
         },
@@ -4243,7 +4226,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 52.41449997993186,
+          "latency_ms": 61.74087501130998,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes all multiples of 3 must end in 3 (1 times) and Believes that the presence of a digit in a number means it must be a multiple of that number (1 times). Let's check whether that has changed."
         },
@@ -4257,7 +4240,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 53.08741598855704,
+          "latency_ms": 56.510915979743004,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks subtracting the same number from numerator and denominator creates equivalent fractions (1 times) and Believes unit fractions are equivalent (1 times). Let's check whether that has changed."
         },
@@ -4270,22 +4253,24 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 50.84012501174584,
+          "latency_ms": 55.30254205223173,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Finds a common multiple but not the lowest common multiple (1 times) and When subtracting fractions with the same denominator, believes they subtract the numerators and the denominators cancel out (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s14",
           "predicted": [
-            15424,
+            15501,
             15969,
-            19420
+            15424,
+            18159,
+            23144
           ],
           "root": 345,
-          "asked": 5,
-          "latency_ms": 43.957791989669204,
+          "asked": 6,
+          "latency_ms": 59.98233298305422,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Believes the largest number in a set of numbers is always their lowest common multiple (1 times) and Confuses the calculations for HCF and LCM (2 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Believes adding two numbers finds their lowest common multiple (1 times) and Believes the largest number in a set of numbers is always their lowest common multiple (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s15",
@@ -4296,7 +4281,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 50.58420798741281,
+          "latency_ms": 56.3192080007866,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes multiplication should be used to find the difference in a word problem (1 times) and Believes that only denominators need to be changed to create equivalent fractions, ignoring the numerators (1 times). Let's check whether that has changed."
         },
@@ -4304,14 +4289,14 @@
           "sid": "s16",
           "predicted": [
             17978,
-            22991,
-            26147
+            26147,
+            15150
           ],
           "root": 3193,
-          "asked": 4,
-          "latency_ms": 37.67624997999519,
+          "asked": 3,
+          "latency_ms": 33.26683398336172,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Believes all fractions have 1 in the numerator (1 times) and Believes answers to real life problems should always be rounded to the nearest integer (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Believes all fractions have 1 in the numerator (1 times) and Believes the amount being shared is the denominator and the number of sharers is the numerator when writing a division as a fraction (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s17",
@@ -4322,7 +4307,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 38.6459999717772,
+          "latency_ms": 39.108041964937,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (1 times) and Believes the smallest number in a set of numbers is always their highest common factor (1 times). Let's check whether that has changed."
         },
@@ -4335,22 +4320,22 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 51.540541055146605,
+          "latency_ms": 51.771875005215406,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes unit fractions are equivalent (1 times) and When subtracting fractions, subtracts the numerators and adds the denominators (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s19",
           "predicted": [
-            14839,
-            15636,
-            17978
+            26147,
+            26992,
+            15150
           ],
           "root": 3193,
-          "asked": 4,
-          "latency_ms": 38.461333024315536,
-          "recalled": false,
-          "opening": "Welcome back. Last time you showed: Believes all fractions have 1 in the numerator (1 times) and Subtracts instead of divides when division is written as a fraction (1 times). Let's check whether that has changed."
+          "asked": 3,
+          "latency_ms": 32.66295796493068,
+          "recalled": true,
+          "opening": "Welcome back. Last time you showed: Thinks dividing by a larger number always results in zero (1 times) and Believes the amount being shared is the denominator and the number of sharers is the numerator when writing a division as a fraction (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s20",
@@ -4362,7 +4347,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 50.816332979593426,
+          "latency_ms": 49.81316701741889,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes fractions and integers are separate in mixed numbers (1 times) and Believes smaller numerator means larger fraction when denominators are equal (1 times). Let's check whether that has changed."
         },
@@ -4374,7 +4359,7 @@
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 55.40058301994577,
+          "latency_ms": 48.355249979067594,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Does not consider the denominator when adding/ subtracting fractions. Adds/subtracts the numerator and makes the denominator the one with the highest value (1 times) and When subtracting fractions, believes you just subtract the numerators and subtract the denominators (3 times). Let's check whether that has changed."
         },
@@ -4387,7 +4372,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 50.199582998175174,
+          "latency_ms": 50.00541603658348,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes larger numerator means smaller fraction when denominators are equal (1 times) and Confuses the calculations for HCF and LCM (1 times). Let's check whether that has changed."
         },
@@ -4400,7 +4385,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 75.66162501461804,
+          "latency_ms": 48.988333030138165,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When adding fractions with identical numerators, leaves the numerator and adds the denominators (1 times) and Believes the denominator of the result is always the larger denominator when adding or subtracting fractions (1 times). Let's check whether that has changed."
         },
@@ -4412,7 +4397,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 36.85937495902181,
+          "latency_ms": 36.83958400506526,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (2 times) and Believes that if there is no common factor other than 1, the answer is 0 (1 times). Let's check whether that has changed."
         },
@@ -4426,7 +4411,7 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 43.86012500617653,
+          "latency_ms": 45.80629197880626,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes a number cannot divide itself evenly, ignoring the definition of factors (1 times) and Thinks a factor of the final digit is also a factor of the whole number (1 times). Let's check whether that has changed."
         },
@@ -4440,23 +4425,23 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 49.02591597056016,
+          "latency_ms": 49.54137501772493,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (1 times) and When finding the difference between two marks on a scale, counts lines instead of gaps (3 times). Let's check whether that has changed."
         },
         {
           "sid": "s27",
           "predicted": [
-            15969,
-            15424,
-            15482,
-            22136
+            15341,
+            15500,
+            15501,
+            18159
           ],
           "root": 345,
-          "asked": 6,
-          "latency_ms": 54.19929197523743,
+          "asked": 5,
+          "latency_ms": 45.93399999430403,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Believes the largest number in a set of numbers is always their lowest common multiple (1 times) and Confuses the calculations for HCF and LCM (2 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Believes finding the product of two numbers gives their lowest common multiple (1 times) and Believes adding two numbers finds their lowest common multiple (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s28",
@@ -4466,22 +4451,23 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 54.65329100843519,
+          "latency_ms": 53.06229199049994,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes multiplication should be used to find the difference in a word problem (1 times) and Believes that only denominators need to be changed to create equivalent fractions, ignoring the numerators (2 times). Let's check whether that has changed."
         },
         {
           "sid": "s29",
           "predicted": [
-            19420,
-            22647,
-            19024
+            15985,
+            18618,
+            20492,
+            24069
           ],
-          "root": 415,
-          "asked": 6,
-          "latency_ms": 53.3154999720864,
-          "recalled": false,
-          "opening": "Welcome back. Last time you showed: Believes smaller numerator means smaller fraction, regardless of denominator (1 times) and Believes smaller denominator means larger fraction, regardless of numerator (1 times). Let's check whether that has changed."
+          "root": 342,
+          "asked": 5,
+          "latency_ms": 43.57712500495836,
+          "recalled": true,
+          "opening": "Welcome back. Last time you showed: Believes all multiples of 3 must end in 3 (1 times) and Believes a number is always a multiple of its final digit (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s30",
@@ -4493,7 +4479,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 48.715583980083466,
+          "latency_ms": 73.39366700034589,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes equal numerators mean equal fractions (1 times) and Believes larger sections in fraction diagrams represent greater proportions (1 times). Let's check whether that has changed."
         }
@@ -4568,9 +4554,11 @@
         {
           "sid": "s04",
           "predicted": [
-            18288
+            14014,
+            13863,
+            14125
           ],
-          "root": 164,
+          "root": 3193,
           "asked": 6,
           "latency_ms": null,
           "recalled": false,
@@ -4581,9 +4569,9 @@
           "planted": {
             "root": 3193,
             "misconceptions": [
-              26147,
+              17978,
               26992,
-              15150
+              15636
             ]
           }
         },
@@ -4594,7 +4582,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 11098.45370799303,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4616,7 +4604,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 5152.551207982469,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4637,7 +4625,7 @@
           ],
           "root": 342,
           "asked": 6,
-          "latency_ms": 17196.71291700797,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4648,7 +4636,7 @@
             "misconceptions": [
               15384,
               22436,
-              22345
+              18289
             ]
           }
         },
@@ -4659,7 +4647,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 21446.87745795818,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4724,10 +4712,9 @@
         {
           "sid": "s11",
           "predicted": [
-            26999,
-            15032
+            15436
           ],
-          "root": 427,
+          "root": 409,
           "asked": 6,
           "latency_ms": null,
           "recalled": false,
@@ -4807,7 +4794,7 @@
         {
           "sid": "s15",
           "predicted": [
-            18806
+            14092
           ],
           "root": 3193,
           "asked": 6,
@@ -4820,7 +4807,7 @@
           "planted": {
             "root": 3193,
             "misconceptions": [
-              17978
+              15150
             ]
           }
         },
@@ -4875,7 +4862,7 @@
           ],
           "root": 427,
           "asked": 6,
-          "latency_ms": 14341.912416974083,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4919,7 +4906,7 @@
           ],
           "root": 331,
           "asked": 6,
-          "latency_ms": 8901.962500007357,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4939,7 +4926,7 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 0.001541979145258665,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4958,7 +4945,7 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 0.001334003172814846,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -4999,7 +4986,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 9395.432999997865,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -5017,7 +5004,7 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 0.001792039256542921,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -5037,7 +5024,7 @@
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 14746.068333974108,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
@@ -5054,18 +5041,14 @@
         },
         {
           "sid": "s27",
-          "predicted": [
-            19778,
-            14944,
-            15971
-          ],
-          "root": 3342,
+          "predicted": [],
+          "root": 164,
           "asked": 6,
           "latency_ms": null,
           "recalled": false,
           "opening": "Hello! It's great to see you again for our next math session. Since I don't have my previous notes handy, could you briefly remind me of the topics we covered last time or any specific areas you'd like to focus on today? Let's get started!",
           "json_ok": true,
-          "misconceptions_unmapped": false,
+          "misconceptions_unmapped": true,
           "root_unmapped": false,
           "planted": {
             "root": 408,
@@ -5152,7 +5135,7 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 7094.837084005121,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hello! Great job on your LCM and multiple questions today. However, we need to review fraction subtraction and multiplication facts, as those were tricky last time. Specifically, let's practice subtracting fractions with different denominators and reinforcing 7 x 8. Ready to tackle these together?",
           "json_ok": true,
@@ -5170,15 +5153,15 @@
         {
           "sid": "s02",
           "predicted": [
-            15147,
-            19416,
-            15004
+            19415,
+            15150,
+            14092
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 6959.873291954864,
+          "latency_ms": 8268.613625026774,
           "recalled": false,
-          "opening": "Hello! Great job on converting fractions and knowing your times tables today. However, we need to review simplifying fractions like 12/18 and solving missing number equations (e.g., ? x 6 = 42). Let's tackle these tricky parts first to build your confidence. Ready to start?",
+          "opening": "Hello! Great job on converting fractions and mastering multiplication facts like 7x8 today. However, we need to review simplifying fractions (12/18) and solving missing number equations (? x 6 = 42). Let's tackle these tricky spots first to build your confidence!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5199,7 +5182,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 7388.430332997814,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your multiplication and mixed numbers today. However, we need to review comparing fractions and finding the lowest common multiple, as those were tricky last time. Are you ready to tackle some practice problems to build confidence in these areas?",
           "json_ok": true,
@@ -5217,38 +5200,38 @@
         {
           "sid": "s04",
           "predicted": [
-            14092,
-            14121,
-            13863
+            15150,
+            19056,
+            14125
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 7091.203666990623,
+          "latency_ms": 8236.251499969512,
           "recalled": false,
-          "opening": "Hi! Ready to tackle fractions and division? Last time, we saw you mastered simple division like 96\u00f78, but struggled with mixed numbers (like 23/6) and sharing problems. Let's focus on visualizing fractions as parts of a whole today to build your confidence!",
+          "opening": "Hello! Today we'll focus on fractions. I noticed you found converting improper fractions to mixed numbers tricky, like deciding if 23/6 is between 3 and 4. We also need to review sharing problems, such as dividing 3 pizzas among 4 people. Let's tackle these concepts together to build your confidence!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 3193,
             "misconceptions": [
-              26147,
+              17978,
               26992,
-              15150
+              15636
             ]
           }
         },
         {
           "sid": "s05",
           "predicted": [
-            19086,
-            15436
+            15436,
+            19086
           ],
-          "root": 345,
+          "root": 408,
           "asked": 6,
-          "latency_ms": 7386.292874987703,
+          "latency_ms": 7813.125834043603,
           "recalled": false,
-          "opening": "Hello! Great job on your multiplication and basic fractions last time. However, we need to revisit comparing fractions visually and finding the lowest common multiple, as those were tricky. Let's start by clearing up those concepts so you feel confident tackling them again. Ready to begin?",
+          "opening": "Hi! Great job on your multiplication and division last time. However, we need to review equivalent fractions and lowest common multiples, as those were tricky. Remember, more shaded parts don't always mean a larger fraction if the pieces are smaller. Let's tackle these concepts together today!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5268,7 +5251,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 5741.632541001309,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on your addition, multiplication, and LCM questions today. I noticed you found the fraction shading question tricky; we often confuse the numerator with the total parts needed. Let's review how to calculate 3/4 of 12 squares together to clear that up before moving on!",
           "json_ok": true,
@@ -5291,7 +5274,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 6939.80312498752,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on those fraction subtractions. Today, let's focus on areas needing practice: identifying multiples of 3 and 6, mastering the 7x8 multiplication fact, and spotting equivalent fractions like 1/3 and 2/6. Ready to tackle these together?",
           "json_ok": true,
@@ -5302,7 +5285,7 @@
             "misconceptions": [
               15384,
               22436,
-              22345
+              18289
             ]
           }
         },
@@ -5315,7 +5298,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 7743.907542026136,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job converting fractions and spotting the largest one last time. Today, let's focus on comparing sizes when denominators differ and visualizing parts of a whole. We'll practice ordering fractions and calculating shaded areas to build your confidence. Ready to dive in?",
           "json_ok": true,
@@ -5339,7 +5322,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 7844.70729198074,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! I noticed you found number line fractions tricky last time, especially counting gaps versus dashes and handling lines starting above zero. Today, we'll practice identifying the correct denominator by counting total spaces first. Ready to try a few together?",
           "json_ok": true,
@@ -5357,15 +5340,13 @@
         {
           "sid": "s10",
           "predicted": [
-            15520,
-            24069,
-            15341
+            15520
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 7421.62187496433,
+          "latency_ms": 7514.297874993645,
           "recalled": false,
-          "opening": "Hello! Great job on your LCM and equivalent fraction questions today. I noticed you found subtracting fractions tricky in our last session (5/6 - 3/4). Let's start by reviewing how to find common denominators so we can tackle that confidently together. Ready?",
+          "opening": "Hello! Great job mastering LCMs and equivalent fractions last time. However, we need to review subtracting fractions with different denominators, as you chose 2/2 instead of 1/12 for 5/6 - 3/4. Let's start by finding a common denominator together to fix that mistake!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5380,14 +5361,14 @@
         {
           "sid": "s11",
           "predicted": [
-            15500,
-            18669
+            15438,
+            19086
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 6693.082167010289,
+          "latency_ms": 7924.049875000492,
           "recalled": false,
-          "opening": "Hello! Great job on your fraction addition and division last time. However, we need to review finding the Lowest Common Multiple (LCM) and adding fractions with different denominators, as you made a few errors there. Let's tackle those concepts first to build your confidence!",
+          "opening": "Hello! Great job on your division and equivalent fractions today. However, we need to review finding the Lowest Common Multiple (LCM) and ordering fractions, as those were tricky last time. Let's start by clarifying how to find multiples correctly before tackling more fraction comparisons. Ready?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5405,7 +5386,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 6199.869250005577,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Great job on your last session! You nailed multiples and equivalent fractions. However, we need to review adding fractions with different denominators, like Jo's walk (1/4 + 1/6). Let's fix that mistake today so you can confidently solve word problems involving fraction addition. Ready?",
           "json_ok": true,
@@ -5427,7 +5408,7 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 7246.217750012875,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job on that LCM question. Today, we'll focus on fractions, as you found comparing sizes and spotting equivalents tricky last time. We'll also revisit calculating parts of a whole. Ready to tackle some fraction problems together?",
           "json_ok": true,
@@ -5450,7 +5431,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 7549.246207985561,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job ordering fractions and finding LCMs last time. We'll focus on comparing fractions with different denominators today, as you found that tricky. Let's also review choosing the correct symbols between numbers. Ready to tackle some new problems?",
           "json_ok": true,
@@ -5467,22 +5448,22 @@
         {
           "sid": "s15",
           "predicted": [
-            15150,
             14092,
-            15004
+            15150,
+            19056
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 6992.138540954329,
+          "latency_ms": 7985.635916003957,
           "recalled": false,
-          "opening": "Hi! Ready to tackle fractions? Last time, you nailed division but struggled estimating where improper fractions like 11/4 fit between whole numbers. We'll focus on converting them to mixed numbers today to build that confidence. Let's get started!",
+          "opening": "Hi! I noticed you found converting improper fractions and finding whole number ranges tricky last time. Many students mix up numerators and denominators or struggle with division visualization. Let's tackle these concepts together today using clear examples to build your confidence. Ready to start?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 3193,
             "misconceptions": [
-              17978
+              15150
             ]
           }
         },
@@ -5493,7 +5474,7 @@
           ],
           "root": 3378,
           "asked": 6,
-          "latency_ms": 6152.365583984647,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Great job on your last session! You aced most questions, but let's revisit simplifying fractions. You chose a decimal form instead of a simplified fraction for 6/24. Today, we'll focus on reducing fractions fully to their simplest terms. Ready to dive in?",
           "json_ok": true,
@@ -5517,7 +5498,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 7345.425458974205,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job on your multiplication and simple fraction subtraction last time. However, we saw some challenges with subtracting fractions having different denominators and finding the Lowest Common Multiple. Let's focus on mastering those concepts today to build your confidence! Ready to start?",
           "json_ok": true,
@@ -5539,7 +5520,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 7450.287750049029,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hello! Great job on LCMs and equivalent fractions today. We'll focus next on adding fractions, as you mixed up numerators/denominators and multiplied instead of adding in some problems. Let's review those steps together to build your confidence! Ready when you are.",
           "json_ok": true,
@@ -5561,7 +5542,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 6190.760958008468,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Ready for our next math session? Last time, you nailed converting 7/3 to a mixed number! However, we saw some confusion with number lines: specifically, identifying fractions based on equal gaps and dashes. Let's review how the denominator relates to the total parts today. What topic would you like to start with?",
           "json_ok": true,
@@ -5580,13 +5561,14 @@
           "sid": "s20",
           "predicted": [
             14537,
-            19079
+            14069,
+            22640
           ],
           "root": 338,
           "asked": 6,
-          "latency_ms": 6743.546333047561,
+          "latency_ms": 8910.46683298191,
           "recalled": false,
-          "opening": "Great job on your fractions and multiplication! Today, let's review simplifying fractions like 4/12 and division with larger numbers, such as 240 \u00f7 40. We'll break these down step-by-step to build your confidence. Ready to get started?",
+          "opening": "Great job on those fractions and multiplication! Today, we'll tackle division by multiples of ten (like 240 \u00f7 40) and simplifying fractions fully. Let's review why 60 was tricky and how to reduce 4/12 correctly. Ready to dive in?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5604,9 +5586,9 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 6406.01133403834,
+          "latency_ms": 6281.346874951851,
           "recalled": false,
-          "opening": "Great job last time! You aced all six questions on multiples, division, and fractions. Since you didn't struggle with anything specific, we'll build on this strong foundation today by tackling slightly more complex word problems involving these same concepts. Ready to dive in?",
+          "opening": "Great job! You answered all six questions correctly in our last session, showing a strong grasp of LCMs, division, and equivalent fractions. Since you didn't struggle with anything specific, let's build on this confidence by tackling slightly more challenging problems involving mixed operations and word problems. Ready to begin?",
           "json_ok": true,
           "misconceptions_unmapped": true,
           "root_unmapped": true,
@@ -5623,9 +5605,9 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 5128.758999984711,
+          "latency_ms": 5741.08166701626,
           "recalled": false,
-          "opening": "Hello! Great job last time\u2014you answered all six questions correctly, mastering equivalent fractions and LCMs. Since you didn't struggle with anything specific, we'll build on this strong foundation by tackling slightly more complex fraction operations today. Ready to dive in?",
+          "opening": "Great job last time! You answered every question correctly, showing strong skills in fractions and LCMs. Since you didn't struggle with anything, we'll build on this confidence by tackling slightly harder problems involving mixed numbers and word problems. Ready to dive in?",
           "json_ok": true,
           "misconceptions_unmapped": true,
           "root_unmapped": true,
@@ -5640,15 +5622,15 @@
         {
           "sid": "s23",
           "predicted": [
-            18903,
-            24739,
-            15636
+            14092,
+            15150,
+            19056
           ],
           "root": 3193,
           "asked": 6,
-          "latency_ms": 7099.759000004269,
+          "latency_ms": 7894.544332986698,
           "recalled": false,
-          "opening": "Hello! Great job on those division problems like 84 \u00f7 4. Today, let's focus on where you stumbled: understanding fractions as parts of a whole and estimating their values between whole numbers. We'll also revisit why adding digits (like in 48 \u00f7 6) isn't the right strategy for division. Ready to dive in?",
+          "opening": "Hi! I noticed you found it tricky to place improper fractions between whole numbers and often swapped numerators with denominators. Today, we'll focus on visualizing these concepts clearly so you can confidently identify values like 11/4 or 3 pizzas shared by 4 people. Let's get started!",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5667,7 +5649,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 6726.078750041779,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hello! Great job on the multiplication and simple fraction questions today. I noticed some challenges with subtracting fractions that have different denominators, like in the cake problem. Let's start by reviewing how to find common denominators so you can solve those confidently. Ready to begin?",
           "json_ok": true,
@@ -5685,9 +5667,9 @@
           "predicted": [],
           "root": null,
           "asked": 6,
-          "latency_ms": 5012.648832984269,
+          "latency_ms": 4511.580666992813,
           "recalled": false,
-          "opening": "Great job last time! You answered every single question correctly, showing strong skills in multiplication, division, and equivalent fractions. Since there were no struggles to address, let's build on this momentum by tackling slightly more challenging problems today. Are you ready?",
+          "opening": "Hello! You aced all six questions in our last session, showing great skill with multiplication, division, and equivalent fractions. Since you didn't struggle with anything specific, we'll build on this strong foundation today by tackling slightly more challenging word problems involving these concepts. Ready to begin?",
           "json_ok": true,
           "misconceptions_unmapped": true,
           "root_unmapped": true,
@@ -5707,7 +5689,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 7509.901624987833,
+          "latency_ms": null,
           "recalled": true,
           "opening": "Hello! Great job on multiplication and equivalent fractions last time. However, we need to review finding missing numerators, writing fractions correctly (like 4/7), and subtracting fractions with different denominators. Let's tackle these tricky concepts together today!",
           "json_ok": true,
@@ -5729,11 +5711,11 @@
             15150,
             14092
           ],
-          "root": 408,
+          "root": 3378,
           "asked": 6,
-          "latency_ms": 6941.753291990608,
+          "latency_ms": 8480.510124994908,
           "recalled": false,
-          "opening": "Hello! Great job on your division and fraction questions today. I noticed you found the rectangle shading tricky; we'll review how to calculate parts of a whole together. Ready to tackle some more problems? Let's get started!",
+          "opening": "Hello! Great job on your division and fraction questions today. I noticed we need to review finding fractions of shapes (like the rectangle problem) and double-checking division facts like 48 \u00f7 6. Let's tackle those together to build your confidence. Ready to start?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5752,9 +5734,9 @@
           ],
           "root": 414,
           "asked": 6,
-          "latency_ms": 6147.01904199319,
+          "latency_ms": 7325.782625004649,
           "recalled": false,
-          "opening": "Hello! Great job on equivalent fractions and division last time. However, we need to practice comparing fractions, as you missed a few questions there. Let's review how to find common denominators to accurately determine which fraction is larger or smaller today. Ready to start?",
+          "opening": "Hello! Great job on the division and equivalent fractions last time. However, you found comparing fractions tricky, especially when denominators differed or mixed numbers were involved. Today, we'll focus on strategies to accurately rank fractions and identify the largest or smallest values. Ready to tackle some practice?",
           "json_ok": true,
           "misconceptions_unmapped": false,
           "root_unmapped": false,
@@ -5776,7 +5758,7 @@
           ],
           "root": 345,
           "asked": 6,
-          "latency_ms": 8386.703833006322,
+          "latency_ms": null,
           "recalled": false,
           "opening": "Hi! Great job on the multiplication and visual fractions last time. Today, we'll focus on adding fractions with different denominators and spotting multiples of 3, as these were tricky. Let's tackle them together step-by-step to build your confidence. Ready to start?",
           "json_ok": true,
@@ -5792,14 +5774,18 @@
         },
         {
           "sid": "s30",
-          "predicted": [],
-          "root": 331,
+          "predicted": [
+            24739,
+            17669,
+            22653
+          ],
+          "root": 338,
           "asked": 6,
-          "latency_ms": 5287.817541975528,
+          "latency_ms": 8372.275541012641,
           "recalled": false,
-          "opening": "Hello! Great job on your fractions and division today. However, we need to review finding factors and the Highest Common Factor (HCF). You chose answers that were too large or missed some factors for 16, 24, and 18. Let's practice listing all factors correctly so you can spot the HCF with confidence!",
+          "opening": "Hello! Great job on your fractions and division today. However, we need to review finding factors and the Highest Common Factor (HCF). You chose answers larger than the numbers themselves for HCF questions, which isn't possible. Let's practice listing factors correctly to master this concept together!",
           "json_ok": true,
-          "misconceptions_unmapped": true,
+          "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 331,
@@ -5821,7 +5807,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 69.63662500493228,
+          "latency_ms": 72.40316597744823,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When shading fractions of shapes, believes the denominator always means the number of sections that are not shaded (1 times) and Believes unit fractions are equivalent (1 times). Let's check whether that has changed."
         },
@@ -5833,7 +5819,7 @@
           ],
           "root": 338,
           "asked": 4,
-          "latency_ms": 43.6058749910444,
+          "latency_ms": 46.22108303010464,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that any common factor is sufficient and does not prioritize finding the greatest one (2 times) and Believes that if there is no common factor other than 1, the answer is 0 (1 times). Let's check whether that has changed."
         },
@@ -5847,22 +5833,22 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 62.04354204237461,
+          "latency_ms": 57.10329196881503,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes fractions and integers are separate in mixed numbers (1 times) and Believes larger numerator means smaller fraction when denominators are equal (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s04",
           "predicted": [
+            15636,
             26992,
-            15150,
-            18518
+            15150
           ],
           "root": 3193,
-          "asked": 6,
-          "latency_ms": 49.01820799568668,
+          "asked": 3,
+          "latency_ms": 36.29512496991083,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Thinks dividing by a larger number always results in zero (1 times) and Believes that a fraction means dividing the denominator by the numerator (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Thinks dividing by a larger number always results in zero (1 times) and Thinks the fraction 1/n can express sharing any number of items between n people (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s05",
@@ -5874,7 +5860,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 59.8208750016056,
+          "latency_ms": 55.0454169861041,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes the number of shaded parts determines fraction equivalence regardless of total parts (1 times) and Thinks a greater number of shaded parts represents a greater fraction (1 times). Let's check whether that has changed."
         },
@@ -5887,23 +5873,22 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 51.26266705337912,
+          "latency_ms": 56.25583394430578,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When adding fractions with identical numerators, leaves the numerator and adds the denominators (1 times) and Believes the denominator of the result is always the larger denominator when adding or subtracting fractions (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s07",
           "predicted": [
-            15627,
-            18289,
-            22436,
-            15985
+            15985,
+            22410,
+            19786
           ],
-          "root": 3378,
-          "asked": 4,
-          "latency_ms": 84.7512079635635,
+          "root": 342,
+          "asked": 6,
+          "latency_ms": 73.0705420137383,
           "recalled": false,
-          "opening": "Welcome back. Last time you showed: If given two numbers in a multiplication equation, believes the task is to find their product (1 times) and Subtracts instead of multiplies (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Believes that the presence of a digit in a number means it must be a multiple of that number (1 times) and Believes the first multiple of a is 2a (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s08",
@@ -5914,7 +5899,7 @@
           ],
           "root": 408,
           "asked": 5,
-          "latency_ms": 68.50783398840576,
+          "latency_ms": 48.434625030495226,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Thinks dimensions are needed to compare fractions (2 times) and When shading fractions of shapes, believes the denominator tells us how many sections to shade (1 times). Let's check whether that has changed."
         },
@@ -5927,7 +5912,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 52.893833024427295,
+          "latency_ms": 57.07166704814881,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator (1 times) and When finding the difference between two marks on a scale, counts lines instead of gaps (4 times). Let's check whether that has changed."
         },
@@ -5939,7 +5924,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 50.679166975896806,
+          "latency_ms": 52.434374985750765,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Thinks adding the same number to numerator and denominator creates equivalent fractions (1 times) and Believes that only denominators need to be changed to create equivalent fractions, ignoring the numerators (1 times). Let's check whether that has changed."
         },
@@ -5949,11 +5934,11 @@
             15501,
             15969,
             24069,
-            21651
+            22647
           ],
           "root": 345,
           "asked": 5,
-          "latency_ms": 46.56662495108321,
+          "latency_ms": 50.607790995854884,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes adding two numbers finds their lowest common multiple (1 times) and Believes the largest number in a set of numbers is always their lowest common multiple (1 times). Let's check whether that has changed."
         },
@@ -5966,7 +5951,7 @@
           ],
           "root": 425,
           "asked": 6,
-          "latency_ms": 58.57620801543817,
+          "latency_ms": 51.291416049934924,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When adding fractions, multiplies the denominators (1 times) and Believes the denominator of the result is always the smaller denominator when adding or subtracting fractions (1 times). Let's check whether that has changed."
         },
@@ -5981,7 +5966,7 @@
           ],
           "root": 3342,
           "asked": 6,
-          "latency_ms": 52.28270799852908,
+          "latency_ms": 50.30654196161777,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes a fraction and decimal are related such that numerator/denominator = numerator.denominator (2 times) and Believes the denominator is the top of a fraction (1 times). Let's check whether that has changed."
         },
@@ -5994,22 +5979,22 @@
           ],
           "root": 415,
           "asked": 6,
-          "latency_ms": 49.548624956514686,
+          "latency_ms": 50.32945901621133,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes smaller numerator means smaller fraction, regardless of denominator (1 times) and Mixes up smallest and largest when ordering fractions (2 times). Let's check whether that has changed."
         },
         {
           "sid": "s15",
           "predicted": [
-            14839,
-            17978,
-            26147
+            26147,
+            15004,
+            15150
           ],
           "root": 3193,
-          "asked": 4,
-          "latency_ms": 38.85433299001306,
-          "recalled": true,
-          "opening": "Welcome back. Last time you showed: Believes all fractions have 1 in the numerator (1 times) and Subtracts instead of divides when division is written as a fraction (1 times). Let's check whether that has changed."
+          "asked": 3,
+          "latency_ms": 32.62204205384478,
+          "recalled": false,
+          "opening": "Welcome back. Last time you showed: Believes the amount being shared is the denominator and the number of sharers is the numerator when writing a division as a fraction (1 times) and Assumes the denominator is divided by the numerator (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s16",
@@ -6020,7 +6005,7 @@
           ],
           "root": 338,
           "asked": 5,
-          "latency_ms": 46.41687503317371,
+          "latency_ms": 46.64950002916157,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes the smallest number in a set of numbers is always their highest common factor (1 times) and Believes the largest number in a set of numbers is always their highest common factor (1 times). Let's check whether that has changed."
         },
@@ -6033,7 +6018,7 @@
           ],
           "root": 435,
           "asked": 6,
-          "latency_ms": 49.61541702505201,
+          "latency_ms": 48.987749963998795,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes that division should be used when asked to find the difference in a word problem (1 times) and When subtracting fractions, believes that if the numerators are the same then you subtract the denominators (1 times). Let's check whether that has changed."
         },
@@ -6042,7 +6027,7 @@
           "predicted": [],
           "root": null,
           "asked": 2,
-          "latency_ms": 23.899416031781584,
+          "latency_ms": 24.133166996762156,
           "recalled": false,
           "opening": "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         },
@@ -6054,7 +6039,7 @@
           ],
           "root": 421,
           "asked": 6,
-          "latency_ms": 50.130957970395684,
+          "latency_ms": 50.45720800990239,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: When reading fractions on a number line, assumes the whole line is 1 (1 times) and When finding the difference between two marks on a scale, counts lines instead of gaps (5 times). Let's check whether that has changed."
         },
@@ -6068,7 +6053,7 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 54.01016696123406,
+          "latency_ms": 45.96250003669411,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes 1 cannot be a factor of any number, rather than cannot be a prime factor (1 times) and Believes factors do not have to be integers (1 times). Let's check whether that has changed."
         },
@@ -6080,7 +6065,7 @@
           ],
           "root": 409,
           "asked": 6,
-          "latency_ms": 50.98133400315419,
+          "latency_ms": 47.41466703126207,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Believes unit fractions are equivalent (1 times) and Believes the denominator of the result is always the smaller denominator when adding or subtracting fractions (1 times). Let's check whether that has changed."
         },
@@ -6092,22 +6077,20 @@
           ],
           "root": 428,
           "asked": 4,
-          "latency_ms": 35.96233297139406,
+          "latency_ms": 35.84841697011143,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes the integers are multiplied and the fractions of mixed numbers are multiplied rather than added when adding mixed numbers (2 times) and Believes you add the whole to the numerators, ignoring denominators, when adding a mixed number to a proper fraction with the same denominator (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s23",
           "predicted": [
-            14839,
-            15636,
-            15004
+            26147
           ],
           "root": 3193,
-          "asked": 4,
-          "latency_ms": 43.63466700306162,
+          "asked": 2,
+          "latency_ms": 24.568541964981705,
           "recalled": true,
-          "opening": "Welcome back. Last time you showed: Subtracts instead of divides when division is written as a fraction (1 times) and Thinks the fraction 1/n can express sharing any number of items between n people (1 times). Let's check whether that has changed."
+          "opening": "Welcome back. Last time you showed: Believes the amount being shared is the denominator and the number of sharers is the numerator when writing a division as a fraction (1 times) and Believes that a fraction means dividing the denominator by the numerator (1 times). Let's check whether that has changed."
         },
         {
           "sid": "s24",
@@ -6117,7 +6100,7 @@
           ],
           "root": 433,
           "asked": 6,
-          "latency_ms": 55.28504203539342,
+          "latency_ms": 48.511500004678965,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes that the subtraction sign in a calculation indicates addition rather than subtraction or negation (1 times) and When subtracting fractions, believes you just subtract the numerators and subtract the denominators (2 times). Let's check whether that has changed."
         },
@@ -6131,7 +6114,7 @@
           ],
           "root": 432,
           "asked": 6,
-          "latency_ms": 49.871499999426305,
+          "latency_ms": 57.51174996839836,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When subtracting fractions, believes they add the numerators (1 times) and When subtracting fractions, thinks you multiply the numerators (1 times). Let's check whether that has changed."
         },
@@ -6144,7 +6127,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 48.75616601202637,
+          "latency_ms": 53.064458013977855,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: When shading fractions of shapes, believes the denominator always means the number of sections that are not shaded (1 times) and Believes unit fractions are equivalent (1 times). Let's check whether that has changed."
         },
@@ -6157,7 +6140,7 @@
           ],
           "root": 408,
           "asked": 6,
-          "latency_ms": 67.3149159993045,
+          "latency_ms": 48.97654097294435,
           "recalled": false,
           "opening": "Welcome back. Last time you showed: Thinks dimensions are needed to compare fractions (2 times) and When shading fractions of shapes, believes the denominator always means the number of sections that are not shaded (1 times). Let's check whether that has changed."
         },
@@ -6171,7 +6154,7 @@
           ],
           "root": 413,
           "asked": 6,
-          "latency_ms": 51.79779202444479,
+          "latency_ms": 52.49770899536088,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes fractions and integers are separate in mixed numbers (1 times) and Thinks the first number in an unordered list must be the smallest (2 times). Let's check whether that has changed."
         },
@@ -6185,7 +6168,7 @@
           ],
           "root": 424,
           "asked": 6,
-          "latency_ms": 52.96308401739225,
+          "latency_ms": 55.93579198466614,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Multiplies the numerators when adding fractions with a common denominator (1 times) and When adding fractions with the same denominator, believes they add the numerators and the denominators cancel out (1 times). Let's check whether that has changed."
         },
@@ -6199,7 +6182,7 @@
           ],
           "root": 331,
           "asked": 5,
-          "latency_ms": 44.24641700461507,
+          "latency_ms": 43.34299999754876,
           "recalled": true,
           "opening": "Welcome back. Last time you showed: Believes 1 cannot be a factor of any number, rather than cannot be a prime factor (1 times) and Believes factors do not have to be integers (1 times). Let's check whether that has changed."
         }

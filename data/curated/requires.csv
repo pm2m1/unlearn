@@ -5,7 +5,6 @@ construct_id,prereq_id,note,confidence
 345,342,"The lowest common multiple is found by listing multiples of each number.",high
 338,331,"The highest common factor is found by listing the factors of each number.",high
 164,3378,"Mental division uses times-table facts in reverse.",high
-3193,164,"Writing a ÷ b as a/b assumes the student understands division as equal sharing.",medium
 408,3342,"Matching shaded diagrams to fractions needs the meaning of numerator (parts taken) and denominator (equal parts).",high
 409,3342,"Recognising equivalent fractions needs the meaning of numerator and denominator.",high
 409,3378,"Equivalent fractions scale numerator and denominator by the same factor using multiplication facts.",high
@@ -56,5 +55,4 @@ construct_id,prereq_id,note,confidence
 421,420,"A non-unit fraction a/n is a steps of the unit fraction 1/n along the line.",high
 3118,421,"Reading a dash between labelled values extends placing fractions on a number line.",medium
 3839,3193,"Finding the whole numbers either side of a/b means working out a ÷ b.",high
-3632,415,"Rounding to 0, 1/2 or 1 means comparing each fraction against those benchmarks.",medium
 3587,408,"Seeing that a fraction depends on its whole builds on fraction models of a shape; the link is indirect.",low

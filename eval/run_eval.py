@@ -98,8 +98,9 @@ def run_ab(cond: str, provider, sim, student, judge, graph_text: str | None = No
         dx = BL.condition_a(provider, judge, answers, constructs)
     else:
         dx = BL.condition_b(provider, judge, answers, constructs, graph_text if cond == "B+" else None)
-    # A diagnosis served (even partly) from the disk cache says nothing about latency: leave it out.
-    latency = (time.perf_counter() - t0) * 1000 if BL.STATS["cached"] == cached_before else None
+    # A diagnosis served (even partly) from the disk cache, or one that made no call (A with no wrong answer), says
+    # nothing about latency: leave it out.
+    latency = (time.perf_counter() - t0) * 1000 if BL.STATS["cached"] == cached_before and dx["calls"] else None
     opening = BL.opening_a(provider) if cond == "A" else BL.opening_b(provider, answers)  # B+ opens as B does
     return {"predicted": dx["predicted"], "root": dx["root"], "asked": len(answers), "latency_ms": latency,
             "recalled": judge.recalled(opening, student.misconceptions), "opening": opening,
@@ -351,6 +352,7 @@ def main(argv=None) -> int:
                  "llm": f"{provider.name} / {provider.model}" if provider else None,
                  "llm_role": "A and B only, one model, no fallback; C uses template wording",
                  "n_per_condition": {c: sum(per_seed[s][c]["n"] for s in per_seed if c in per_seed[s]) for c in ran},
+                 "seeds_per_condition": {c: sorted(int(s) for s in per_seed if c in per_seed[s]) for c in ran},
                  "llm_calls": {k: (round(v, 1) if isinstance(v, float) else v) for k, v in BL.STATS.items()} if needs_llm else None,
                  "calibration": calibration, "stopped": stopped,
                  "not_run": {c: why or "not requested" for c in ORDER if c not in ran},

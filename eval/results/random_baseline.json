@@ -3,14 +3,44 @@
   "per_seed": {
     "0": {
       "A": {
-        "top1_misconception": 0.023,
-        "top3_misconception": 0.07,
-        "root_cause_accuracy": 0.19
+        "top1_misconception": 0.027,
+        "top3_misconception": 0.08,
+        "root_cause_accuracy": 0.206
       },
       "B": {
+        "top1_misconception": 0.04,
+        "top3_misconception": 0.116,
+        "root_cause_accuracy": 0.206
+      },
+      "B+": {
+        "top1_misconception": 0.005,
+        "top3_misconception": 0.015,
+        "root_cause_accuracy": 0.025
+      },
+      "candidate_list_sizes": {
+        "prerequisites": 6.6,
+        "A_misconceptions": 9.667,
+        "B_misconceptions": 10,
+        "Bplus_misconceptions": 410,
+        "Bplus_constructs": 40
+      },
+      "planted_misconception_on_list": {
+        "A": 0.267,
+        "B": 0.333,
+        "B+": 1
+      },
+      "n": 30
+    },
+    "1": {
+      "A": {
         "top1_misconception": 0.03,
-        "top3_misconception": 0.09,
-        "root_cause_accuracy": 0.19
+        "top3_misconception": 0.088,
+        "root_cause_accuracy": 0.239
+      },
+      "B": {
+        "top1_misconception": 0.02,
+        "top3_misconception": 0.058,
+        "root_cause_accuracy": 0.239
       },
       "B+": {
         "top1_misconception": 0.005,
@@ -25,38 +55,8 @@
         "Bplus_constructs": 40
       },
       "planted_misconception_on_list": {
-        "A": 0.233,
-        "B": 0.3,
-        "B+": 1
-      },
-      "n": 30
-    },
-    "1": {
-      "A": {
-        "top1_misconception": 0.023,
-        "top3_misconception": 0.068,
-        "root_cause_accuracy": 0.173
-      },
-      "B": {
-        "top1_misconception": 0.01,
-        "top3_misconception": 0.03,
-        "root_cause_accuracy": 0.173
-      },
-      "B+": {
-        "top1_misconception": 0.005,
-        "top3_misconception": 0.015,
-        "root_cause_accuracy": 0.025
-      },
-      "candidate_list_sizes": {
-        "prerequisites": 6.7,
-        "A_misconceptions": 9.667,
-        "B_misconceptions": 10,
-        "Bplus_misconceptions": 410,
-        "Bplus_constructs": 40
-      },
-      "planted_misconception_on_list": {
-        "A": 0.2,
-        "B": 0.1,
+        "A": 0.267,
+        "B": 0.167,
         "B+": 1
       },
       "n": 30
@@ -65,12 +65,12 @@
       "A": {
         "top1_misconception": 0.02,
         "top3_misconception": 0.058,
-        "root_cause_accuracy": 0.165
+        "root_cause_accuracy": 0.232
       },
       "B": {
-        "top1_misconception": 0.007,
-        "top3_misconception": 0.02,
-        "root_cause_accuracy": 0.165
+        "top1_misconception": 0.01,
+        "top3_misconception": 0.03,
+        "root_cause_accuracy": 0.232
       },
       "B+": {
         "top1_misconception": 0.005,
@@ -78,7 +78,7 @@
         "root_cause_accuracy": 0.025
       },
       "candidate_list_sizes": {
-        "prerequisites": 6.967,
+        "prerequisites": 6.733,
         "A_misconceptions": 9,
         "B_misconceptions": 10,
         "Bplus_misconceptions": 410,
@@ -86,7 +86,7 @@
       },
       "planted_misconception_on_list": {
         "A": 0.167,
-        "B": 0.067,
+        "B": 0.1,
         "B+": 1
       },
       "n": 30

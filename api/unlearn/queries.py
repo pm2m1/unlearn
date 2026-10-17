@@ -314,10 +314,11 @@ RETURN [n IN nodes(path) | n.name] AS chain, pathWeight
 
 # Changed from SPEC (decisions, Phase 6): every misconception seen at least once, those on the root cause the
 # student was last diagnosed with first (by their SEEN_IN.w there), then strongest, then most recent. The tutor
-# opens with what it diagnosed last session. Measured on 90 simulated students' session-2 openings (top 2):
-#   SPEC rule (confidence > 0.6, newest first)   recall 29%, precision 81%, nothing to say for 58/90
-#   seen once or more, strongest first            recall 53%, precision 30%
-#   seen once or more, last diagnosed root first  recall 68%, precision 44%   <- this query
+# opens with what it diagnosed last session. Measured on 90 simulated students' session-2 openings (top 2),
+# eval/design_checks.py:
+#   SPEC rule (confidence > 0.6, newest first)   recall 28%, precision 78%, nothing to say for 58/90
+#   seen once or more, strongest first            recall 56%, precision 31%
+#   seen once or more, last diagnosed root first  recall 68%, precision 45%   <- this query
 RECALL = """
 MATCH (s:Student {id:$sid})
 OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(dx:Event {type:'diagnosis'})-[:ABOUT]->(root:Construct)
@@ -332,6 +333,27 @@ WITH m, e, on_root, collect(ev.summary) AS events
 RETURN m.name AS misconception, e.count AS times, e.confidence AS confidence, e.last_ts AS last_seen,
        on_root, events[0..3] AS recent
 ORDER BY on_root DESC, confidence DESC, last_seen DESC LIMIT 5
+"""
+
+# The two recall rules RECALL replaced, kept for eval/design_checks.py, which measures all three on the same
+# session-1 histories. RECALL_SPEC_RULE is the build spec's (seen twice, newest first).
+RECALL_SPEC_RULE = """
+MATCH (s:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
+WHERE e.confidence > 0.6
+RETURN m.name AS misconception, e.confidence AS confidence, e.last_ts AS last_seen
+ORDER BY last_seen DESC LIMIT 5
+"""
+
+RECALL_STRONGEST_FIRST = """
+MATCH (s:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
+WHERE e.count >= 1
+RETURN m.name AS misconception, e.confidence AS confidence, e.last_ts AS last_seen
+ORDER BY confidence DESC, last_seen DESC LIMIT 5
+"""
+
+MISCONCEPTION_NAMES = """
+MATCH (m:Misconception) WHERE m.id IN $ids
+RETURN m.id AS id, m.name AS name
 """
 
 PICK_SKILL = """
