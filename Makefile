@@ -1,5 +1,5 @@
 PY ?= .venv/bin/python
-export PYTHONPATH := api
+export PYTHONPATH := api:.
 
 .PHONY: up down seed test topics
 
