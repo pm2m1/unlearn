@@ -253,8 +253,8 @@ MATCH (s:Student {id:$sid}), (c:Construct {id:$cid})
 MATCH p = (c)-[:REQUIRES*1..4]->(pre:Construct)
 WHERE NOT (s)-[:MASTERED]->(pre)
 WITH s, pre, min(length(p)) AS depth
-OPTIONAL MATCH (s)-[e:SHOWED]->(m:Misconception)-[:SEEN_IN]->(pre)
-WITH pre, depth, sum(coalesce(e.count, 0) * coalesce(e.confidence, 0.0)) AS evidence, collect(DISTINCT m.name) AS miscs
+OPTIONAL MATCH (s)-[e:SHOWED]->(m:Misconception)-[si:SEEN_IN]->(pre)
+WITH pre, depth, sum(coalesce(e.count, 0) * coalesce(e.confidence, 0.0) * coalesce(si.pct, 0.0) / 100.0) AS evidence, collect(DISTINCT m.name) AS miscs
 WHERE evidence > 0
 RETURN pre.id AS id, pre.name AS name, depth, evidence, miscs
 ORDER BY evidence DESC, depth DESC LIMIT 3
@@ -417,6 +417,12 @@ MATCH (s:Student {id:$sid}), (a:Agent {name:$agent})
 CREATE (t:Task {id:$id, kind:$kind, state:'submitted', created_ts:$ts})
 CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a)
 RETURN t.id AS id
+"""
+
+STUDENT_SHOWED = """
+MATCH (:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
+RETURN m.id AS mid, m.name AS name, e.count AS count, e.confidence AS confidence
+ORDER BY e.confidence DESC, m.id
 """
 
 TASK_STATE = """

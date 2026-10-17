@@ -323,12 +323,14 @@ MATCH (s:Student {id:$sid}), (c:Construct {id:$cid})
 MATCH p = (c)-[:REQUIRES*1..4]->(pre:Construct)
 WHERE NOT (s)-[:MASTERED]->(pre)
 WITH s, pre, min(length(p)) AS depth
-OPTIONAL MATCH (s)-[e:SHOWED]->(m:Misconception)-[:SEEN_IN]->(pre)
-WITH pre, depth, sum(coalesce(e.count, 0) * coalesce(e.confidence, 0.0)) AS evidence, collect(DISTINCT m.name) AS miscs
+OPTIONAL MATCH (s)-[e:SHOWED]->(m:Misconception)-[si:SEEN_IN]->(pre)
+WITH pre, depth, sum(coalesce(e.count, 0) * coalesce(e.confidence, 0.0) * coalesce(si.pct, 0.0) / 100.0) AS evidence, collect(DISTINCT m.name) AS miscs
 WHERE evidence > 0
 RETURN pre.id AS id, pre.name AS name, depth, evidence, miscs
 ORDER BY evidence DESC, depth DESC LIMIT 3
 ```
+
+Evidence is weighted by the Eedi edge weight `SEEN_IN.pct`, so a generic misconception spread thinly over many constructs adds little to each, while one concentrated on a prerequisite counts nearly in full. Two hits on a prerequisite distractor of median weight (pct 66.7 in this slice) score 1.5 × 0.667 = 1.0, which is why the Diagnoser's stop thresholds are 1.0 and 0.33 (the old 1.5 and 0.5 scaled by the same 2/3).
 
 Then fetch the chain for the receipt:
 
@@ -472,7 +474,7 @@ Three agents run as worker loops in plain Python (`asyncio`). Each one claims a 
 
 | Agent | Trigger | Steps | Stops when | Hands off to |
 | --- | --- | --- | --- | --- |
-| Diagnoser | `diagnose` task, created when a session starts | `recall` → loop: `probe_frontier` or `next_question` → `record_attempt` → `root_cause` | Top evidence ≥ 1.5 and leads the runner-up by ≥ 0.5, or 6 questions asked | Tutor (`remediate`) |
+| Diagnoser | `diagnose` task, created when a session starts | `recall` → loop: `probe_frontier` or `next_question` → `record_attempt` → `root_cause` | Top evidence ≥ 1.0 and leads the runner-up by ≥ 0.33, or 6 questions asked | Tutor (`remediate`) |
 | Tutor | `remediate` task | `root_cause` → `learning_path` → `pick_skill` → explain → 1 check question → `update_skill` | Check answered | Teacher (`review`) if confidence stays > 0.6, else done |
 | Teacher agent | `review` tasks, or the teacher's chat | `cohorts`, `keystones`, `bridges` → `propose` | Proposal written | Human teacher |
 

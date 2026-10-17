@@ -162,6 +162,6 @@ A number line from 0 to 1 is split into 10 equal gaps. An arrow points to the 7t
 14. **Extra range indexes** on Subject/Topic/SubTopic `id` (from Phase 1). Students are `s01`–`s30` with synthetic first names.
 
 ## 5. Things to watch later
-- **Shared misconceptions spread evidence.** `root_cause` counts SHOWED evidence on every construct a misconception is SEEN_IN. Generic ones like 13957 "Confuses factors and multiples" are SEEN_IN 342, 345, 331 and 338 at once, so one wrong answer adds evidence to all four.
+- **Shared misconceptions spread evidence.** *Fixed in Phase 3 step 0: `root_cause` now weights each hit by `SEEN_IN.pct / 100`, tested in `tests/test_root_cause_weighting.py`; Diagnoser thresholds rescaled to 1.0 / 0.33.* Original note: `root_cause` counts SHOWED evidence on every construct a misconception is SEEN_IN. Generic ones like 13957 "Confuses factors and multiples" are SEEN_IN 342, 345, 331 and 338 at once, so one wrong answer adds evidence to all four.
 - **`diagnose_text` can return fewer than 3 rows.** It over-fetches 25 of the 410 template misconceptions, then filters to the construct, so constructs with only a few misconceptions may come back short.
 - **The image's default `TIMEOUT 1000`** (from Phase 1) has not been hit by any test or seed step so far. I have not benchmarked tool latency yet.
