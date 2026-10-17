@@ -4,14 +4,20 @@ The LLM writes words, never facts. Every reply is checked against the rows the t
 turn: any construct or misconception name it mentions must appear in those rows. A reply that fails is
 retried once, then replaced by a template built only from the rows, so the demo never fails.
 
-Provider chain: Groq -> Gemini -> OpenRouter -> template, all through the openai SDK's OpenAI-compatible
-endpoints. A provider with no key in .env is skipped; a provider that errors (network, rate limit) hands
-over to the next one. Model names were checked against each provider's docs on 2026-10-17:
-  Groq        https://api.groq.com/openai/v1                           llama-3.3-70b-versatile
+App provider chain: Gemini -> OpenRouter -> Groq -> template, all through the openai SDK's OpenAI-compatible
+endpoints. A provider with no key in .env is skipped (OpenRouter and Groq are optional); a provider that
+errors (network, rate limit) hands over to the next one. Model names were checked against each provider's
+docs on 2026-10-17:
   Gemini      https://generativelanguage.googleapis.com/v1beta/openai/  gemini-3.8-flash
   OpenRouter  https://openrouter.ai/api/v1                             google/gemma-4-31b-it:free
-OpenRouter lists no free Llama 70B model now, so it uses a free Gemma model with tool support. Override any
-model with GROQ_MODEL / GEMINI_MODEL / OPENROUTER_MODEL. UNLEARN_LLM=template turns the chain off (tests).
+  Groq        https://api.groq.com/openai/v1                           llama-3.3-70b-versatile
+Override any model with GEMINI_MODEL / OPENROUTER_MODEL / GROQ_MODEL. UNLEARN_LLM=template turns the chain
+off (tests).
+
+Ollama is for the local eval only (eval/run_eval.py), never in the app chain or the Docker image:
+ollama_provider() talks to OLLAMA_BASE_URL (default http://localhost:11434/v1; from inside Docker use
+http://host.docker.internal:11434/v1) with OLLAMA_MODEL, and turns Qwen's thinking mode off with
+reasoning_effort="none" (Ollama ignores think=false on its OpenAI-compatible endpoint).
 
 Replies are cached on disk by a hash of (provider, model, messages), so reruns cost nothing.
 """
@@ -39,10 +45,12 @@ class Provider:
     base_url: str
     model_env: str
     default_model: str
+    extra_body: tuple = ()      # (name, value) pairs sent as extra request fields
+    keyless: bool = False       # local servers (Ollama) need no key
 
     @property
     def key(self) -> str | None:
-        return os.getenv(self.key_env) or None
+        return "local" if self.keyless else (os.getenv(self.key_env) or None)
 
     @property
     def model(self) -> str:
@@ -50,14 +58,24 @@ class Provider:
 
 
 PROVIDERS = [
-    Provider("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", "GROQ_MODEL", "llama-3.3-70b-versatile"),
+    # Thinking off: with it on, gemini-3.8-flash spent max_tokens on hidden reasoning and cut replies short
+    # (6 visible tokens); "none" answers in full in ~4 s. It rejects "minimal".
     Provider("gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/",
-             "GEMINI_MODEL", "gemini-3.8-flash"),
+             "GEMINI_MODEL", "gemini-3.8-flash", extra_body=(("reasoning_effort", "none"),)),
     Provider("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", "OPENROUTER_MODEL",
              "google/gemma-4-31b-it:free"),
+    Provider("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", "GROQ_MODEL", "llama-3.3-70b-versatile"),
 ]
 
+
+def ollama_provider(model: str | None = None) -> Provider:
+    """The local eval model. Not part of PROVIDERS: the app never calls it."""
+    return Provider("ollama", "", os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"), "OLLAMA_MODEL",
+                    model or os.getenv("OLLAMA_MODEL") or "qwen3.5:27b-q4_K_M",
+                    extra_body=(("reasoning_effort", "none"),), keyless=True)
+
 MARK = re.compile(r"\[\[(.+?)\]\]")
+THINK = re.compile(r"<think>.*?</think>", re.S)
 MIN_NAME_LEN = 15  # shorter vocabulary names are too likely to match ordinary words
 
 
@@ -170,6 +188,13 @@ def _cache_path(provider: Provider, messages: list[dict]) -> Path:
     return CACHE_DIR / f"{hashlib.sha256(key.encode()).hexdigest()}.json"
 
 
+LAST_USAGE: dict = {}  # token counts of the last uncached completion (eval timing)
+
+
+def provider_timeout(provider: Provider) -> float:
+    return 180.0 if provider.keyless else TIMEOUT_S  # a local model may be loading into memory
+
+
 def complete(provider: Provider, messages: list[dict]) -> tuple[str, bool]:
     """One chat completion, cached on disk. Returns (text, from_cache)."""
     path = _cache_path(provider, messages)
@@ -177,10 +202,11 @@ def complete(provider: Provider, messages: list[dict]) -> tuple[str, bool]:
         return json.loads(path.read_text())["text"], True
     from openai import OpenAI
 
-    client = OpenAI(api_key=provider.key, base_url=provider.base_url, timeout=TIMEOUT_S, max_retries=0)
+    client = OpenAI(api_key=provider.key, base_url=provider.base_url, timeout=provider_timeout(provider), max_retries=0)
     resp = client.chat.completions.create(model=provider.model, messages=messages, max_tokens=MAX_TOKENS,
-                                          temperature=0.3)
-    text = (resp.choices[0].message.content or "").strip()
+                                          temperature=0.3, extra_body=dict(provider.extra_body) or None)
+    text = THINK.sub("", resp.choices[0].message.content or "").strip()  # in case a model inlines its thinking
+    LAST_USAGE.update(tokens=getattr(resp.usage, "completion_tokens", None), prompt_tokens=getattr(resp.usage, "prompt_tokens", None))
     if not text:
         raise RuntimeError("empty completion")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -242,9 +268,10 @@ def chat_tools(provider: Provider, messages: list[dict], tool_specs: list[dict])
     each round depends on live tool rows."""
     from openai import OpenAI
 
-    client = OpenAI(api_key=provider.key, base_url=provider.base_url, timeout=TIMEOUT_S, max_retries=0)
+    client = OpenAI(api_key=provider.key, base_url=provider.base_url, timeout=provider_timeout(provider), max_retries=0)
     resp = client.chat.completions.create(model=provider.model, messages=messages, tools=tool_specs,
-                                          max_tokens=MAX_TOKENS, temperature=0.2)
+                                          max_tokens=MAX_TOKENS, temperature=0.2,
+                                          extra_body=dict(provider.extra_body) or None)
     msg = resp.choices[0].message
     calls = [{"id": c.id, "name": c.function.name, "arguments": json.loads(c.function.arguments or "{}")}
              for c in (msg.tool_calls or [])]
