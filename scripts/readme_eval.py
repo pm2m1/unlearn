@@ -41,6 +41,18 @@ def cell(summary, c, m, unit, multi):
     return f"{fmt(v['mean'], unit)} ({lo}–{hi})"
 
 
+def latency_cell(ev, c, m, seeds=None):
+    """A latency with the number of diagnoses timed: pooled across runs (latency_pooled) when present."""
+    pooled = ev.get("latency_pooled")
+    if pooled:
+        v = (pooled["overall"] if seeds is None else pooled["per_seed"][str(seeds[0])]).get(c)
+        return "–" if not v or v[m.replace("latency_", "")] is None else f"{fmt(v[m.replace('latency_', '')], 'ms')} (n={v['n']})"
+    ps = ev["per_seed"]
+    keys = [str(s) for s in (seeds or ev["meta"]["seeds"]) if c in ps.get(str(s), {})]
+    xs = [ps[s][c][m] for s in keys if ps[s][c][m] is not None]
+    return f"{fmt(sum(xs) / len(xs), 'ms')} (n={sum(ps[s][c]['latency_n'] for s in keys)})" if xs else "–"
+
+
 def random_column(rb, seeds_of):
     """Expected score of a uniform pick from what each condition is scored on, over the seeds it ran."""
     def mean(key, c):
@@ -70,6 +82,9 @@ def seed_table(ev, conds, seeds_of) -> list[str]:
         for row_label, m, unit in ROWS[:6]:
             vals = []
             for c in conds:
+                if unit == "ms" and (len(seeds) == 1 or not ev.get("latency_pooled")):
+                    vals.append(latency_cell(ev, c, m, seeds))
+                    continue
                 xs = [ps[str(s)][c][m] for s in seeds if ps[str(s)][c][m] is not None]
                 vals.append(fmt(sum(xs) / len(xs), unit) if xs else "–")
             out.append(f"| {row_label} | " + " | ".join(vals) + " |")
@@ -88,7 +103,8 @@ def block() -> str:
     lines = [head, "|" + " --- |" * (len(conds) + 2)]
     rnd = random_column(rb, seeds_of)
     for label, m, unit in ROWS:
-        cells = [cell(summary, c, m, unit, len(seeds_of[c]) > 1) for c in conds]
+        cells = [latency_cell(ev, c, m) if unit == "ms" else cell(summary, c, m, unit, len(seeds_of[c]) > 1)
+                 for c in conds]
         if m in ("top1_misconception", "top3_misconception", "root_cause_accuracy"):
             r = " / ".join(rfmt(rnd(m, c)) for c in ("A", "B", "B+"))
         else:
@@ -101,6 +117,13 @@ def block() -> str:
     lines += ["", f"Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: "
               f"`{meta['llm'].split(' / ')[-1]}` (local, Ollama, thinking off), one model, no fallback. C: template wording; "
               "its metrics come from the graph."]
+    pooled = ev.get("latency_pooled")
+    if pooled:
+        nb = {c: " + ".join(str(k) for k in pooled["overall"][c]["n_by_run"].values()) for c in ("A", "B", "B+")}
+        lines += ["", "Latency is p50 / p95 over every diagnosis timed with fresh LLM calls (cached ones are left out), "
+                  f"pooled across the pre-review and post-review runs of the same model: n = {nb['A']} for A, "
+                  f"{nb['B']} for B and {nb['B+']} for B+. C makes no LLM calls; its latency is this run's "
+                  f"{pooled['overall']['C']['n']} diagnoses. `n` in a latency cell is the number of diagnoses timed."]
     lines += seed_table(ev, conds, seeds_of)
     lines += ["",
               f"Candidate lists, averaged over the same students: {sizes['prerequisites']:.1f} root-cause candidates "

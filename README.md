@@ -307,7 +307,7 @@ It walks up to four prerequisite hops back from the skill the student is working
   - **B: vector RAG.** The full attempt history, plus the top-10 misconceptions retrieved from FalkorDB's vector index by embedding each question with the chosen option.
   - **B+: LLM + graph as text.** B's prompt, plus every curated `REQUIRES` edge and every construct's misconceptions with their `SEEN_IN.w` weights, as plain text (about 22,000 tokens). B+ tests whether the graph's value is the *knowledge* in it, which can be pasted into a prompt, or the *traversal* Unlearn runs over it.
   - **C: Unlearn.** The agents, through the same step API the web UI uses.
-- **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk. Cached diagnoses, and A's diagnoses that made no call (a student with no wrong answer), are left out of the latency figures. On the post-review re-run most A and B diagnoses were cache hits, so A's latency comes from 5 fresh diagnoses and B's from 30.
+- **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk. Cached diagnoses, and A's diagnoses that made no call (a student with no wrong answer), are left out of the latency figures. On the post-review re-run most A and B diagnoses were cache hits (A had 5 fresh diagnoses, B 30), so A's, B's and B+'s latency pools every timed diagnosis from the pre-review and post-review runs (`run_eval.py --pool-latency`). Each fresh call is timed once, in the run that made it. Every latency cell shows its n.
 - **Same question pool.** A, B and B+ ask the same seeded 6 questions from the pool C draws from (the target and everything it depends on). C chooses its questions adaptively.
 - **Answers are IDs.** A, B and B+ choose from candidate lists with IDs and must reply with IDs. An ID the condition wasn't shown counts as wrong.
   - Root-cause candidates are the target's prerequisites, taken from the curated graph. **That narrows their choice to about 7 skills and favours them.** A random pick is already right 21–24% of the time.
@@ -332,10 +332,12 @@ It walks up to four prerequisite hops back from the skill the student is working
 | Root-cause accuracy | 32% (27%–37%) | 37% (30%–50%) | 40% | 72% (63%–83%) | 23% / 23% / 2.5% |
 | Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.2 (5.1–5.2) | – |
 | Session-2 recall | 0% | 9% (7%–10%) | 7% | 57% (50%–70%) | – |
-| p50 latency per diagnosis | 17.1 s (9.8 s–24.4 s) | 7.6 s (7.3 s–7.9 s) | 113.4 s | 50 ms (49 ms–50 ms) | – |
-| p95 latency per diagnosis | 23.8 s (15.8 s–31.7 s) | 8.4 s (8.0 s–8.6 s) | 122.0 s | 61 ms (57 ms–66 ms) | – |
+| p50 latency per diagnosis | 14.9 s (n=50) | 7.5 s (n=120) | 113.8 s (n=60) | 50 ms (n=90) | – |
+| p95 latency per diagnosis | 32.4 s (n=50) | 9.2 s (n=120) | 130.8 s (n=60) | 61 ms (n=90) | – |
 
 Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
+
+Latency is p50 / p95 over every diagnosis timed with fresh LLM calls (cached ones are left out), pooled across the pre-review and post-review runs of the same model: n = 45 + 5 for A, 90 + 30 for B and 30 + 30 for B+. C makes no LLM calls; its latency is this run's 90 diagnoses. `n` in a latency cell is the number of diagnoses timed.
 
 **B+ ran on seed 0 only**, so its column above is not comparable with the other columns' three-seed means. On seed 0, the same 30 students for every condition:
 
@@ -346,7 +348,7 @@ Mean (min–max across seeds) where a condition ran on more than one seed. Model
 | Root-cause accuracy | 33% | 30% | 40% | 63% |
 | Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.2 |
 | Session-2 recall | 0% | 7% | 7% | 50% |
-| p50 latency per diagnosis | 24.4 s | 7.7 s | 113.4 s | 50 ms |
+| p50 latency per diagnosis | 18.0 s (n=25) | 8.5 s (n=36) | 113.8 s (n=60) | 50 ms (n=30) |
 
 Candidate lists, averaged over the same students: 6.6 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B. A planted misconception is on A's list for 23% of students and on B's for 20%, which caps A's and B's misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was shown, B's lists plus its graph text (410 misconceptions and 40 constructs), and every planted misconception (100%) is in it. The random-guess column picks uniformly from those same sets.
 
@@ -363,10 +365,10 @@ Candidate lists, averaged over the same students: 6.6 root-cause candidates (the
 - **C wins on every metric.** Against A and B, over the same 90 students (seeds 0–2):
   - Root cause: 72% against 32% (A) and 37% (B), and 23% for a random pick from their own lists.
   - Misconceptions: 48% top-1 and 79% top-3, against at most 7% and 13% (B).
-  - It asks fewer questions (5.2 against 6) and answers in about 50 ms instead of 8–17 s.
+  - It asks fewer questions (5.2 against 6) and answers in about 50 ms (n=90) instead of 7.5 s for B (n=120) and 15 s for A (n=50), at p50.
 - **B+ tests knowledge against traversal.** It ran on seed 0 only, so it is compared on seed 0's 30 students (the seed-0 table above), never with the three-seed means:
   - **Against B:** B+ beats B on root cause (40% against 30%), top-1 misconception (23% against 13%) and top-3 (47% against 27%). So the graph's knowledge does help an LLM.
-  - **Against C:** it's still far behind: 40% against 63% on root cause, 23% against 50% on top-1 and 47% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. Each B+ call takes 113 s, against 7.7 s for B and 50 ms for C on the same seed.
+  - **Against C:** it's still far behind: 40% against 63% on root cause, 23% against 50% on top-1 and 47% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. On seed 0, a B+ diagnosis takes 114 s at p50 (n=60), against 8.5 s for B (n=36) and 50 ms for C (n=30).
 - **B+ is not close to C on any seed-0 metric**, so no claim needs narrowing on that count.
 - **Session-2 recall.** Over seeds 0–2, C scores 57% against 9% for B and 0% for A. On seed 0, C scores 50% against 7% for both B and B+, whose openings are identical.
   - The eval's figure comes from the embedding judge applied to the real opening text.

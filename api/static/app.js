@@ -682,6 +682,24 @@ async function loadEval() {
   }
 }
 
+// A latency and how many diagnoses were timed: pooled across runs (latency_pooled) when present, else this run's seeds.
+function latencyOf(r, c, key, seeds) {
+  const pooled = r.latency_pooled;
+  if (pooled) {
+    const x = (seeds ? pooled.per_seed[seeds[0]] : pooled.overall)?.[c];
+    const v = x?.[key.replace("latency_", "")];
+    return v === null || v === undefined ? null : { v, n: x.n };
+  }
+  const per = Object.entries(r.per_seed || {}).filter(([s, v]) => v[c] && (!seeds || seeds.map(String).includes(s))).map(([, v]) => v[c]);
+  const xs = per.map((v) => v[key]).filter((x) => x !== null && x !== undefined);
+  return xs.length ? { v: xs.reduce((a, b) => a + b, 0) / xs.length, n: per.reduce((a, v) => a + (v.latency_n || 0), 0) } : null;
+}
+
+function latencyCell(r, c, key, seeds, fmt) {
+  const x = latencyOf(r, c, key, seeds);
+  return x ? el("td", {}, el("strong", { text: fmt(x.v, "") }), el("span", { class: "muted", text: ` n=${x.n}` })) : el("td", { text: "–" });
+}
+
 function evalTable(r, title) {
   const conds = [["A", "A. No memory"], ["B", "B. Vector RAG"], ["B+", "B+. LLM + graph as text"], ["C", "C. Unlearn"]];
   const rows = [["Top-1 misconception", "top1_misconception", "%"], ["Top-3 misconception", "top3_misconception", "%"],
@@ -691,6 +709,7 @@ function evalTable(r, title) {
   const cell = (c, m, u) => {
     const v = r.summary[c]?.[m];
     if (!r.summary[c]) return el("td", { class: "muted", text: "not run" });
+    if (m.startsWith("latency_")) return latencyCell(r, c, m, null, fmt);
     if (!v) return el("td", { text: "–" });
     if (v.min === v.max) return el("td", {}, el("strong", { text: fmt(v.mean, u) }));
     return el("td", {}, el("strong", { text: fmt(v.mean, u) }), el("span", { class: "muted", text: ` ${fmt(v.min, u)}–${fmt(v.max, u)}` }));
@@ -705,6 +724,7 @@ function evalTable(r, title) {
       return el("th", {}, el("div", { text: l }), n ? el("div", { class: "muted", style: "font-weight:400;font-size:12px", text: `n=${n}, seed${seeds.length > 1 ? "s" : ""} ${seeds.join(", ")}` }) : null);
     }))),
       el("tbody", {}, rows.map(([label, key, u]) => el("tr", {}, el("td", { text: label }), conds.map(([c]) => cell(c, key, u)))))),
+    ...(r.latency_pooled ? [el("p", { class: "muted", text: `Latency: every diagnosis timed with fresh LLM calls, pooled across runs ${r.latency_pooled.runs.join(", ")} (A, B, B+; C makes no LLM calls, so this run only). n = diagnoses timed.` })] : []),
     ...seedTables(r, conds, rows, fmt),
     ...notes, ...(m.bplus_rescored ? [el("p", { class: "muted", text: `Correction: ${m.bplus_rescored}.` })] : []),
     el("p", { class: "muted", text: `Simulator bias: ${m.simulator_bias}.` })];
@@ -727,7 +747,10 @@ function seedTables(r, conds, rows, fmt) {
     el("table", { class: "eval" }, el("thead", {}, el("tr", {}, el("th", { text: "Metric" }), ran.map(([c, l]) => el("th", {}, el("div", { text: l }),
       el("div", { class: "muted", style: "font-weight:400;font-size:12px", text: `n=${n(c)}` }))))),
       el("tbody", {}, rows.slice(0, 6).map(([label, key, u]) => el("tr", {}, el("td", { text: label }),
-        ran.map(([c]) => { const v = val(c, key); return el("td", {}, el("strong", { text: v === null ? "–" : fmt(v, u) })); })))))];
+        ran.map(([c]) => {
+          if (key.startsWith("latency_")) return latencyCell(r, c, key, seeds, fmt);
+          const v = val(c, key); return el("td", {}, el("strong", { text: v === null ? "–" : fmt(v, u) }));
+        })))))];
 }
 
 function randomView(r) {

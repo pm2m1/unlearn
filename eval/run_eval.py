@@ -14,7 +14,10 @@ same judge. Metrics per seed, then mean and min-max across seeds:
   root-cause accuracy           the predicted prerequisite is the planted broken one
   questions to diagnosis        questions asked in session 1 before the diagnosis
   session-2 recall              session 2's opening message names a planted misconception (judge)
-  p50 / p95 latency             wall time of one session-1 diagnosis
+  p50 / p95 latency             wall time of one session-1 diagnosis, timed only when every LLM call in it was fresh
+A run whose A/B prompts are mostly cached times few diagnoses, so --pool-latency pools every timed diagnosis of
+A, B and B+ across saved runs of the same model (each fresh call is timed once, in the run that made it):
+    python eval/run_eval.py --pool-latency eval_pre_review,eval   # writes latency_pooled into eval.json
 A and B use one fixed provider (the first configured), with the disk cache; if none is configured the run
 stops before doing anything. Writes eval/results/eval.json and eval/results/eval.md.
 """
@@ -149,14 +152,24 @@ def markdown(result: dict) -> str:
             ("Session-2 recall", "session2_recall", "%"), ("p50 latency (ms)", "latency_p50_ms", ""),
             ("p95 latency (ms)", "latency_p95_ms", "")]
 
+    pooled = (result.get("latency_pooled") or {}).get("overall", {})
+
     def cell(c, m, unit):
         if c not in result["summary"]:
             return "not run"
+        if m.startswith("latency_"):
+            if c in pooled:
+                v = pooled[c][m.replace("latency_", "")]
+                return "–" if v is None else f"{v:.1f} (n={pooled[c]['n']})"
+            n = sum(result["per_seed"][s][c]["latency_n"] for s in result["per_seed"] if c in result["per_seed"][s])
+            n_note = f" n={n}"
+        else:
+            n_note = ""
         v = result["summary"][c][m]
         if v is None:
             return "–"
         f = (lambda x: f"{100 * x:.0f}%") if unit == "%" else (lambda x: f"{x:.1f}" if isinstance(x, float) else str(x))
-        return f"{f(v['mean'])} ({f(v['min'])}–{f(v['max'])})"
+        return f"{f(v['mean'])} ({f(v['min'])}–{f(v['max'])}{n_note})"
     meta = result["meta"]
     lines = [f"# Eval results", "",
              f"{meta['students']} simulated students × seeds {meta['seeds']} × {meta['sessions']} sessions. "
@@ -166,8 +179,46 @@ def markdown(result: dict) -> str:
     lines += [f"| {name} | " + " | ".join(cell(c, m, u) for c in conds) + " |" for name, m, u in rows]
     for c, why in meta.get("not_run", {}).items():
         lines.append(f"\n{LABELS[c]} not run: {why}")
+    if pooled:
+        lines.append(f"\nLatency: p50 / p95 over every timed diagnosis in {', '.join(result['latency_pooled']['runs'])} "
+                     "(A, B, B+; C from this run only), n = diagnoses timed.")
     lines.append("\nThe simulator uses the same option-to-misconception map as Unlearn, which favours Unlearn; see the README.")
     return "\n".join(lines) + "\n"
+
+
+POOLED = ("A", "B", "B+")  # C makes no LLM calls: its latency comes from the current run only
+
+
+def _lat(rows: list[dict]) -> list[float]:
+    return [r["latency_ms"] for r in rows if r["latency_ms"] is not None and r["latency_ms"] >= 1]  # < 1 ms: no call
+
+
+def pool_latency(stems: list[str], out: str) -> int:
+    """Pool A's, B's and B+'s timed diagnoses across saved runs into out's latency_pooled (no LLM calls)."""
+    runs = {stem: json.loads((RESULTS / f"{stem}.json").read_text()) for stem in stems}
+    assert len({r["meta"]["llm"] for r in runs.values()}) == 1, "runs used different A/B models"
+    result = runs[out] if out in runs else json.loads((RESULTS / f"{out}.json").read_text())
+
+    def stats(seeds):
+        cell = {}
+        for c in result["meta"]["conditions_run"]:
+            srcs = stems if c in POOLED else [out]
+            by = {stem: _lat([r for s in seeds for r in runs.get(stem, result)["students"].get(s, {}).get(c, [])])
+                  for stem in srcs}
+            xs = [x for v in by.values() for x in v]
+            cell[c] = {"p50_ms": _round(pct(xs, 0.5)), "p95_ms": _round(pct(xs, 0.95)), "n": len(xs),
+                       "n_by_run": {k: len(v) for k, v in by.items()}}
+        return cell
+    seeds = [str(s) for s in result["meta"]["seeds"]]
+    result["latency_pooled"] = {
+        "runs": stems, "model": result["meta"]["llm"],
+        "rule": "every diagnosis timed in any of the runs (no cached call, at least one call), pooled; C from "
+                f"{out} only, since it makes no LLM calls",
+        "overall": stats(seeds), "per_seed": {s: stats([s]) for s in seeds}}
+    (RESULTS / f"{out}.json").write_text(json.dumps(result, indent=2, default=str) + "\n")
+    (RESULTS / f"{out}.md").write_text(markdown(result))
+    print(json.dumps(result["latency_pooled"]["overall"]))
+    return 0
 
 
 def eval_provider(which: str, model: str | None):
@@ -260,10 +311,13 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default="eval", help="results file stem in eval/results (eval, crosscheck)")
     ap.add_argument("--no-calibrate", action="store_true", help="skip the 5 timing calls (quota-limited cross-checks)")
     ap.add_argument("--merge", help="comma-separated result stems to combine into --out (e.g. eval_seed0,eval_seeds12)")
+    ap.add_argument("--pool-latency", help="comma-separated result stems whose A/B/B+ timings to pool into --out")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     if a.merge:
         return merge(a.merge.split(","), a.out)
+    if a.pool_latency:
+        return pool_latency(a.pool_latency.split(","), a.out)
     seeds = [int(s) for s in a.seeds.split(",")]
     conds = [c.strip().upper() for c in a.conditions.split(",")]
     needs_llm = any(c in ("A", "B", "B+") for c in conds)

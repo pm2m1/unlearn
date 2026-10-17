@@ -6188,5 +6188,163 @@
         }
       ]
     }
+  },
+  "latency_pooled": {
+    "runs": [
+      "eval_pre_review",
+      "eval"
+    ],
+    "model": "ollama / qwen3.5:27b-q4_K_M",
+    "rule": "every diagnosis timed in any of the runs (no cached call, at least one call), pooled; C from eval only, since it makes no LLM calls",
+    "overall": {
+      "A": {
+        "p50_ms": 14876.2,
+        "p95_ms": 32361.7,
+        "n": 50,
+        "n_by_run": {
+          "eval_pre_review": 45,
+          "eval": 5
+        }
+      },
+      "B": {
+        "p50_ms": 7495.7,
+        "p95_ms": 9223.7,
+        "n": 120,
+        "n_by_run": {
+          "eval_pre_review": 90,
+          "eval": 30
+        }
+      },
+      "B+": {
+        "p50_ms": 113796.5,
+        "p95_ms": 130759.1,
+        "n": 60,
+        "n_by_run": {
+          "eval_pre_review": 30,
+          "eval": 30
+        }
+      },
+      "C": {
+        "p50_ms": 49.5,
+        "p95_ms": 60.9,
+        "n": 90,
+        "n_by_run": {
+          "eval": 90
+        }
+      }
+    },
+    "per_seed": {
+      "0": {
+        "A": {
+          "p50_ms": 17987.0,
+          "p95_ms": 32537.0,
+          "n": 25,
+          "n_by_run": {
+            "eval_pre_review": 23,
+            "eval": 2
+          }
+        },
+        "B": {
+          "p50_ms": 8461.8,
+          "p95_ms": 10226.4,
+          "n": 36,
+          "n_by_run": {
+            "eval_pre_review": 30,
+            "eval": 6
+          }
+        },
+        "B+": {
+          "p50_ms": 113796.5,
+          "p95_ms": 130759.1,
+          "n": 60,
+          "n_by_run": {
+            "eval_pre_review": 30,
+            "eval": 30
+          }
+        },
+        "C": {
+          "p50_ms": 49.6,
+          "p95_ms": 57.2,
+          "n": 30,
+          "n_by_run": {
+            "eval": 30
+          }
+        }
+      },
+      "1": {
+        "A": {
+          "p50_ms": 10579.8,
+          "p95_ms": 17972.0,
+          "n": 17,
+          "n_by_run": {
+            "eval_pre_review": 14,
+            "eval": 3
+          }
+        },
+        "B": {
+          "p50_ms": 7272.5,
+          "p95_ms": 8016.9,
+          "n": 40,
+          "n_by_run": {
+            "eval_pre_review": 30,
+            "eval": 10
+          }
+        },
+        "B+": {
+          "p50_ms": null,
+          "p95_ms": null,
+          "n": 0,
+          "n_by_run": {
+            "eval_pre_review": 0,
+            "eval": 0
+          }
+        },
+        "C": {
+          "p50_ms": 48.7,
+          "p95_ms": 60.9,
+          "n": 30,
+          "n_by_run": {
+            "eval": 30
+          }
+        }
+      },
+      "2": {
+        "A": {
+          "p50_ms": 12720.2,
+          "p95_ms": 19959.3,
+          "n": 8,
+          "n_by_run": {
+            "eval_pre_review": 8,
+            "eval": 0
+          }
+        },
+        "B": {
+          "p50_ms": 7173.0,
+          "p95_ms": 8384.5,
+          "n": 44,
+          "n_by_run": {
+            "eval_pre_review": 30,
+            "eval": 14
+          }
+        },
+        "B+": {
+          "p50_ms": null,
+          "p95_ms": null,
+          "n": 0,
+          "n_by_run": {
+            "eval_pre_review": 0,
+            "eval": 0
+          }
+        },
+        "C": {
+          "p50_ms": 50.3,
+          "p95_ms": 65.7,
+          "n": 30,
+          "n_by_run": {
+            "eval": 30
+          }
+        }
+      }
+    }
   }
 }
