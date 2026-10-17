@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unlearn</title>
+  <meta name="description" content="A tutor that traces a student's misconception back to the prerequisite that broke, with the graph query that proves it.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='9' r='5' fill='%23e3a33b'/%3E%3Ccircle cx='8' cy='23' r='5' fill='%23c9cbd1'/%3E%3Ccircle cx='24' cy='23' r='5' fill='%23d2453f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.34.3/cytoscape.min.js"
+          integrity="sha512-SQebVa91Tn1DeP45Wo74monK/I9wiQg59uKc7P8vp3T7KQ9l5e8IMjZ1GJTgZehUVQt7eS61DTqldQUb1EHfnw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="wordmark">Unlearn</span>
+      <span class="tagline">finds the prerequisite that broke</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button role="tab" class="tab" data-view="student" aria-selected="true">Student</button>
+      <button role="tab" class="tab" data-view="teacher" aria-selected="false">Teacher</button>
+      <button role="tab" class="tab" data-view="eval" aria-selected="false">Eval</button>
+    </nav>
+    <div class="status" id="health" title="FalkorDB status"><span class="dot"></span><span class="label">connecting…</span></div>
+  </header>
+
+  <main>
+    <!-- ================= Student ================= -->
+    <section class="view" id="view-student" data-view="student">
+      <div class="student-grid">
+        <div class="col-left">
+          <div class="card setup">
+            <div class="field">
+              <label for="student-select">Student</label>
+              <select id="student-select"></select>
+            </div>
+            <div class="field grow">
+              <label for="target-select">Topic</label>
+              <select id="target-select"></select>
+            </div>
+            <div class="setup-actions">
+              <button class="btn primary" id="start-btn">Start session</button>
+              <label class="toggle" title="Let the seeded simulator answer for this student, one step at a time">
+                <input type="checkbox" id="autoplay"> <span>Autoplay</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="banner recall" id="recall-banner" hidden>
+            <div class="banner-kicker">Last time you…</div>
+            <div class="banner-body" id="recall-text"></div>
+          </div>
+
+          <div class="card question" id="question-card" hidden>
+            <div class="card-kicker"><span id="q-agent" class="agent-chip">Diagnoser</span><span id="q-progress"></span></div>
+            <h2 class="q-text" id="q-text"></h2>
+            <div class="options" id="q-options" role="group" aria-label="Answer options"></div>
+            <details class="explain" id="explain-box">
+              <summary>Explain your thinking <span class="optional">optional</span></summary>
+              <textarea id="explain-text" rows="2" placeholder="e.g. I added the tops and the bottoms"></textarea>
+            </details>
+            <div class="q-foot">
+              <button class="btn link" id="simulate-btn">Let the simulated student answer</button>
+            </div>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+          </div>
+
+          <div class="card diagnosis" id="diagnosis-card" hidden>
+            <div class="card-kicker"><span class="agent-chip">Diagnoser</span><span>diagnosis</span></div>
+            <div class="dx-root" id="dx-root"></div>
+            <ol class="chain" id="dx-chain"></ol>
+            <p class="dx-message" id="dx-message"></p>
+            <button class="btn primary" id="tutor-btn">Start tutoring</button>
+          </div>
+
+          <div class="card tutor" id="tutor-card" hidden>
+            <div class="card-kicker"><span class="agent-chip tutor">Tutor</span><span id="tutor-skill"></span></div>
+            <div class="tutor-explain" id="tutor-explain"></div>
+            <div class="tutor-check" id="tutor-check" hidden>
+              <div class="subhead">Check question</div>
+              <h3 class="q-text small" id="check-text"></h3>
+              <div class="options" id="check-options" role="group" aria-label="Check question options"></div>
+            </div>
+            <div class="feedback" id="tutor-feedback" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="col-right">
+          <div class="card graph-card">
+            <div class="graph-head">
+              <div>
+                <div class="card-kicker"><span>Student's slice of the graph</span></div>
+                <div class="graph-title" id="graph-title">Start a session to see the prerequisite graph</div>
+              </div>
+              <ul class="legend" aria-label="Legend">
+                <li><i class="sw mis"></i>misconception</li>
+                <li><i class="sw mastered"></i>mastered</li>
+                <li><i class="sw root"></i>root cause</li>
+                <li><i class="sw asked"></i>asked now</li>
+                <li><i class="sw grey"></i>other</li>
+              </ul>
+            </div>
+            <div id="cy" class="cy" aria-label="Prerequisite graph"></div>
+            <div class="graph-empty" id="graph-empty">The REQUIRES chain from the topic down to its prerequisites appears here.</div>
+          </div>
+          <div class="card steps-card">
+            <div class="card-kicker"><span>Receipts</span><span class="muted">every claim, with the Cypher behind it</span></div>
+            <ol class="steps" id="steps"></ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Teacher ================= -->
+    <section class="view" id="view-teacher" data-view="teacher" hidden>
+      <div class="teacher-head">
+        <div>
+          <h1 class="view-title">Class <span id="class-name">demo</span></h1>
+          <p class="muted" id="class-summary">30 simulated students</p>
+        </div>
+        <div class="teacher-actions">
+          <button class="btn" id="refresh-btn">Refresh</button>
+          <button class="btn primary" id="simulate-all-btn">Simulate the class (2 sessions each)</button>
+        </div>
+      </div>
+      <div class="teacher-grid">
+        <div class="card t-proposals">
+          <div class="card-kicker"><span>Pending proposals</span><span class="muted">nothing changes until you approve</span></div>
+          <div id="proposals" class="list"></div>
+        </div>
+        <div class="card t-cohorts">
+          <div class="card-kicker"><span>Cohorts</span><span class="muted">algo.WCC over shared misconceptions</span><button class="receipt-link" data-receipt-for="cohorts">receipt</button></div>
+          <div id="cohorts" class="list"></div>
+        </div>
+        <div class="card t-keystones">
+          <div class="card-kicker"><span>Keystones</span><span class="muted">algo.pageRank over REQUIRES</span><button class="receipt-link" data-receipt-for="keystones">receipt</button></div>
+          <ol id="keystones" class="ranked"></ol>
+        </div>
+        <div class="card t-bridges">
+          <div class="card-kicker"><span>Bridges</span><span class="muted">algo.betweenness, curriculum graph</span><button class="receipt-link" data-receipt-for="bridges">receipt</button></div>
+          <ol id="bridges" class="ranked"></ol>
+        </div>
+        <div class="card t-chat">
+          <div class="card-kicker"><span>Ask about the class</span><span class="muted">tools only, every name checked against the rows</span></div>
+          <div class="chat-log" id="chat-log" aria-live="polite"></div>
+          <form class="chat-form" id="chat-form">
+            <input id="chat-input" autocomplete="off" placeholder="e.g. Which cohorts do I have? What do you remember about Rosa?">
+            <button class="btn primary" type="submit">Ask</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= Eval ================= -->
+    <section class="view" id="view-eval" data-view="eval" hidden>
+      <h1 class="view-title">Evaluation</h1>
+      <p class="muted">Graph vs vector RAG vs no memory is coming in the eval phase. Results in <code>eval/results/*.json</code> show up here.</p>
+      <div id="eval-results"></div>
+    </section>
+  </main>
+
+  <!-- ================= Receipt drawer ================= -->
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-labelledby="drawer-title">
+    <div class="drawer-head">
+      <div>
+        <div class="card-kicker"><span id="drawer-agent" class="agent-chip">Agent</span><span id="drawer-id" class="muted"></span></div>
+        <h2 id="drawer-title">Receipt</h2>
+      </div>
+      <button class="btn icon" id="drawer-close" aria-label="Close receipt">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+</body>
+</html>

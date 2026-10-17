@@ -141,7 +141,7 @@ class TeacherChat(Agent):
                              if rec else f"{who} has no confident misconceptions yet.")
         if "cohort" in m or "group" in m or not (named or any(k in m for k in ("keystone", "bridge", "proposal", "pending"))):
             groups = self.run_tool(task_id, "cohorts", {})
-            parts.append(f"{len(groups)} cohort(s): " + "; ".join(", ".join(g["students"]) for g in groups[:4])
+            parts.append(f"{len(groups)} cohort(s): " + "; ".join(", ".join(g["students"]) for g in groups[:4]) + "."
                          if groups else "No cohorts: no two students share a confident misconception yet.")
         if "keystone" in m or "foundation" in m or "important" in m:
             ks = self.run_tool(task_id, "keystones", {})
@@ -151,7 +151,8 @@ class TeacherChat(Agent):
             parts.append("Bridges across topics: " + "; ".join(b["name"] for b in br[:3]) + ".")
         if "proposal" in m or "pending" in m or "approve" in m:
             ps = self.run_tool(task_id, "pending_proposals", {})
-            parts.append(f"{len(ps)} pending proposal(s): " + "; ".join(f"{p['kind']} for {', '.join(p['students'])}" for p in ps[:4])
+            parts.append(f"{len(ps)} pending proposal(s), first {min(len(ps), 4)}: "
+                         + "; ".join(f"{p['kind']} for {', '.join(p['students'])}" for p in ps[:4]) + "."
                          if ps else "No pending proposals.")
         return " ".join(parts)
 

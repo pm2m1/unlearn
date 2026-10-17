@@ -43,6 +43,13 @@ class Teacher(Agent):
             facts = {"kind": kind, "students": [sid], "construct_name": root["name"]}
             payload = {"construct_id": root["id"]}
             turn = [rc]
+        # Don't stack duplicates: the same kind on the same construct for the same students is already waiting.
+        pending = self.call(task_id, tools.proposals, c, "pending")["rows"]
+        if any(p["kind"] == kind and sorted(p["students"]) == students
+               and p["payload"].get("construct_id") == payload.get("construct_id") for p in pending):
+            self.note(task_id, f"an identical {kind} proposal is already pending")
+            self.call(task_id, tools.complete_task, c, task_id)
+            return
         payload["reason"] = self.say(task_id, "proposal", facts, turn + [keys, bridges])
         self.call(task_id, tools.propose, c, pid, kind, payload, students)
         self.call(task_id, tools.complete_task, c, task_id)
