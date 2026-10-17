@@ -746,3 +746,17 @@ SESSION_SCORE = """
 MATCH (:Student {id:$sid})-[a:ATTEMPTED {session:$sess}]->(:Question)
 RETURN sum(CASE WHEN a.correct THEN 1 ELSE 0 END) AS correct, count(a) AS total
 """
+
+# --- Eval (eval/run_eval.py, eval/baselines.py) -------------------------------------------------------
+
+# Condition B's retriever and the eval's judge: nearest misconceptions to a text, over the whole class graph
+# (no construct filter, unlike diagnose_text). Score is a cosine distance, lower is closer.
+NEAREST_MISCONCEPTIONS = """
+CALL db.idx.vector.queryNodes('Misconception', 'embedding', $k, vecf32($v)) YIELD node, score
+RETURN node.id AS id, node.name AS name, score
+ORDER BY score ASC
+"""
+
+CLASS_CONSTRUCTS = """
+MATCH (c:Construct) RETURN c.id AS id, c.name AS name ORDER BY id
+"""

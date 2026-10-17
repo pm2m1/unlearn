@@ -204,15 +204,16 @@ def _template_reply(kind: str, facts: dict, turn_rows: list, vocabulary: list[st
     return Reply(text, "template", attempts + [{"provider": "template", "ok": True, "problems": []}])
 
 
-def write(kind: str, facts: dict, turn_rows: list, vocabulary: list[str]) -> Reply:
-    """Words for one agent turn, backed by the turn's tool rows.
+def write(kind: str, facts: dict, turn_rows: list, vocabulary: list[str], providers: list[Provider] | None = None) -> Reply:
+    """Words for one agent turn, backed by the turn's tool rows. `providers` pins the chain (the eval uses one
+    fixed provider so every condition runs on the same LLM).
 
     For the first provider that answers: check the reply, retry once with the problems named, then use the
     template. A provider that errors is skipped for the next one. No provider -> template.
     """
     draft = template(kind, facts)
     attempts: list[dict] = []
-    for provider in available():
+    for provider in (available() if providers is None else providers):
         messages = messages_for(kind, facts, draft)
         try:
             for _ in range(2):

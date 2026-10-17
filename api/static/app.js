@@ -663,14 +663,55 @@ async function loadEval() {
   const { results } = await api("/eval/results");
   box.replaceChildren();
   if (!Object.keys(results).length) { box.append(el("p", { class: "empty", text: "No results yet." })); return; }
-  for (const [name, r] of Object.entries(results)) {
-    box.append(el("h2", { text: name }));
-    if (r.tools) {
-      box.append(el("p", { class: "muted", text: `${r.calls_per_tool} calls per tool on ${r.class_graph} · ${r.measured}` }),
-        el("table", {}, el("thead", {}, el("tr", {}, ["tool", "p50 ms", "p95 ms"].map((h) => el("th", { text: h })))),
-          el("tbody", {}, Object.entries(r.tools).map(([t, v]) => el("tr", {}, el("td", { text: t }), el("td", { text: v.p50_ms.toFixed(2) }), el("td", { text: v.p95_ms.toFixed(2) }))))));
-    } else box.append(el("pre", { text: JSON.stringify(r, null, 2).slice(0, 4000) }));
+  const order = ["eval", "concurrency", "latency"];
+  const names = Object.keys(results).sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99);
+  for (const name of names) {
+    const r = results[name];
+    if (name === "eval" && r.summary) box.append(...evalTable(r));
+    else if (name === "concurrency" && r.isolation) box.append(...concurrencyView(r));
+    else if (r.tools) box.append(...latencyTable(r));
+    else box.append(el("h2", { text: name }), el("pre", { text: JSON.stringify(r, null, 2).slice(0, 4000) }));
   }
+}
+
+function evalTable(r) {
+  const conds = [["A", "A. No memory"], ["B", "B. Vector RAG"], ["C", "C. Unlearn"]];
+  const rows = [["Top-1 misconception", "top1_misconception", "%"], ["Top-3 misconception", "top3_misconception", "%"],
+    ["Root-cause accuracy", "root_cause_accuracy", "%"], ["Questions to diagnosis", "questions_to_diagnosis", ""],
+    ["Session-2 recall", "session2_recall", "%"], ["p50 latency (ms)", "latency_p50_ms", ""], ["p95 latency (ms)", "latency_p95_ms", ""]];
+  const fmt = (x, u) => (u === "%" ? `${Math.round(100 * x)}%` : Number(x).toFixed(1));
+  const cell = (c, m, u) => {
+    const v = r.summary[c]?.[m];
+    if (!r.summary[c]) return el("td", { class: "muted", text: "not run" });
+    if (!v) return el("td", { text: "–" });
+    return el("td", {}, el("strong", { text: fmt(v.mean, u) }), el("span", { class: "muted", text: ` ${fmt(v.min, u)}–${fmt(v.max, u)}` }));
+  };
+  const m = r.meta;
+  const notes = Object.entries(m.not_run || {}).map(([c, why]) => el("p", { class: "muted", text: `${c} not run: ${why}.` }));
+  return [el("h2", { text: "Graph vs vector RAG vs no memory" }),
+    el("p", { class: "muted", text: `${m.students} simulated students × seeds ${m.seeds.join(", ")} × ${m.sessions} sessions · mean, min–max across seeds · LLM: ${m.llm || "none (template wording)"}` }),
+    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, el("th", { text: "Metric" }), conds.map(([, l]) => el("th", { text: l })))),
+      el("tbody", {}, rows.map(([label, key, u]) => el("tr", {}, el("td", { text: label }), conds.map(([c]) => cell(c, key, u)))))),
+    ...notes, el("p", { class: "muted", text: `Simulator bias: ${m.simulator_bias}.` })];
+}
+
+function concurrencyView(r) {
+  const t = (title, x) => el("tr", {}, el("td", { text: title }), el("td", { text: x.p50_ms.toFixed(2) }), el("td", { text: x.p95_ms.toFixed(2) }), el("td", { text: String(x.n) }));
+  const iso = r.isolation;
+  return [el("h2", { text: "Concurrency: one graph per class" }),
+    el("p", { class: "muted", text: `${r.students_per_graph} simulated students in each of ${r.graphs.join(" and ")}, at once, through the async client.` }),
+    el("table", {}, el("thead", {}, el("tr", {}, ["", "p50 ms", "p95 ms", "queries"].map((h) => el("th", { text: h })))),
+      el("tbody", {}, Object.entries(r.per_graph).map(([g, x]) => t(`${g} (both classes running)`, x)))),
+    el("p", { class: "muted", text: "Probe writes into class A while a heavy write load runs:" }),
+    el("table", {}, el("thead", {}, el("tr", {}, ["", "p50 ms", "p95 ms", "writes"].map((h) => el("th", { text: h })))),
+      el("tbody", {}, t("A alone (baseline)", iso.baseline), t("load on class B (other graph)", iso.load_on_other_graph), t("load on class A (same graph)", iso.load_on_same_graph)))];
+}
+
+function latencyTable(r) {
+  return [el("h2", { text: "Tool latency" }),
+    el("p", { class: "muted", text: `${r.calls_per_tool} calls per tool on ${r.class_graph} · ${r.measured}` }),
+    el("table", {}, el("thead", {}, el("tr", {}, ["tool", "p50 ms", "p95 ms"].map((h) => el("th", { text: h })))),
+      el("tbody", {}, Object.entries(r.tools).map(([t, v]) => el("tr", {}, el("td", { text: t }), el("td", { text: v.p50_ms.toFixed(2) }), el("td", { text: v.p95_ms.toFixed(2) })))))];
 }
 
 /* ------------------------------------------------------------------ small helpers */
