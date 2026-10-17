@@ -17,9 +17,7 @@ def fake_llm(monkeypatch, tmp_path):
     def complete(provider, messages):
         calls.append(messages[-1]["content"])
         if "Reply as JSON" in messages[-1]["content"]:
-            return json.dumps({"misconceptions": ["Adds the numerators and adds the denominators"],
-                               "prerequisite": "Find the lowest common multiple",
-                               "root_cause": "Find the lowest common multiple"}), False
+            return json.dumps({"misconception_ids": [15341, 99999999], "root_cause_id": 345}), False
         return "Welcome back! Let's keep practising fractions today.", False
 
     monkeypatch.setattr(run_eval, "eval_provider", lambda which, model: (fake, None))
@@ -41,13 +39,17 @@ def test_harness_runs_all_conditions(fake_llm):
     # Own output name: its scratch graphs (class_pytest_eval_s0) never collide with a real eval run.
     assert run_eval.main(["--students", "2", "--seeds", "0", "--out", "pytest_eval"]) == 0
     result = json.loads((out / "pytest_eval.json").read_text())
-    assert set(result["summary"]) == {"A", "B", "C"}
-    for c in "ABC":
+    assert set(result["summary"]) == {"A", "B", "B+", "C"}
+    for c in ("A", "B", "B+", "C"):
         assert set(result["summary"][c]) == set(run_eval.METRICS)
     assert result["meta"]["llm"] == "fake / fake-1"
     assert result["meta"]["calibration"]["json_valid"] == "2/2"
     assert "| Root-cause accuracy |" in (out / "pytest_eval.md").read_text()
     assert any("Candidate misconceptions retrieved" in c for c in calls)  # B saw retrieved misconceptions
+    assert any("PREREQUISITE GRAPH" in c for c in calls)                   # B+ saw the graph as text
+    # Ids that weren't offered are dropped, never snapped to a neighbour.
+    rows = result["students"]["0"]["B"]
+    assert all(99999999 not in r["predicted"] for r in rows)
 
 
 def test_judge_recall_matches_close_sentences_only():

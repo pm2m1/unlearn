@@ -295,3 +295,6 @@ label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 
   .steps button { grid-template-columns: 80px minmax(0, 1fr); }
   .steps .q { display: none; }
 }
+
+#eval-results .footnote { margin-top: 32px; color: var(--muted); font-size: 14px; }
+#eval-results .footnote summary { cursor: pointer; }

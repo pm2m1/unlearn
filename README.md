@@ -26,7 +26,7 @@ flowchart TB
     MCPS --> TOOLS
     subgraph AG["Agents: workers that claim Tasks from the graph"]
         D[Diagnoser] -- "handoff" --> T[Tutor] -- "handoff (if still stuck)" --> TE[Teacher agent]
-        LLM["LLM chain: Groq → Gemini → OpenRouter → template<br/>writes words, never facts; receipt-checked"]
+        LLM["LLM chain: Gemini → OpenRouter → Groq → template<br/>writes words, never facts; receipt-checked"]
     end
     AG --> TOOLS["16 fixed Cypher tools (queries.py)<br/>each returns rows + a receipt: queries, params, node ids"]
     TOOLS --> DB
@@ -39,6 +39,23 @@ flowchart TB
 - **Tutor.** Explains the root cause with the remediation skill that has worked best so far, asks one check question, and updates that skill's success rate. If the student is still stuck, it hands off to the Teacher agent.
 - **Teacher agent.** Looks at cohorts (WCC), keystones (PageRank) and bridges (betweenness), then writes a **Proposal**. Nothing changes until a human approves it. On approval, an executor applies the change from the graph's own edges and logs an `Event`.
 - **Receipts everywhere.** Every tool call returns `{cypher, params, rows, node_ids}`. The UI's drawer shows them, and the LLM's words are rejected if they name a construct or misconception that isn't in that turn's rows.
+- **The LLM writes words, never facts.**
+  - **The chain:** Gemini (`gemini-3.8-flash`, thinking off) → OpenRouter → Groq → template. Each provider is skipped when it has no key.
+  - **Checked replies:** a reply must pass the receipt check, have at least 8 words and no bare list markers. A reply that fails gets one retry, then the template takes over.
+  - **Free-tier limit:** Gemini's free tier allows 20 requests per model per day. A busy demo uses that up within a few sessions, after which every reply is a template. Nothing breaks, but the wording becomes plainer.
+
+### Design decisions worth knowing
+- **Stop thresholds.** The Diagnoser stops when the top root-cause evidence is ≥ 1.5 and leads the runner-up by ≥ 0.5. These are the SPEC's original values, and they follow from the evidence scale: the median prerequisite distractor has weight 1.0, so two hits score 1.5. Looser thresholds (1.0 / 0.33) named the planted root slightly more often on the simulator (109/126/126 of 151 against 103/121/121 on seeds 0–2). They were not adopted, so the thresholds aren't tuned to the simulator the eval scores against.
+- **Recall.** `recall` returns every misconception the student has shown. It ranks those on the root cause the student was diagnosed with last session first, then the strongest, then the most recent.
+  - **Why it changed:** the build spec kept only misconceptions seen at least twice. That left 58 of 90 simulated students with nothing to recall in session 2.
+  - **Chosen after seeing the eval results, stated plainly:** I measured three rules on the same session-1 histories and picked "last diagnosed root first" afterwards. The tutor should open with what it diagnosed last session, and that rule does exactly that.
+  - **The cost:** fewer of the named misconceptions are right than under the original rule, because one-off slips get named too.
+
+  | `recall` rule | Session-2 opening names a planted misconception | Named misconceptions that were planted |
+  | --- | --- | --- |
+  | Seen twice (confidence > 0.6), newest first (build spec) | 29% | 81% |
+  | Seen once or more, strongest first | 53% | 30% |
+  | Seen once or more, last diagnosed root first (**current**) | 68% | 44% |
 
 ## Graph data model
 
@@ -108,7 +125,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 ## Every query
 
 <!-- queries:start -->
-109 queries, all parameterised, all in [`api/unlearn/queries.py`](api/unlearn/queries.py).
+111 queries, all parameterised, all in [`api/unlearn/queries.py`](api/unlearn/queries.py).
 
 **Agent tools (the 16 tools and the queries they run)**
 
@@ -126,7 +143,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 | `PROBE_FRONTIER` | `probe_frontier`: deepest unmastered, unprobed prerequisites | variable-length path + pattern predicates |
 | `LEARNING_PATH` | `learning_path`: teaching order, deepest first | variable-length `REQUIRES*0..6` |
 | `LEARNING_PATH_SP` | `learning_path`: shortest chain to one construct | `algo.SPpaths` |
-| `RECALL` | `recall`: confident misconceptions with their latest events | episodic + semantic traversal |
+| `RECALL` | `recall`: misconceptions shown, those on the last diagnosed root first, with their latest events | episodic + semantic traversal |
 | `PICK_SKILL` | `pick_skill`: best remediation skill for a misconception | procedural memory |
 | `SKILL_STEPS` | `pick_skill`: the skill's ordered steps | traversal |
 | `UPDATE_SKILL` | `update_skill`: success rate with a +2/+3 prior | two ordered SETs |
@@ -205,7 +222,9 @@ It walks up to four prerequisite hops back from the skill the student is working
 
 | Query | Purpose | FalkorDB feature |
 | --- | --- | --- |
-| `NEAREST_MISCONCEPTIONS` | condition B's retriever and the eval judge | vector index |
+| `NEAREST_MISCONCEPTIONS` | the baselines' candidate retriever and the eval judge | vector index |
+| `ALL_REQUIRES` | condition B+: every curated REQUIRES edge, as text in the prompt | pattern match |
+| `ALL_SEEN_IN` | condition B+: every construct's misconceptions with SEEN_IN.w, as text in the prompt | pattern match |
 | `CLASS_CONSTRUCTS` | the eval judge's construct names | label scan |
 | `CONC_PROBE_WRITE` | a small timed write (isolation probes) | MERGE |
 | `CONC_HEAVY_WRITE` | a deliberately heavy write that holds a graph's write lock | UNWIND + CREATE |
@@ -287,7 +306,7 @@ TODO: A and B need an LLM API key and have not been run yet. Nothing in their co
 
 **Simulator bias, stated plainly.** The simulator picks wrong answers through the same option-to-misconception map Unlearn reads. That favours Unlearn: a real student's wrong answer is messier than the map. The noise above (a 10% guess rate, 15% of planted misconceptions not picked) is there to blunt that, not remove it.
 
-Session-2 recall is low because `recall` only returns misconceptions held with confidence above 0.6, which means seen at least twice. With five noisy questions, most students show their planted misconception only once. If one sighting were enough, recall would be 81%, at the cost of recalling some one-off slips.
+Session-2 recall depends on the `recall` rule; see the trade-off table under "Design decisions worth knowing".
 
 ### Concurrency (`eval/concurrency.py`, [`eval/results/concurrency.json`](eval/results/concurrency.json))
 

@@ -38,8 +38,10 @@ from unlearn.db import copy_graph, delete_graph, run_batched
 RESULTS = Path(__file__).resolve().parent / "results"
 METRICS = ["top1_misconception", "top3_misconception", "root_cause_accuracy", "questions_to_diagnosis",
            "session2_recall", "latency_p50_ms", "latency_p95_ms"]
-LABELS = {"A": "A. No memory", "B": "B. Vector RAG", "C": "C. Unlearn"}
-CALLS_PER_STUDENT = {"A": BL.POOL_QUESTIONS + 1, "B": 2, "C": 6}  # upper bounds before retries and cache
+LABELS = {"A": "A. No memory", "B": "B. Vector RAG", "B+": "B+. LLM + graph as text", "C": "C. Unlearn"}
+ORDER = ["A", "B", "B+", "C"]
+CALLS_PER_STUDENT = {"A": BL.POOL_QUESTIONS + 1, "B": 2, "B+": 2, "C": 6}  # upper bounds before retries and cache
+BPLUS_MAX_MIN = 75  # B+ projected over this many minutes -> seed 0 only
 
 
 def pct(xs, p):
@@ -86,15 +88,28 @@ def run_c(class_id: str, student, writer, judge) -> dict:
             "recalled": judge.recalled(opening, student.misconceptions), "opening": opening}
 
 
-def run_ab(cond: str, provider, sim, student, judge) -> dict:
+def run_ab(cond: str, provider, sim, student, judge, graph_text: str | None = None) -> dict:
+    """A, B or B+ for one student. Predictions are the ids the model chose from its candidate lists."""
     answers = BL.answer_session(student, BL.pool_questions(sim, student))
+    constructs = BL.prerequisite_candidates(sim, student, judge.construct_names)
+    cached_before = BL.STATS["cached"]
     t0 = time.perf_counter()
-    dx = BL.condition_a(provider, answers) if cond == "A" else BL.condition_b(provider, judge, answers)
-    latency = (time.perf_counter() - t0) * 1000
-    opening = BL.opening_a(provider) if cond == "A" else BL.opening_b(provider, answers)
-    return {"predicted": judge.misconception_ids(dx["misconceptions"]), "root": judge.construct_id(dx["root_cause"]),
-            "asked": len(answers), "latency_ms": latency, "recalled": judge.recalled(opening, student.misconceptions),
-            "opening": opening, "raw": dx}
+    if cond == "A":
+        dx = BL.condition_a(provider, judge, answers, constructs)
+    else:
+        dx = BL.condition_b(provider, judge, answers, constructs, graph_text if cond == "B+" else None)
+    # A diagnosis served (even partly) from the disk cache says nothing about latency: leave it out.
+    latency = (time.perf_counter() - t0) * 1000 if BL.STATS["cached"] == cached_before else None
+    opening = BL.opening_a(provider) if cond == "A" else BL.opening_b(provider, answers)  # B+ opens as B does
+    return {"predicted": dx["predicted"], "root": dx["root"], "asked": len(answers), "latency_ms": latency,
+            "recalled": judge.recalled(opening, student.misconceptions), "opening": opening,
+            "json_ok": dx["json_ok"], "misconceptions_unmapped": dx["misconceptions_unmapped"],
+            "root_unmapped": dx["root_unmapped"], "raw": (dx.get("raw") or "")[:600],
+            "planted": {"root": student.root_cause, "misconceptions": student.misconceptions}}
+
+
+def _round(x):
+    return None if x is None else round(x, 1)
 
 
 def score(rows: list[dict], students: dict) -> dict:
@@ -106,8 +121,13 @@ def score(rows: list[dict], students: dict) -> dict:
         "root_cause_accuracy": mean([r["root"] == students[r["sid"]].root_cause for r in rows]),
         "questions_to_diagnosis": mean([r["asked"] for r in rows]),
         "session2_recall": mean([r["recalled"] for r in rows]),
-        "latency_p50_ms": round(pct([r["latency_ms"] for r in rows], 0.5), 1),
-        "latency_p95_ms": round(pct([r["latency_ms"] for r in rows], 0.95), 1),
+        "latency_p50_ms": _round(pct([r["latency_ms"] for r in rows if r["latency_ms"] is not None], 0.5)),
+        "latency_p95_ms": _round(pct([r["latency_ms"] for r in rows if r["latency_ms"] is not None], 0.95)),
+        "latency_n": sum(r["latency_ms"] is not None for r in rows),
+        # scoring audit (A, B, B+): outputs that weren't valid JSON, or named no offered id
+        "invalid_json": sum(r.get("json_ok") is False for r in rows),
+        "misconceptions_unmapped": sum(bool(r.get("misconceptions_unmapped")) for r in rows),
+        "root_unmapped": sum(bool(r.get("root_unmapped")) for r in rows),
     }
 
 
@@ -122,7 +142,7 @@ def summarise(per_seed: dict, conds: list[str]) -> dict:
 
 
 def markdown(result: dict) -> str:
-    conds = ["A", "B", "C"]
+    conds = ORDER
     rows = [("Top-1 misconception", "top1_misconception", "%"), ("Top-3 misconception", "top3_misconception", "%"),
             ("Root-cause accuracy", "root_cause_accuracy", "%"), ("Questions to diagnosis", "questions_to_diagnosis", ""),
             ("Session-2 recall", "session2_recall", "%"), ("p50 latency (ms)", "latency_p50_ms", ""),
@@ -141,7 +161,7 @@ def markdown(result: dict) -> str:
              f"{meta['students']} simulated students × seeds {meta['seeds']} × {meta['sessions']} sessions. "
              f"Mean (min–max across seeds). A/B model: {meta['llm'] or 'none'}; C: template wording. "
              f"n per condition: {meta.get('n_per_condition')}.", "",
-             "| Metric | " + " | ".join(LABELS[c] for c in conds) + " |", "| --- | --- | --- | --- |"]
+             "| Metric | " + " | ".join(LABELS[c] for c in conds) + " |", "| --- " * (len(conds) + 1) + "|"]
     lines += [f"| {name} | " + " | ".join(cell(c, m, u) for c in conds) + " |" for name, m, u in rows]
     for c, why in meta.get("not_run", {}).items():
         lines.append(f"\n{LABELS[c]} not run: {why}")
@@ -161,11 +181,32 @@ def eval_provider(which: str, model: str | None):
         if prov.model not in {m["name"] for m in tags.get("models", [])}:
             return None, f"Ollama has no model {prov.model!r} (ollama pull {prov.model})"
         return prov, None
-    prov = next(p for p in llm.PROVIDERS if p.name == which)
+    prov = next(p for p in llm.hosted_providers() if p.name == which)  # first model of that provider
     if model:
         import dataclasses
         prov = dataclasses.replace(prov, default_model=model, model_env="")
     return (prov, None) if prov.key else (None, f"no {prov.key_env} in .env")
+
+
+def time_bplus(provider, seed: int, n: int) -> dict:
+    """Time n real (uncached) B+ prompts on a scratch copy of the template: B+ prompts carry the whole graph."""
+    g = T.graph_name(f"bplus_timing_s{seed}")
+    delete_graph(g)
+    copy_graph("class_template", g)
+    try:
+        judge, text = BL.Judge(g), BL.graph_as_text(g)
+        sim = Simulator(seed=seed)
+        BL.reset_stats()
+        for i in range(1, n + 1):
+            student = Simulator(seed=seed).student(f"s{i:02d}")
+            answers = BL.answer_session(student, BL.pool_questions(sim, student))
+            constructs = BL.prerequisite_candidates(sim, student, judge.construct_names)
+            BL.condition_b(provider, judge, answers, constructs, text + f"\n(timing {time.time_ns()})")
+        calls = max(BL.STATS["calls"], 1)
+        return {"calls": BL.STATS["calls"], "seconds_per_call": round(BL.STATS["seconds"] / calls, 1),
+                "prompt_tokens": llm.LAST_USAGE.get("prompt_tokens")}
+    finally:
+        delete_graph(g)
 
 
 def calibrate(provider, sims: dict, n: int = 5) -> dict:
@@ -175,7 +216,7 @@ def calibrate(provider, sims: dict, n: int = 5) -> dict:
     for i, (sim, student) in enumerate(list(sims.values())[:n]):
         answers = BL.answer_session(student, BL.pool_questions(sim, student))
         prompt = ("Attempt history:\n" + BL.history_text(answers) + '\n\nReply as JSON: {"misconceptions": [the 3 most likely], '
-                  '"root_cause": "the earlier skill this student is most likely missing"} (calibration)')
+                  f'"root_cause": "the earlier skill this student is most likely missing"}} (calibration {time.time_ns()})')  # never cached
         parsed += BL.parse_json(BL._call(provider, BL.DIAG_SYSTEM, prompt)) is not None
     calls = max(BL.STATS["calls"], 1)
     return {"calls": BL.STATS["calls"], "cached": BL.STATS["cached"], "json_valid": f"{parsed}/{n}",
@@ -186,7 +227,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--students", type=int, default=30)
     ap.add_argument("--seeds", default="0,1,2")
-    ap.add_argument("--conditions", default="A,B,C")
+    ap.add_argument("--conditions", default="A,B,B+,C")
     ap.add_argument("--llm", default="ollama", choices=["ollama", "gemini", "openrouter", "groq"],
                     help="the single model A and B use (C is template-only)")
     ap.add_argument("--model", help="model tag override (default: OLLAMA_MODEL or qwen3.5:27b-q4_K_M for ollama)")
@@ -197,7 +238,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     seeds = [int(s) for s in a.seeds.split(",")]
     conds = [c.strip().upper() for c in a.conditions.split(",")]
-    needs_llm = any(c in conds for c in "AB")
+    needs_llm = any(c in ("A", "B", "B+") for c in conds)
     provider, why = eval_provider(a.llm, a.model) if needs_llm else (None, None)
 
     n = a.students * len(seeds)
@@ -227,6 +268,18 @@ def main(argv=None) -> int:
     elif needs_llm:
         BL.reset_stats(a.max_calls)
 
+    bplus_seeds = seeds
+    if "B+" in conds and not a.dry_run:
+        bplus = time_bplus(provider, seeds[0], min(2, a.students))
+        projected = bplus["seconds_per_call"] * a.students * len(seeds) / 60
+        print(f"B+ timing on {bplus['calls']} real prompts ({bplus['prompt_tokens']} prompt tokens each): "
+              f"{bplus['seconds_per_call']} s per call. Projected B+ time for {len(seeds)} seed(s): {projected:.0f} min", flush=True)
+        if projected > BPLUS_MAX_MIN and len(seeds) > 1:
+            bplus_seeds = seeds[:1]
+            print(f"Over {BPLUS_MAX_MIN} min, so B+ runs on seed {seeds[0]} only.", flush=True)
+        calibration = {**(calibration or {}), "bplus": bplus, "bplus_seeds": bplus_seeds}
+        BL.reset_stats(BL.STATS["limit"])
+
     writer = functools.partial(llm.write, providers=[])  # C: template wording, graph-derived metrics
     per_seed, raw, stopped = {}, {}, None
     for seed in seeds:
@@ -239,14 +292,17 @@ def main(argv=None) -> int:
         copy_graph("class_template", g)
         run_batched(g, Q.LOAD_STUDENTS, [{"id": s, "alias": s} for s in sids])
         judge = BL.Judge(g)
+        graph_text = BL.graph_as_text(g) if "B+" in conds else None
         per_seed[seed], raw[seed] = {}, {}
         for c in conds:
+            if c == "B+" and seed not in bplus_seeds:
+                continue
             t0 = time.time()
             rows = []
             for sid in sids:
                 student = Simulator(seed=seed).student(sid)  # fresh answer stream per condition, same planted state
                 try:
-                    r = run_c(class_id, student, writer, judge) if c == "C" else run_ab(c, provider, sim, student, judge)
+                    r = run_c(class_id, student, writer, judge) if c == "C" else run_ab(c, provider, sim, student, judge, graph_text)
                 except BL.BudgetExceeded as e:
                     stopped = f"{e} during {LABELS[c]}, seed {seed}, after {len(rows)} students"
                     break
@@ -263,7 +319,7 @@ def main(argv=None) -> int:
         if stopped:
             break
 
-    ran = [c for c in conds if any(c in per_seed[s] for s in per_seed)]
+    ran = [c for c in ORDER if c in conds and any(c in per_seed[s] for s in per_seed)]
     result = {
         "meta": {"students": a.students, "seeds": seeds, "sessions": 2, "conditions_run": ran,
                  "llm": f"{provider.name} / {provider.model}" if provider else None,
@@ -271,7 +327,7 @@ def main(argv=None) -> int:
                  "n_per_condition": {c: sum(per_seed[s][c]["n"] for s in per_seed if c in per_seed[s]) for c in ran},
                  "llm_calls": {k: (round(v, 1) if isinstance(v, float) else v) for k, v in BL.STATS.items()} if needs_llm else None,
                  "calibration": calibration, "stopped": stopped,
-                 "not_run": {c: why or "not requested" for c in "ABC" if c not in ran},
+                 "not_run": {c: why or "not requested" for c in ORDER if c not in ran},
                  "judge": {"recall_max_distance": BL.RECALL_MAX_DISTANCE, "pool_questions": BL.POOL_QUESTIONS},
                  "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C"},
         "per_seed": per_seed,

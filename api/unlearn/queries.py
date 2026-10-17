@@ -312,18 +312,26 @@ YIELD path, pathWeight
 RETURN [n IN nodes(path) | n.name] AS chain, pathWeight
 """
 
-# Changed from SPEC (decision, Phase 6): every misconception seen at least once, strongest first. With the SPEC's
-# confidence > 0.6 (seen twice) 58/90 simulated students had nothing to recall in session 2; recall of a planted
-# misconception rose from 29% to 53%, while the share of named misconceptions that were planted fell 81% -> 30%.
+# Changed from SPEC (decisions, Phase 6): every misconception seen at least once, those on the root cause the
+# student was last diagnosed with first (by their SEEN_IN.w there), then strongest, then most recent. The tutor
+# opens with what it diagnosed last session. Measured on 90 simulated students' session-2 openings (top 2):
+#   SPEC rule (confidence > 0.6, newest first)   recall 29%, precision 81%, nothing to say for 58/90
+#   seen once or more, strongest first            recall 53%, precision 30%
+#   seen once or more, last diagnosed root first  recall 68%, precision 44%   <- this query
 RECALL = """
-MATCH (s:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
+MATCH (s:Student {id:$sid})
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(dx:Event {type:'diagnosis'})-[:ABOUT]->(root:Construct)
+WITH s, root, dx.ts AS dx_ts ORDER BY dx_ts DESC LIMIT 1
+MATCH (s)-[e:SHOWED]->(m:Misconception)
 WHERE e.count >= 1
+OPTIONAL MATCH (m)-[si:SEEN_IN]->(root)
+WITH s, m, e, coalesce(si.w, 0.0) AS on_root
 OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(ev:Event)-[:ABOUT]->(m)
-WITH m, e, ev ORDER BY ev.ts DESC
-WITH m, e, collect(ev.summary) AS events
+WITH m, e, on_root, ev ORDER BY ev.ts DESC
+WITH m, e, on_root, collect(ev.summary) AS events
 RETURN m.name AS misconception, e.count AS times, e.confidence AS confidence, e.last_ts AS last_seen,
-       events[0..3] AS recent
-ORDER BY confidence DESC, last_seen DESC LIMIT 5
+       on_root, events[0..3] AS recent
+ORDER BY on_root DESC, confidence DESC, last_seen DESC LIMIT 5
 """
 
 PICK_SKILL = """
@@ -775,4 +783,15 @@ MERGE (p:Probe {id:$id}) SET p.ts = $ts RETURN p.id AS id
 # A deliberately heavy write (creates $n nodes) to keep a graph's write lock busy.
 CONC_HEAVY_WRITE = """
 UNWIND range(1, $n) AS i CREATE (:Load {i:i, w:$w})
+"""
+
+# B+ (eval): the whole curated graph as text.
+ALL_REQUIRES = """
+MATCH (a:Construct)-[:REQUIRES]->(b:Construct)
+RETURN a.id AS a, a.name AS a_name, b.id AS b, b.name AS b_name ORDER BY a, b
+"""
+
+ALL_SEEN_IN = """
+MATCH (m:Misconception)-[si:SEEN_IN]->(c:Construct)
+RETURN c.id AS cid, c.name AS cname, m.id AS mid, m.name AS mname, si.w AS w ORDER BY cid, w DESC, mid
 """

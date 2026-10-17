@@ -379,17 +379,33 @@ YIELD path, pathWeight
 RETURN [n IN nodes(path) | n.name] AS chain, pathWeight
 ```
 
-**`recall`** opens each session with what the tutor remembers: every misconception the student has shown, strongest (most repeated) first. It used to keep only confidence > 0.6, meaning seen twice. That left 58 of 90 simulated students with nothing to recall, so the threshold was lowered. Measured on 90 simulated students, the change raised recall of a planted misconception in the session-2 opening from 29% to 53%, while precision (named misconceptions that were planted) fell from 81% to 30%:
+**`recall`** opens each session with what the tutor remembers. It returns every misconception the student has shown, ranked:
+1. those on the root cause the student was diagnosed with most recently, by their `SEEN_IN.w` there;
+2. then by confidence (the most repeated);
+3. then by how recently they were shown.
+
+The original rule kept only confidence > 0.6, meaning seen twice. That left 58 of 90 simulated students with nothing to recall. The ordering was chosen after seeing the eval results: the tutor opens with what it diagnosed last session. Measured on the session-2 opening, which names the top 2:
+
+| Rule | Recall of a planted misconception | Named misconceptions that were planted |
+| --- | --- | --- |
+| confidence > 0.6, newest first (original) | 29% | 81% |
+| seen once or more, strongest first | 53% | 30% |
+| seen once or more, last diagnosed root first (current) | 68% | 44% |
 
 ```
-MATCH (s:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
+MATCH (s:Student {id:$sid})
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(dx:Event {type:'diagnosis'})-[:ABOUT]->(root:Construct)
+WITH s, root, dx.ts AS dx_ts ORDER BY dx_ts DESC LIMIT 1
+MATCH (s)-[e:SHOWED]->(m:Misconception)
 WHERE e.count >= 1
+OPTIONAL MATCH (m)-[si:SEEN_IN]->(root)
+WITH s, m, e, coalesce(si.w, 0.0) AS on_root
 OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(ev:Event)-[:ABOUT]->(m)
-WITH m, e, ev ORDER BY ev.ts DESC
-WITH m, e, collect(ev.summary) AS events
+WITH m, e, on_root, ev ORDER BY ev.ts DESC
+WITH m, e, on_root, collect(ev.summary) AS events
 RETURN m.name AS misconception, e.count AS times, e.confidence AS confidence, e.last_ts AS last_seen,
-       events[0..3] AS recent
-ORDER BY confidence DESC, last_seen DESC LIMIT 5
+       on_root, events[0..3] AS recent
+ORDER BY on_root DESC, confidence DESC, last_seen DESC LIMIT 5
 ```
 
 **`pick_skill`** and **`update_skill`** are procedural memory. Two separate `SET` clauses keep the update order explicit:

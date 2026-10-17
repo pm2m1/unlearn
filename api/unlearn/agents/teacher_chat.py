@@ -85,6 +85,7 @@ class TeacherChat(Agent):
             try:
                 text, problems = self._llm_turn(task_id, provider, message, attempts)
             except Exception as e:  # network, auth, bad tool args: next provider
+                llm.note_failure(provider, e)
                 attempts.append({"provider": provider.name, "ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}"})
                 continue
             if text is not None:

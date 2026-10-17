@@ -663,12 +663,17 @@ async function loadEval() {
   const { results } = await api("/eval/results");
   box.replaceChildren();
   if (!Object.keys(results).length) { box.append(el("p", { class: "empty", text: "No results yet." })); return; }
-  const order = ["eval", "crosscheck", "concurrency", "latency"];
+  const order = ["eval", "concurrency", "latency", "crosscheck"];
   const names = Object.keys(results).sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99);
   for (const name of names) {
     const r = results[name];
-    if (r.summary && r.meta) box.append(...evalTable(r, name === "eval" ? "Graph vs vector RAG vs no memory"
-      : `Cross-check (${r.meta.llm || "LLM"}), n = ${Object.entries(r.meta.n_per_condition || {}).map(([c, n]) => `${c}: ${n}`).join(", ")}`));
+    if (r.summary && r.meta && name === "eval") box.append(...evalTable(r, "Graph vs vector RAG vs no memory"));
+    else if (r.summary && r.meta) {
+      const n = Object.entries(r.meta.n_per_condition || {}).map(([c, k]) => `${c}: ${k}`).join(", ");
+      const foot = el("details", { class: "footnote" }, el("summary", { text: `Footnote: cross-check with ${r.meta.llm || "another LLM"} (n = ${n}). Indicative only, n too small to conclude.` }),
+        ...evalTable(r, `Cross-check (${r.meta.llm}), indicative only`));
+      box.append(foot);
+    }
     else if (name === "concurrency" && r.isolation) box.append(...concurrencyView(r));
     else if (r.tools) box.append(...latencyTable(r));
     else box.append(el("h2", { text: name }), el("pre", { text: JSON.stringify(r, null, 2).slice(0, 4000) }));
@@ -676,7 +681,7 @@ async function loadEval() {
 }
 
 function evalTable(r, title) {
-  const conds = [["A", "A. No memory"], ["B", "B. Vector RAG"], ["C", "C. Unlearn"]];
+  const conds = [["A", "A. No memory"], ["B", "B. Vector RAG"], ["B+", "B+. LLM + graph as text"], ["C", "C. Unlearn"]];
   const rows = [["Top-1 misconception", "top1_misconception", "%"], ["Top-3 misconception", "top3_misconception", "%"],
     ["Root-cause accuracy", "root_cause_accuracy", "%"], ["Questions to diagnosis", "questions_to_diagnosis", ""],
     ["Session-2 recall", "session2_recall", "%"], ["p50 latency (ms)", "latency_p50_ms", ""], ["p95 latency (ms)", "latency_p95_ms", ""]];

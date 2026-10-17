@@ -4,20 +4,21 @@ The LLM writes words, never facts. Every reply is checked against the rows the t
 turn: any construct or misconception name it mentions must appear in those rows. A reply that fails is
 retried once, then replaced by a template built only from the rows, so the demo never fails.
 
-App provider chain: Gemini -> OpenRouter -> Groq -> template, all through the openai SDK's OpenAI-compatible
-endpoints. A provider with no key in .env is skipped (OpenRouter and Groq are optional); a provider that
-errors (network, rate limit) hands over to the next one. Model names were checked against each provider's
-docs on 2026-10-17:
-  Gemini      https://generativelanguage.googleapis.com/v1beta/openai/  gemini-3.8-flash
-  OpenRouter  https://openrouter.ai/api/v1                             google/gemma-4-31b-it:free
-  Groq        https://api.groq.com/openai/v1                           llama-3.3-70b-versatile
-Override any model with GEMINI_MODEL / OPENROUTER_MODEL / GROQ_MODEL. UNLEARN_LLM=template turns the chain
-off (tests).
+App provider chain (app_providers()), all through the openai SDK's OpenAI-compatible endpoints:
+  [Ollama, only when OLLAMA_BASE_URL is set] -> gemini-3.8-flash -> gemini-3.6-flash -> gemini-3.5-flash-lite
+  -> OpenRouter -> Groq -> template
+A provider with no key is skipped (OpenRouter and Groq are optional). Gemini's free tier counts requests per
+model per day (20 for gemini-3.8-flash), so the three Gemini models are chained: a model that runs out hands
+over to the next. A provider that errors is skipped for this reply; one that hits a rate limit is also cooled
+down in-process (an hour for a daily quota, a minute otherwise) so later replies don't wait on it.
+The Gemini model names are the API's own (models.list, 2026-10-17); override the list with GEMINI_MODELS
+(comma-separated). Other overrides: OPENROUTER_MODEL, GROQ_MODEL. UNLEARN_LLM=template turns the chain off.
 
-Ollama is for the local eval only (eval/run_eval.py), never in the app chain or the Docker image:
-ollama_provider() talks to OLLAMA_BASE_URL (default http://localhost:11434/v1; from inside Docker use
-http://host.docker.internal:11434/v1) with OLLAMA_MODEL, and turns Qwen's thinking mode off with
-reasoning_effort="none" (Ollama ignores think=false on its OpenAI-compatible endpoint).
+Ollama: ollama_provider() talks to OLLAMA_BASE_URL with OLLAMA_MODEL (default qwen3.5:27b-q4_K_M) and turns
+Qwen's thinking off with reasoning_effort="none" (Ollama ignores think=false on its OpenAI-compatible
+endpoint). The eval always uses it (default http://localhost:11434/v1). The app uses it first only when
+OLLAMA_BASE_URL is set in .env, for recording locally; compose never passes it, so the deployed app doesn't.
+From inside Docker the address would be http://host.docker.internal:11434/v1.
 
 Replies are cached on disk by a hash of (provider, model, messages), so reruns cost nothing.
 """
@@ -26,6 +27,7 @@ import hashlib
 import json
 import os
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -57,22 +59,49 @@ class Provider:
         return os.getenv(self.model_env) or self.default_model
 
 
-PROVIDERS = [
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+GEMINI_MODELS = ("gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite")
+
+
+def gemini_providers() -> list[Provider]:
     # Thinking off: with it on, gemini-3.8-flash spent max_tokens on hidden reasoning and cut replies short
     # (6 visible tokens); "none" answers in full in ~4 s. It rejects "minimal".
-    Provider("gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta/openai/",
-             "GEMINI_MODEL", "gemini-3.8-flash", extra_body=(("reasoning_effort", "none"),)),
-    Provider("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", "OPENROUTER_MODEL",
-             "google/gemma-4-31b-it:free"),
-    Provider("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", "GROQ_MODEL", "llama-3.3-70b-versatile"),
-]
+    models = [m.strip() for m in (os.getenv("GEMINI_MODELS") or ",".join(GEMINI_MODELS)).split(",") if m.strip()]
+    return [Provider("gemini", "GEMINI_API_KEY", GEMINI_URL, "", m, extra_body=(("reasoning_effort", "none"),))
+            for m in models]
+
+
+def hosted_providers() -> list[Provider]:
+    return gemini_providers() + [
+        Provider("openrouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", "OPENROUTER_MODEL",
+                 "google/gemma-4-31b-it:free"),
+        Provider("groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", "GROQ_MODEL", "llama-3.3-70b-versatile"),
+    ]
 
 
 def ollama_provider(model: str | None = None) -> Provider:
-    """The local eval model. Not part of PROVIDERS: the app never calls it."""
-    return Provider("ollama", "", os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"), "OLLAMA_MODEL",
+    """The local model: always the eval's A/B model; in the app only when OLLAMA_BASE_URL is set."""
+    return Provider("ollama", "", os.getenv("OLLAMA_BASE_URL") or "http://localhost:11434/v1", "OLLAMA_MODEL",
                     model or os.getenv("OLLAMA_MODEL") or "qwen3.5:27b-q4_K_M",
                     extra_body=(("reasoning_effort", "none"),), keyless=True)
+
+
+def app_providers() -> list[Provider]:
+    """The app's chain, in order. Ollama leads only when OLLAMA_BASE_URL is set (local recording)."""
+    return ([ollama_provider()] if os.getenv("OLLAMA_BASE_URL") else []) + hosted_providers()
+
+
+PROVIDERS = hosted_providers()  # as configured at import; app_providers() re-reads the environment
+
+# In-process cooldown after a rate limit: (name, model) -> time.time() until which it is skipped.
+_COOLDOWN: dict[tuple[str, str], float] = {}
+
+
+def note_failure(provider: Provider, error: Exception) -> None:
+    from openai import RateLimitError
+    if isinstance(error, RateLimitError):
+        daily = "PerDay" in str(error)
+        _COOLDOWN[(provider.name, provider.model)] = time.time() + (3600 if daily else 60)
 
 MARK = re.compile(r"\[\[(.+?)\]\]")
 THINK = re.compile(r"<think>.*?</think>", re.S)
@@ -231,7 +260,8 @@ def complete(provider: Provider, messages: list[dict]) -> tuple[str, bool]:
 def available() -> list[Provider]:
     if os.getenv("UNLEARN_LLM", "auto") == "template":
         return []
-    return [p for p in PROVIDERS if p.key]
+    now = time.time()
+    return [p for p in app_providers() if p.key and _COOLDOWN.get((p.name, p.model), 0) <= now]
 
 
 # --- Entry point --------------------------------------------------------------
@@ -267,7 +297,8 @@ def write(kind: str, facts: dict, turn_rows: list, vocabulary: list[str], provid
                     {"role": "assistant", "content": text},
                     {"role": "user", "content": "Problems: " + "; ".join(problems) + ". Write a complete message "
                      "of at least two sentences, using only names from FACTS, copied exactly, in [[double brackets]]."}]
-        except Exception as e:  # network, auth, rate limit: try the next provider
+        except Exception as e:  # network, auth, rate limit: try the next provider (another Gemini model first)
+            note_failure(provider, e)
             attempts.append({"provider": provider.name, "model": provider.model, "ok": False,
                              "error": f"{type(e).__name__}: {str(e)[:200]}"})
             continue

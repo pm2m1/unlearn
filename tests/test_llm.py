@@ -85,3 +85,29 @@ def test_malformed_reply_is_retried_then_templated(fake_chain):
     reply = llm.write("diagnosis", FACTS, ROWS, VOCAB)
     assert reply.source == "template"
     assert any("words" in p or "list marker" in p for a in reply.attempts[:2] for p in a["problems"])
+
+
+def test_app_chain_order(monkeypatch):
+    monkeypatch.delenv("UNLEARN_LLM", raising=False)
+    monkeypatch.delenv("GEMINI_MODELS", raising=False)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
+    assert [(p.name, p.model) for p in llm.available()] == [
+        ("gemini", "gemini-3.8-flash"), ("gemini", "gemini-3.6-flash"), ("gemini", "gemini-3.5-flash-lite")]
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+    assert llm.available()[0].name == "ollama"  # local recording: Ollama first, only when set
+
+
+def test_daily_quota_cools_a_model_down(monkeypatch):
+    import httpx
+    from openai import RateLimitError
+    monkeypatch.delenv("UNLEARN_LLM", raising=False)
+    monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+    monkeypatch.setattr(llm, "_COOLDOWN", {})
+    first = llm.available()[0]
+    resp = httpx.Response(429, request=httpx.Request("POST", "http://x"))
+    llm.note_failure(first, RateLimitError("GenerateRequestsPerDayPerProjectPerModel-FreeTier", response=resp, body=None))
+    assert llm.available()[0].model == "gemini-3.6-flash"  # skipped for an hour, the next model leads
