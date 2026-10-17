@@ -546,7 +546,7 @@ Record 20 seconds of Claude Desktop calling `cohorts` then `propose` on the demo
 
 ## API and UI
 
-FastAPI serves the API; the UI is Streamlit with `streamlit-agraph` for the graph panel. Streamlit is the safe choice for a solo 40-hour build. Swap to a single static page with vis-network only if you finish early.
+FastAPI serves the API and the UI. The UI is static HTML, CSS and JS in `api/static/`, served at `/` with no build step. Its graph panel uses Cytoscape.js, loaded from cdnjs at a pinned version with an SRI hash. One container serves everything, so there is no separate UI service.
 
 **Endpoints**
 
@@ -619,40 +619,36 @@ Report each cell as the mean with min–max across the three seeds. Expect Unlea
 
 ## Deployment
 
-One Docker Compose file runs everything locally and on the host: `falkordb`, `api`, `ui`. Deploy to Railway (FalkorDB's docs have a Railway page) or a small VM. Don't rely on FalkorDB Cloud's free tier for judging.
+One Docker Compose file runs two services: `falkordb` and `api`, which also serves the UI. Two profiles share one FalkorDB volume. Run one at a time:
+
+- `dev`: FalkorDB on `127.0.0.1:6379`, for seed scripts and tests on the host, and the API on `127.0.0.1:8000`.
+- `prod`: only the API is published, on `0.0.0.0:8000`. FalkorDB has no published port.
+
+Deploy to Railway (FalkorDB's docs have a Railway page) or a small VM. Don't rely on FalkorDB Cloud's free tier for judging.
 
 ```
+x-falkordb: &falkordb
+  image: falkordb/falkordb:v4.20.7
+  environment: [REDIS_ARGS=--requirepass ${FALKOR_PASSWORD}]
+  volumes: [falkor-data:/var/lib/falkordb/data]
+x-api: &api
+  build: {context: ., dockerfile: api/Dockerfile}
+  environment: {FALKOR_HOST: falkordb, FALKOR_PASSWORD: ${FALKOR_PASSWORD}, GROQ_API_KEY: ..., GEMINI_API_KEY: ...}
 services:
-  falkordb:
-    image: falkordb/falkordb:<pinned-tag>
-    environment:
-      - REDIS_ARGS=--requirepass ${FALKOR_PASSWORD}
-    volumes:
-      - falkor-data:/var/lib/falkordb/data   # confirm path in FalkorDB "Persistence on Docker" docs
-  api:
-    build: ./api
-    environment:
-      - FALKOR_HOST=falkordb
-      - FALKOR_PASSWORD=${FALKOR_PASSWORD}
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-    depends_on: [falkordb]
-  ui:
-    build: ./ui
-    environment:
-      - API_URL=http://api:8000
-    ports: ["8501:8501"]
-    depends_on: [api]
+  falkordb:      {<<: *falkordb, profiles: [dev],  ports: ["127.0.0.1:6379:6379"]}
+  falkordb-prod: {<<: *falkordb, profiles: [prod], networks: {default: {aliases: [falkordb]}}}
+  api:           {<<: *api, profiles: [dev],  ports: ["127.0.0.1:8000:8000"], depends_on: [falkordb]}
+  api-prod:      {<<: *api, profiles: [prod], ports: ["8000:8000"], depends_on: [falkordb-prod]}
 volumes:
   falkor-data:
 ```
 
 - **Pin the image.** Pull once, test your exact queries, then pin that tag. Participants hit crashes on some 6.0.x builds.
-- **Self-heal on boot.** On API startup, call `GRAPH.LIST`. If `class_demo` is missing, run the seed. A wiped instance then recovers on its own.
-- **Keep FalkorDB private.** Expose only the UI port. Don't publish 6379 or the FalkorDB Browser port.
+- **Self-heal on boot.** On API startup, call `GRAPH.LIST` and seed only what is missing: no `curriculum` means a full seed, no `class_template` means 04 then 05, and no `class_demo` means 05. A wiped instance then recovers on its own. The Eedi CSVs are baked into the image, so seeding needs no network.
+- **Keep FalkorDB private.** In prod, publish only the API port (8000), which also serves the UI. Don't publish 6379 or the FalkorDB Browser port.
 - **Bake the embedding model into the API image** at build time, so cold starts don't download it.
 - **Wake before judging.** Hit `/health` after submitting and again during judging if your host sleeps idle services.
-- **Local fallback.** The README's one-command setup is `cp .env.example .env && docker compose up && make seed`.
+- **Local fallback.** The README's setup is `cp .env.example .env` (set `FALKOR_PASSWORD`), then `docker compose --profile dev up -d --build`. Self-heal seeds on first boot.
 
 ## Repo structure
 
@@ -673,7 +669,9 @@ unlearn/
 │       └── skills.json
 ├── scripts/                    # 01_download … 05_new_class
 ├── api/
-│   ├── main.py                 # FastAPI app
+│   ├── main.py                 # FastAPI app (also serves the UI)
+│   ├── static/                 # web UI: index.html, app.css, app.js (no build step)
+│   ├── Dockerfile
 │   └── unlearn/
 │       ├── db.py               # connection, graph selection, receipts
 │       ├── queries.py          # every Cypher string in one file
@@ -681,7 +679,6 @@ unlearn/
 │       ├── agents/             # diagnoser.py, tutor.py, teacher.py, runner.py
 │       ├── llm.py              # provider chain + cache + receipt check
 │       └── unlearn_mcp.py
-├── ui/app.py                   # Streamlit
 ├── eval/                       # simulator.py, baselines.py, run_eval.py, results/
 └── tests/                      # test_queries.py, test_claim_race.py
 ```
@@ -702,7 +699,7 @@ About 28 hours of work and two sleeps between now and a 22:00 IST submit on Oct 
 | 21:00–Oct 18, 01:00 | Agents, handoff, approval gate, LLM chain, receipt check | CLI runs one full session end to end | Teacher agent only proposes `regroup` |
 | 01:00–02:00 | MCP wrapper | Claude Desktop calls `root_cause` | Expose 3 tools only |
 | 02:00–07:30 | Sleep | — | — |
-| 07:30–11:30 | API, Streamlit UI, deploy | Live URL works on your phone | Static graph render, no animation |
+| 07:30–11:30 | API, static web UI, deploy | Live URL works on your phone | Static graph render, no animation |
 | 11:30–14:30 | Eval run, concurrency numbers | Results table filled | 15 students, 1 seed, conditions B and C only |
 | 14:30–17:30 | README, `AI_USAGE.md`, demo video | Video under 3 minutes, uploaded | One take, no editing |
 | 17:30–20:00 | dev.to blog, bug fixes | Blog published | Shorter blog |

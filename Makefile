@@ -1,13 +1,26 @@
 PY ?= .venv/bin/python
 export PYTHONPATH := api:.
 
-.PHONY: up down seed test topics latency demo
+.PHONY: up dev prod down seed test topics latency demo serve
 
+# FalkorDB only, on 127.0.0.1:6379, for running the scripts, tests and API on the host.
 up:
-	docker compose up -d --wait falkordb
+	docker compose --profile dev up -d --wait falkordb
+
+# FalkorDB + API (with the UI) in containers, both on loopback: http://localhost:8000
+dev:
+	docker compose --profile dev up -d --build --wait
+
+# Production: only the API port (8000) is published.
+prod:
+	docker compose --profile prod up -d --build --wait
 
 down:
-	docker compose down
+	docker compose --profile dev --profile prod down
+
+# The API on the host (needs `make up`): http://localhost:8000
+serve:
+	$(PY) -m uvicorn main:app --app-dir api --host 127.0.0.1 --port 8000
 
 seed:
 	$(PY) scripts/01_download.py

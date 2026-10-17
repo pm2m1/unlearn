@@ -1,6 +1,6 @@
 FalkorDB==1.8.0
 pandas==3.0.6
-huggingface_hub==2.2.0
+huggingface_hub==1.33.0
 pytest==9.1.1
 python-dotenv==1.2.4
 networkx==3.7

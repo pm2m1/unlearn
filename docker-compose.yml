@@ -1,19 +1,73 @@
+# Two profiles share one FalkorDB volume:
+#   dev   FalkorDB on 127.0.0.1:6379 (seed scripts and tests run on the host) + API on 127.0.0.1:8000
+#   prod  only the API is published (0.0.0.0:8000); FalkorDB has no published port at all
+# Run one profile at a time:  docker compose --profile dev up -d --build
+#                             docker compose --profile prod up -d --build
+
+x-falkordb: &falkordb
+  # Pinned: last 4.x patch older than two weeks. 6.0.x (new Rust engine) avoided per SPEC risks.
+  image: falkordb/falkordb:v4.20.7
+  environment:
+    - REDIS_ARGS=--requirepass ${FALKOR_PASSWORD}
+  volumes:
+    - falkor-data:/var/lib/falkordb/data
+  healthcheck:
+    test: ["CMD-SHELL", "redis-cli -a '${FALKOR_PASSWORD}' --no-auth-warning ping | grep -q PONG"]
+    interval: 5s
+    timeout: 3s
+    retries: 10
+  restart: unless-stopped
+
+x-api: &api
+  build:
+    context: .
+    dockerfile: api/Dockerfile
+  image: unlearn-api:local
+  environment:
+    FALKOR_HOST: falkordb
+    FALKOR_PORT: "6379"
+    FALKOR_PASSWORD: ${FALKOR_PASSWORD}
+    GROQ_API_KEY: ${GROQ_API_KEY:-}
+    GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    GROQ_MODEL: ${GROQ_MODEL:-}
+    GEMINI_MODEL: ${GEMINI_MODEL:-}
+    OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
+    UNLEARN_LLM: ${UNLEARN_LLM:-auto}
+  restart: unless-stopped
+
 services:
   falkordb:
-    # Pinned: last 4.x patch older than two weeks. 6.0.x (new Rust engine) avoided per SPEC risks.
-    image: falkordb/falkordb:v4.20.7
-    environment:
-      - REDIS_ARGS=--requirepass ${FALKOR_PASSWORD}
-    volumes:
-      - falkor-data:/var/lib/falkordb/data
-    # Local dev only: seed scripts run on the host. Bound to loopback, never public.
+    <<: *falkordb
+    profiles: ["dev"]
+    # Local dev only: bound to loopback, never public.
     ports:
       - "127.0.0.1:${FALKOR_PORT:-6379}:6379"
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a '${FALKOR_PASSWORD}' --no-auth-warning ping | grep -q PONG"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+
+  falkordb-prod:
+    <<: *falkordb
+    profiles: ["prod"]
+    networks:
+      default:
+        aliases: [falkordb]
+
+  api:
+    <<: *api
+    profiles: ["dev"]
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      falkordb:
+        condition: service_healthy
+
+  api-prod:
+    <<: *api
+    profiles: ["prod"]
+    ports:
+      - "8000:8000"
+    depends_on:
+      falkordb-prod:
+        condition: service_healthy
 
 volumes:
   falkor-data:
