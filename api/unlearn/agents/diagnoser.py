@@ -42,7 +42,7 @@ class Diagnoser(Agent):
         sid, cid, sess = ctx["student_id"], ctx["construct_id"], ctx["session"]
 
         rec = self.call(task_id, tools.recall, c, sid)
-        self.say(task_id, "recall", {"recall": rec["rows"]}, rec["rows"])
+        self.say(task_id, "recall", {"recall": rec["rows"], "session_n": ctx["session_n"]}, rec["rows"])
 
         asked, ruled_out, suspects, exhausted = 0, set(), [], set()
         while True:

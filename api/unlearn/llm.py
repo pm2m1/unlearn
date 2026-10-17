@@ -111,6 +111,8 @@ def _join(xs: list[str]) -> str:
 def template(kind: str, facts: dict) -> str:
     if kind == "recall":
         items = facts.get("recall") or []
+        if not items and (facts.get("session_n") or 1) > 1:
+            return "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         if not items:
             return "Welcome! This is our first session, so I'll start with a few questions."
         parts = [f"{r['misconception']} ({r['times']} times)" for r in items[:2]]

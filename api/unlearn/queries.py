@@ -439,9 +439,16 @@ RETURN count(e) AS n, collect(DISTINCT e.weight) AS weights, collect(DISTINCT e.
 
 # --- Agent helpers (not among the 16 tools) -----------------------------------
 
+STUDENT_SESSIONS = """
+MATCH (:Student {id:$sid})-[:HAD_SESSION]->(se:Session)
+RETURN se.id AS id, se.n AS n, se.ts AS ts ORDER BY n
+"""
+
 TASK_CONTEXT = """
 MATCH (t:Task {id:$id})-[:ABOUT]->(s:Student)
-RETURN t.id AS id, t.kind AS kind, s.id AS student_id, t.construct_id AS construct_id, t.session AS session
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(se:Session {id:t.session})
+RETURN t.id AS id, t.kind AS kind, s.id AS student_id, t.construct_id AS construct_id, t.session AS session,
+       se.n AS session_n
 """
 
 COMPLETE_TASK = """

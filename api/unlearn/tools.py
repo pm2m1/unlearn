@@ -302,6 +302,12 @@ def task_context(class_id: str, task_id: str) -> dict:
     return r.done(rows, _ids("Task", [task_id]) + _ids("Student", [x["student_id"] for x in rows]))
 
 
+def sessions(class_id: str, student_id: str) -> dict:
+    """The student's sessions, oldest first."""
+    r = _Receipt(graph_name(class_id))
+    return r.done(r.run(Q.STUDENT_SESSIONS, {"sid": student_id}), _ids("Student", [student_id]))
+
+
 def complete_task(class_id: str, task_id: str) -> dict:
     """End a chain: mark the last task completed without handing off."""
     r = _Receipt(graph_name(class_id))
