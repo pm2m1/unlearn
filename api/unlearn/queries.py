@@ -663,3 +663,52 @@ SESSION_LOOKUP = """
 MATCH (s:Student)-[:HAD_SESSION]->(se:Session {id:$sess})
 RETURN s.id AS student_id, se.n AS n, se.ts AS ts
 """
+
+# --- API / UI reads ------------------------------------------------------------------------------------
+
+# The REQUIRES subgraph under a target: the student's slice for the graph panel.
+SLICE_FOR_TARGET = """
+MATCH (:Construct {id:$tid})-[:REQUIRES*0..6]->(c:Construct)
+RETURN DISTINCT c.id AS id, c.name AS name
+"""
+
+SLICE_EDGES = """
+MATCH (:Construct {id:$tid})-[:REQUIRES*0..6]->(a:Construct)-[:REQUIRES]->(b:Construct)
+RETURN DISTINCT a.id AS src, b.id AS dst
+"""
+
+STUDENT_SHOWED_ON_SLICE = """
+MATCH (:Student {id:$sid})-[e:SHOWED]->(m:Misconception)-[si:SEEN_IN]->(c:Construct)
+WHERE c.id IN $cids
+RETURN m.id AS mid, m.name AS name, e.count AS count, e.confidence AS confidence, c.id AS cid, si.w AS w
+"""
+
+STUDENT_MASTERED_ON_SLICE = """
+MATCH (:Student {id:$sid})-[m:MASTERED]->(c:Construct)
+WHERE c.id IN $cids
+RETURN c.id AS id, m.evidence AS evidence
+"""
+
+CLASS_STUDENTS = """
+MATCH (s:Student)
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(se:Session)
+RETURN s.id AS id, s.alias AS alias, count(se) AS sessions
+ORDER BY id
+"""
+
+# Constructs that have prerequisites, deepest chains first: the session targets a teacher can pick.
+TARGETS = """
+MATCH (st:SubTopic)-[:HAS_CONSTRUCT]->(c:Construct)-[:REQUIRES]->(:Construct)
+WITH DISTINCT st, c
+MATCH p = (c)-[:REQUIRES*1..6]->(:Construct)
+RETURN c.id AS id, c.name AS name, st.name AS subtopic, max(length(p)) AS depth
+ORDER BY depth DESC, name
+"""
+
+PROPOSAL_LOOKUP = """
+MATCH (p:Proposal {id:$id}) RETURN p.id AS id, p.state AS state
+"""
+
+COUNT_NODES = """
+MATCH (n) RETURN count(n) AS n
+"""

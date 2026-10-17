@@ -402,6 +402,41 @@ def session_lookup(class_id: str, session_id: str) -> dict:
     return r.done(rows, _ids("Student", [x["student_id"] for x in rows]))
 
 
+def student_graph(class_id: str, student_id: str, target_id: int, session_id: str | None = None) -> dict:
+    """The student's slice under a target for the graph panel: constructs, REQUIRES edges, the student's
+    misconceptions on them, mastered constructs, this session's attempts, and root_cause with its chain."""
+    r = _Receipt(graph_name(class_id))
+    constructs = r.run(Q.SLICE_FOR_TARGET, {"tid": target_id})
+    cids = [x["id"] for x in constructs]
+    edges = r.run(Q.SLICE_EDGES, {"tid": target_id})
+    showed = r.run(Q.STUDENT_SHOWED_ON_SLICE, {"sid": student_id, "cids": cids})
+    mastered = r.run(Q.STUDENT_MASTERED_ON_SLICE, {"sid": student_id, "cids": cids})
+    attempts = r.run(Q.SESSION_ATTEMPTS, {"sid": student_id, "sess": session_id}) if session_id else []
+    rc = r.run(Q.ROOT_CAUSE, {"sid": student_id, "cid": target_id})
+    chain = r.run(Q.ROOT_CAUSE_CHAIN, {"cid": target_id, "pid": rc[0]["id"]}) if rc else []
+    row = {"target": target_id, "constructs": constructs, "requires": edges, "showed": showed,
+           "mastered": mastered, "attempts": attempts, "root_cause": rc,
+           "chain_ids": chain[0]["ids"] if chain else []}
+    return r.done([row], _ids("Student", [student_id]) + _ids("Construct", cids))
+
+
+def class_students(class_id: str) -> dict:
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.CLASS_STUDENTS)
+    return r.done(rows, _ids("Student", [x["id"] for x in rows]))
+
+
+def targets(class_id: str) -> dict:
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.TARGETS)
+    return r.done(rows, _ids("Construct", [x["id"] for x in rows]))
+
+
+def proposal_lookup(class_id: str, proposal_id: str) -> dict:
+    r = _Receipt(graph_name(class_id))
+    return r.done(r.run(Q.PROPOSAL_LOOKUP, {"id": proposal_id}), _ids("Proposal", [proposal_id]))
+
+
 # Query text -> its name in queries.py, so traces can print "ROOT_CAUSE" instead of the Cypher.
 QUERY_NAMES = {v.strip(): k for k, v in vars(Q).items() if k.isupper() and isinstance(v, str)}
 

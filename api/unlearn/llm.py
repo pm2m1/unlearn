@@ -232,3 +232,19 @@ def write(kind: str, facts: dict, turn_rows: list, vocabulary: list[str]) -> Rep
             continue
         return _template_reply(kind, facts, turn_rows, vocabulary, attempts)  # failed the check twice
     return _template_reply(kind, facts, turn_rows, vocabulary, attempts)
+
+
+# --- Tool calling (Teacher chat) -------------------------------------------------
+
+def chat_tools(provider: Provider, messages: list[dict], tool_specs: list[dict]) -> dict:
+    """One tool-calling round. Returns {"content", "tool_calls": [{"id", "name", "arguments"}]}. Not cached:
+    each round depends on live tool rows."""
+    from openai import OpenAI
+
+    client = OpenAI(api_key=provider.key, base_url=provider.base_url, timeout=TIMEOUT_S, max_retries=0)
+    resp = client.chat.completions.create(model=provider.model, messages=messages, tools=tool_specs,
+                                          max_tokens=MAX_TOKENS, temperature=0.2)
+    msg = resp.choices[0].message
+    calls = [{"id": c.id, "name": c.function.name, "arguments": json.loads(c.function.arguments or "{}")}
+             for c in (msg.tool_calls or [])]
+    return {"content": (msg.content or "").strip(), "tool_calls": calls}
