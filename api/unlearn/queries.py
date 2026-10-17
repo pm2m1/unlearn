@@ -468,8 +468,9 @@ RETURN se.id AS id, se.n AS n, se.ts AS ts ORDER BY n
 TASK_CONTEXT = """
 MATCH (t:Task {id:$id})-[:ABOUT]->(s:Student)
 OPTIONAL MATCH (s)-[:HAD_SESSION]->(se:Session {id:t.session})
-RETURN t.id AS id, t.kind AS kind, s.id AS student_id, t.construct_id AS construct_id, t.session AS session,
-       se.n AS session_n
+RETURN t.id AS id, t.kind AS kind, t.state AS state, s.id AS student_id, t.construct_id AS construct_id,
+       t.session AS session, se.n AS session_n, t.pending_qid AS pending_qid, t.pending_cid AS pending_cid,
+       t.skill AS skill, t.mid AS mid, t.root_id AS root_id
 """
 
 COMPLETE_TASK = """
@@ -607,4 +608,58 @@ MATCH (:Proposal {id:$pid})-[:HAD_EVENT]->(ev:Event) RETURN ev.id AS id, ev.type
 
 COUNT_LABELS = """
 MATCH (n) WHERE n:Group OR n:Assignment RETURN labels(n)[0] AS label, count(n) AS n
+"""
+
+# --- Steppable agents: per-session state lives on the Task and in this session's ATTEMPTED edges ----------
+
+# Claim one specific task (an HTTP request driving its own session). Race-safe like CLAIM.
+CLAIM_TASK = """
+MATCH (t:Task {id:$id, state:'submitted'})-[:ASSIGNED_TO]->(:Agent {name:$agent})
+SET t.state = 'working', t.claimed_by = $worker
+RETURN t.id AS id, t.kind AS kind
+"""
+
+# CLAIM limited to one session, so a simulated session's workers never take a live session's tasks.
+CLAIM_IN_SESSION = """
+MATCH (t:Task {state:'submitted', session:$sess})-[:ASSIGNED_TO]->(:Agent {name:$agent})
+WITH t ORDER BY t.created_ts LIMIT 1
+SET t.state = 'working', t.claimed_by = $worker
+RETURN t.id AS id, t.kind AS kind
+"""
+
+# The question a task is waiting on (null clears it).
+SET_PENDING = """
+MATCH (t:Task {id:$id}) SET t.pending_qid = $qid, t.pending_cid = $cid RETURN t.id AS id
+"""
+
+# What the Tutor taught, so the check answer can update the right skill in a later request.
+SET_TUTOR_PLAN = """
+MATCH (t:Task {id:$id}) SET t.skill = $skill, t.mid = $mid, t.root_id = $root RETURN t.id AS id
+"""
+
+SESSION_TASKS = """
+MATCH (t:Task {session:$sess})
+OPTIONAL MATCH (t)-[:ASSIGNED_TO]->(a:Agent)
+RETURN t.id AS id, t.kind AS kind, t.state AS state, t.pending_qid AS pending_qid, a.name AS agent,
+       t.created_ts AS created_ts
+ORDER BY created_ts
+"""
+
+# This session's answers in order: the Diagnoser's search state is derived from these.
+SESSION_ATTEMPTS = """
+MATCH (:Student {id:$sid})-[a:ATTEMPTED {session:$sess}]->(q:Question)-[:ASSESSES]->(c:Construct)
+RETURN q.id AS qid, c.id AS construct_id, a.correct AS correct, a.ts AS ts
+ORDER BY ts, qid
+"""
+
+# Answered correctly this session, plus everything those constructs depend on: ruled out as the root cause.
+SESSION_RULED_OUT = """
+MATCH (:Student {id:$sid})-[:ATTEMPTED {session:$sess, correct:true}]->(:Question)-[:ASSESSES]->(c:Construct)
+MATCH (c)-[:REQUIRES*0..6]->(d:Construct)
+RETURN collect(DISTINCT d.id) AS ids
+"""
+
+SESSION_LOOKUP = """
+MATCH (s:Student)-[:HAD_SESSION]->(se:Session {id:$sess})
+RETURN s.id AS student_id, se.n AS n, se.ts AS ts
 """

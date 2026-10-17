@@ -131,3 +131,27 @@ def test_fabricated_llm_reply_never_reaches_the_student(world, monkeypatch):
     assert said and all(s.source == "template" for s in said)
     assert all("cheese" not in s.text for s in said)
     assert all([a["ok"] for a in s.rows] == [False, False, True] for s in said)
+
+
+def test_step_api_drives_one_session_without_memory(world):
+    """The HTTP path: one call per step, a fresh agent each time; only the graph carries state."""
+    from unlearn.agents import runner
+    from unlearn.agents.base import StepError
+
+    run_batched(f"class_{CLASS_ID}", Q.LOAD_STUDENTS, [{"id": "p5", "alias": "P5"}])
+    student = Simulator(seed=0, noiseless=True).student("p5", 408, 410, [18650])
+    out = runner.start(CLASS_ID, "p5", 410, session_id="p5-s1")
+    assert out["kind"] == "question" and out["session_n"] == 1
+    with pytest.raises(StepError):
+        runner.answer(CLASS_ID, "p5-s1", "q-not-pending", "A")
+    while out["kind"] == "question":
+        out = runner.answer(CLASS_ID, "p5-s1", out["question"]["id"], student.answer(out["question"]))
+    assert out["kind"] == "diagnosis" and out["root"]["id"] == 408
+    tut = runner.remediate(CLASS_ID, "p5-s1")
+    assert tut["kind"] == "check" and tut["skill"]["skill"] and tut["explanation"]
+    with pytest.raises(StepError):
+        runner.remediate(CLASS_ID, "p5-s1")  # already claimed
+    done = runner.answer(CLASS_ID, "p5-s1", tut["question"]["id"], student.answer(tut["question"]))
+    assert done["kind"] == "done" and done["agent"] == "Tutor"
+    with pytest.raises(StepError):
+        runner.answer(CLASS_ID, "p5-s1", tut["question"]["id"], "A")  # nothing pending any more

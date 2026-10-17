@@ -217,10 +217,13 @@ def create_task(class_id: str, task_id: str, kind: str, student_id: str, agent: 
     return r.done(rows, _ids("Task", [task_id]) + _ids("Student", [student_id]))
 
 
-def claim(class_id: str, agent: str, worker: str) -> dict:
-    """Claim the oldest submitted task for an agent. At most one worker wins a task."""
+def claim(class_id: str, agent: str, worker: str, session_id: str | None = None) -> dict:
+    """Claim the oldest submitted task for an agent (only in one session, if given). At most one worker wins a task."""
     r = _Receipt(graph_name(class_id))
-    rows = r.run(Q.CLAIM, {"agent": agent, "worker": worker})
+    if session_id is None:
+        rows = r.run(Q.CLAIM, {"agent": agent, "worker": worker})
+    else:
+        rows = r.run(Q.CLAIM_IN_SESSION, {"agent": agent, "worker": worker, "sess": session_id})
     return r.done(rows, _ids("Task", [x["id"] for x in rows]))
 
 
@@ -356,6 +359,47 @@ def reset_student(class_id: str, student_id: str) -> dict:
               Q.RESET_STUDENT_EDGES, Q.RESET_STUDENT_GROUPS):
         r.run(q, {"sid": student_id})
     return r.done([], _ids("Student", [student_id]))
+
+
+def claim_task(class_id: str, task_id: str, agent: str, worker: str) -> dict:
+    """Claim one specific submitted task. Empty rows if someone else already has it."""
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.CLAIM_TASK, {"id": task_id, "agent": agent, "worker": worker})
+    return r.done(rows, _ids("Task", [task_id]))
+
+
+def set_pending(class_id: str, task_id: str, question_id: str | None, construct_id: int | None) -> dict:
+    """Record the question a task is waiting on, or clear it."""
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.SET_PENDING, {"id": task_id, "qid": question_id, "cid": construct_id})
+    return r.done(rows, _ids("Task", [task_id]) + _ids("Question", [question_id]))
+
+
+def set_tutor_plan(class_id: str, task_id: str, skill: str | None, misconception_id: int, root_id: int) -> dict:
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.SET_TUTOR_PLAN, {"id": task_id, "skill": skill, "mid": misconception_id, "root": root_id})
+    return r.done(rows, _ids("Task", [task_id]))
+
+
+def session_tasks(class_id: str, session_id: str) -> dict:
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.SESSION_TASKS, {"sess": session_id})
+    return r.done(rows, _ids("Task", [x["id"] for x in rows]))
+
+
+def session_state(class_id: str, student_id: str, session_id: str) -> dict:
+    """This session's attempts in order, and the constructs they rule out (answered right, plus their prerequisites)."""
+    r = _Receipt(graph_name(class_id))
+    attempts = r.run(Q.SESSION_ATTEMPTS, {"sid": student_id, "sess": session_id})
+    ruled_out = r.run(Q.SESSION_RULED_OUT, {"sid": student_id, "sess": session_id})
+    rows = [{"attempts": attempts, "ruled_out": ruled_out[0]["ids"] if ruled_out else []}]
+    return r.done(rows, _ids("Student", [student_id]) + _ids("Question", [a["qid"] for a in attempts]))
+
+
+def session_lookup(class_id: str, session_id: str) -> dict:
+    r = _Receipt(graph_name(class_id))
+    rows = r.run(Q.SESSION_LOOKUP, {"sess": session_id})
+    return r.done(rows, _ids("Student", [x["student_id"] for x in rows]))
 
 
 # Query text -> its name in queries.py, so traces can print "ROOT_CAUSE" instead of the Cypher.

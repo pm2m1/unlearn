@@ -11,6 +11,8 @@ from unlearn import llm, tools
 
 # answerer(student_id, question) -> option key. The question dict has id, text and options [{key, text}].
 Answerer = Callable[[str, dict], str]
+# Interactive agents (Diagnoser, Tutor) run one step per call: begin(task_id), then answer(task_id, ...) until
+# the returned dict's "kind" is no longer a question. Nothing is held in memory between steps.
 
 
 @dataclass
@@ -19,6 +21,8 @@ class Step:
     task_id: str
     tool: str                       # tool name, "llm:<kind>" for a reply, or "note"
     queries: list[str] = field(default_factory=list)
+    cypher: list[str] = field(default_factory=list)
+    params: list[dict] = field(default_factory=list)
     node_ids: list[dict] = field(default_factory=list)
     rows: list = field(default_factory=list)
     text: str = ""
@@ -40,7 +44,8 @@ class Agent:
 
     def call(self, task_id: str, fn, *args, **kwargs) -> dict:
         out = fn(*args, **kwargs)
-        self.on_step(Step(self.name, task_id, fn.__name__, tools.query_names(out), out["node_ids"], out["rows"]))
+        self.on_step(Step(self.name, task_id, fn.__name__, tools.query_names(out), out["cypher"], out["params"],
+                          out["node_ids"], out["rows"]))
         return out
 
     def note(self, task_id: str, text: str) -> None:
@@ -61,5 +66,12 @@ class Agent:
 
     # --- tasks ---
 
+    def context(self, task_id: str) -> dict:
+        return self.call(task_id, tools.task_context, self.class_id, task_id)["rows"][0]
+
     def handle(self, task_id: str) -> None:
         raise NotImplementedError
+
+
+class StepError(ValueError):
+    """The request doesn't fit the task's state (wrong question, nothing pending, task not open)."""
