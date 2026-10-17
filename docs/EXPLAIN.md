@@ -90,8 +90,9 @@ Root 345 after 5 questions, 2 levels down.
   | | B+ | B | Unlearn (C) |
   | --- | --- | --- | --- |
   | Root cause, seed 0 | 37% | 27% | 67% |
-  | Root cause, 3 seeds | — | — | 73% |
-  | Time per diagnosis | ~114 s | — | ~50 ms |
+  | Top-3 misconception, seed 0 | 33% | 23% | 73% |
+  | Root cause, 3 seeds | — | 37% | 73% |
+  | Time per diagnosis | ~114 s | ~8 s | ~50 ms |
 
   The graph's *knowledge* helps an LLM a little. The *traversal* (rule out, descend, weigh evidence, remember) is what gets you to the root.
 - **What the graph does that a prompt can't:**
@@ -113,7 +114,7 @@ Root 345 after 5 questions, 2 levels down.
   - Place value was left out on purpose.
 - **Baselines are capped by retrieval.**
   - A planted misconception is on A's candidate list for 20% of students and on B's for 16%, so their misconception scores can't go higher whatever the model does.
-  - B+ is scored against B's list too, although its prompt lists every misconception with its ID.
+  - B+ is not capped: it is scored on every ID in its prompt (410 misconceptions, 40 constructs). It was first scored on B's list only, which was corrected on Oct 18 from the cached outputs. Its top-3 went from 20% to 33%; its root cause was unchanged.
   - Root-cause candidates (the target's ~7 prerequisites) favour the baselines: a random pick is right 18% of the time.
 - **Model size.** The baselines ran on a 27B local model. A stronger model may narrow the gap on naming misconceptions.
 - **Questions run out.** There are only 3 questions per construct and `next_question` never repeats one, so session 2 sometimes can't re-ask the root.

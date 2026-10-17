@@ -48,7 +48,8 @@
       "recall_max_distance": 0.35,
       "pool_questions": 6
     },
-    "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C"
+    "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C",
+    "bplus_rescored": "B+ re-scored from the LLM cache on every id it was shown (eval/rescore_bplus.py); the first scoring kept only ids on B's retrieved list"
   },
   "per_seed": {
     "0": {
@@ -81,8 +82,8 @@
         "n": 30
       },
       "B+": {
-        "top1_misconception": 0.1,
-        "top3_misconception": 0.2,
+        "top1_misconception": 0.167,
+        "top3_misconception": 0.333,
         "root_cause_accuracy": 0.367,
         "questions_to_diagnosis": 6,
         "session2_recall": 0.1,
@@ -90,7 +91,7 @@
         "latency_p95_ms": 133112.7,
         "latency_n": 30,
         "invalid_json": 0,
-        "misconceptions_unmapped": 5,
+        "misconceptions_unmapped": 1,
         "root_unmapped": 1,
         "n": 30
       },
@@ -187,14 +188,14 @@
     },
     "B+": {
       "top1_misconception": {
-        "mean": 0.1,
-        "min": 0.1,
-        "max": 0.1
+        "mean": 0.167,
+        "min": 0.167,
+        "max": 0.167
       },
       "top3_misconception": {
-        "mean": 0.2,
-        "min": 0.2,
-        "max": 0.2
+        "mean": 0.333,
+        "min": 0.333,
+        "max": 0.333
       },
       "root_cause_accuracy": {
         "mean": 0.367,
@@ -1602,14 +1603,18 @@
         },
         {
           "sid": "s02",
-          "predicted": [],
+          "predicted": [
+            26193,
+            18650,
+            14092
+          ],
           "root": 428,
           "asked": 6,
           "latency_ms": 122996.64029100677,
           "recalled": false,
           "opening": "Great job on those fraction additions! However, we need to review adding mixed numbers and equivalent fractions. You missed questions where improper fractions needed simplifying or where different denominators represented the same value. Let's tackle those concepts first to build your confidence. Ready to start?",
           "json_ok": true,
-          "misconceptions_unmapped": true,
+          "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 428,
@@ -1643,6 +1648,8 @@
         {
           "sid": "s04",
           "predicted": [
+            15985,
+            22359,
             14092
           ],
           "root": 342,
@@ -1664,6 +1671,8 @@
         {
           "sid": "s05",
           "predicted": [
+            16249,
+            18617,
             13957
           ],
           "root": 331,
@@ -1711,7 +1720,8 @@
           "sid": "s07",
           "predicted": [
             24069,
-            15341
+            15341,
+            26183
           ],
           "root": 345,
           "asked": 6,
@@ -1730,14 +1740,18 @@
         },
         {
           "sid": "s08",
-          "predicted": [],
+          "predicted": [
+            24501,
+            18628,
+            15521
+          ],
           "root": 435,
           "asked": 6,
           "latency_ms": 124080.69508295739,
           "recalled": false,
           "opening": "Hi! Great job mastering equivalent fractions and mixed numbers last time. However, we need to review subtracting fractions with different denominators, as you chose 5/6 instead of 1/6 for 1/2 - 1/3. Let's focus on finding common denominators today to fix this!",
           "json_ok": true,
-          "misconceptions_unmapped": true,
+          "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 435,
@@ -1774,6 +1788,7 @@
           "sid": "s10",
           "predicted": [
             15636,
+            26147,
             18903
           ],
           "root": 3193,
@@ -1795,14 +1810,18 @@
         },
         {
           "sid": "s11",
-          "predicted": [],
+          "predicted": [
+            14092,
+            16784,
+            18648
+          ],
           "root": 3342,
           "asked": 6,
           "latency_ms": 124661.11504199216,
           "recalled": false,
           "opening": "Hello! Great job on your multiplication and LCM questions last time. I noticed you mixed up \"four sevenths\" by choosing 7/4 instead of 4/7. Let's start today by reviewing how to correctly write fractions so the numerator and denominator are in the right order. Ready?",
           "json_ok": true,
-          "misconceptions_unmapped": true,
+          "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 415,
@@ -1906,7 +1925,8 @@
           "sid": "s16",
           "predicted": [
             18805,
-            18904
+            18904,
+            15304
           ],
           "root": 421,
           "asked": 6,
@@ -1927,14 +1947,18 @@
         },
         {
           "sid": "s17",
-          "predicted": [],
+          "predicted": [
+            15931,
+            24501,
+            18628
+          ],
           "root": 433,
           "asked": 6,
           "latency_ms": 112182.46566696325,
           "recalled": false,
           "opening": "Hello! Great job on equivalent fractions and identifying numerators/denominators. Today, we'll focus on subtracting fractions with different denominators and understanding multiples of 4, as these were tricky last time. Let's review those concepts together to build your confidence!",
           "json_ok": true,
-          "misconceptions_unmapped": true,
+          "misconceptions_unmapped": false,
           "root_unmapped": false,
           "planted": {
             "root": 432,
@@ -2017,7 +2041,9 @@
         {
           "sid": "s21",
           "predicted": [
-            18904
+            18904,
+            15304,
+            14092
           ],
           "root": 421,
           "asked": 6,
@@ -2037,6 +2063,8 @@
         {
           "sid": "s22",
           "predicted": [
+            14092,
+            15515,
             16057
           ],
           "root": 3378,
@@ -2081,7 +2109,9 @@
         {
           "sid": "s24",
           "predicted": [
-            18661
+            18661,
+            14092,
+            15515
           ],
           "root": 3378,
           "asked": 6,
@@ -2171,6 +2201,8 @@
         {
           "sid": "s28",
           "predicted": [
+            15333,
+            26058,
             14121
           ],
           "root": 428,
@@ -2193,6 +2225,7 @@
           "sid": "s29",
           "predicted": [
             19086,
+            24501,
             15501
           ],
           "root": 345,

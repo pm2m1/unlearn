@@ -252,10 +252,19 @@ def condition_b(provider, judge: Judge, answers, constructs, graph_text: str | N
     out = parse_json(text)
     if out is None:
         STATS["json_failures"] += 1
-    return {**map_ids(out, cands, constructs), "raw": text, "calls": 1, "retrieved": [i for i, _ in cands]}
+    # B+ is scored on every id it was shown: B's lists plus every id in the graph text.
+    m_shown = cands + list(getattr(graph_text, "misconceptions", []))
+    c_shown = constructs + list(getattr(graph_text, "constructs", []))
+    return {**map_ids(out, m_shown, c_shown), "raw": text, "calls": 1, "retrieved": [i for i, _ in cands]}
 
 
-def graph_as_text(graph: str) -> str:
+class GraphText(str):
+    """B+'s graph as prompt text, carrying the (id, name) lists it shows so B+ can be scored on all of them."""
+    misconceptions: list[tuple[int, str]]
+    constructs: list[tuple[int, str]]
+
+
+def graph_as_text(graph: str) -> GraphText:
     """B+'s knowledge: the class graph's curated REQUIRES edges and every construct's misconceptions with weights."""
     from unlearn import queries as Q
     req, _ = run(graph, Q.ALL_REQUIRES)
@@ -269,7 +278,11 @@ def graph_as_text(graph: str) -> str:
         by.setdefault((r["cid"], r["cname"]), []).append(f"[{r['mid']}] {r['mname']} (w {r['w']:.2f})")
     for (cid, cname), ms in sorted(by.items()):
         lines.append(f"[{cid}] {cname}: " + "; ".join(ms))
-    return "\n".join(lines)
+    text = GraphText("\n".join(lines))
+    text.misconceptions = list(dict.fromkeys((r["mid"], r["mname"]) for r in seen))
+    text.constructs = list(dict.fromkeys([(r["a"], r["a_name"]) for r in req] + [(r["b"], r["b_name"]) for r in req]
+                                         + [(r["cid"], r["cname"]) for r in seen]))
+    return text
 
 
 def opening_b(provider, answers) -> str:

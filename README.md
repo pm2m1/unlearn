@@ -304,21 +304,26 @@ It walks up to four prerequisite hops back from the skill the student is working
   - **C: Unlearn.** The agents, through the same step API the web UI uses.
 - **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk, and cached diagnoses are left out of the latency figures.
 - **Same question pool.** A, B and B+ ask the same seeded 6 questions from the pool C draws from (the target and everything it depends on). C chooses its questions adaptively.
-- **Answers are IDs.** A, B and B+ choose from candidate lists with IDs and must reply with IDs. An ID that wasn't offered counts as wrong.
+- **Answers are IDs.** A, B and B+ choose from candidate lists with IDs and must reply with IDs. An ID the condition wasn't shown counts as wrong.
   - Root-cause candidates are the target's prerequisites, taken from the curated graph. **That narrows their choice to about 7 skills and favours them.** A random pick is already right 17–19% of the time.
-  - Misconception candidates are the retrieved ones.
+  - Misconception candidates are the retrieved ones for A and B. B+ is scored on every ID it was shown: B's lists plus every misconception and construct in its graph text.
 - **Session-2 recall** means the opening message of session 2 names a planted misconception, as judged by embedding distance ≤ 0.35 for every condition. B+ opens exactly as B does, so the two share a recall score.
 - **The first run's scoring was replaced.** It asked for free text and snapped every answer to its nearest ID, so a vague answer was still scored as a specific skill. An audit of its cached outputs found no invalid JSON, but 8–14 of about 30 root-cause guesses per condition and seed weren't close to the skill they were scored as. Scoring by offered IDs roughly doubled A's and B's root-cause scores on seed 0 (13% → 27% and 10% → 27%).
 - **B+ ran on seed 0 only.** At about 115 s per call, all three seeds would have taken about three hours, against a 75-minute budget.
+- **Correction (Oct 18): B+ re-scored.** B+ was first scored only on IDs from B's retrieved list, although its prompt lists all 410 misconceptions with their IDs. Planted misconceptions it named from the graph text were counted wrong. It was re-scored on every ID it was shown, from the cached model outputs with no new LLM calls (`eval/rescore_bplus.py`). The replay reproduced A's and B's saved predictions exactly, and only B+'s scoring fields changed (14 of 30 students). Results:
+  - Top-1 misconception went from 10% to 17%.
+  - Top-3 misconception went from 20% to 33%.
+  - Root cause stayed at 37%: every planted root is one of the prerequisites B+ was offered anyway.
+  - A, B, C, latency and recall are unchanged.
 
 **Results** (generated from [`eval/results/eval.json`](eval/results/eval.json) and [`random_baseline.json`](eval/results/random_baseline.json) by `scripts/readme_eval.py`):
 
 <!-- eval:start -->
-| Metric | A. No memory (n=90, seeds 0, 1, 2) | B. Vector RAG (n=90, seeds 0, 1, 2) | B+. LLM + graph as text (n=30, seeds 0) | C. Unlearn (n=90, seeds 0, 1, 2) | Random guess (A / B, B+ lists) |
+| Metric | A. No memory (n=90, seeds 0, 1, 2) | B. Vector RAG (n=90, seeds 0, 1, 2) | B+. LLM + graph as text (n=30, seeds 0) | C. Unlearn (n=90, seeds 0, 1, 2) | Random guess (A / B / B+) |
 | --- | --- | --- | --- | --- | --- |
-| Top-1 misconception | 6% (0%–10%) | 8% (3%–17%) | 10% | 47% (40%–50%) | 2% / 2% |
-| Top-3 misconception | 6% (0%–10%) | 11% (3%–23%) | 20% | 78% (73%–87%) | 7% / 5% |
-| Root-cause accuracy | 28% (23%–33%) | 37% (27%–47%) | 37% | 73% (67%–80%) | 18% |
+| Top-1 misconception | 6% (0%–10%) | 8% (3%–17%) | 17% | 47% (40%–50%) | 2.2% / 1.6% / 0.5% |
+| Top-3 misconception | 6% (0%–10%) | 11% (3%–23%) | 33% | 78% (73%–87%) | 6.5% / 4.7% / 1.5% |
+| Root-cause accuracy | 28% (23%–33%) | 37% (27%–47%) | 37% | 73% (67%–80%) | 18% / 18% / 2.5% |
 | Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.3 (5.2–5.4) | – |
 | Session-2 recall | 0% | 10% | 10% | 56% (50%–63%) | – |
 | p50 latency per diagnosis | 12.6 s (9.4 s–17.8 s) | 7.6 s (7.0 s–8.6 s) | 114.1 s | 51 ms (50 ms–51 ms) | – |
@@ -326,7 +331,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 
 Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
 
-Candidate lists, averaged over the same students: 6.7 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B and B+. A planted misconception is on A's list for 20% of students and on B's for 16%, which caps A's and B's misconception scores whatever the model does. **B+ is capped by the same list:** its prompt lists every misconception with its ID, but only IDs on B's retrieved list are scored, so a planted misconception it names from the graph text counts as wrong.
+Candidate lists, averaged over the same students: 6.7 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B. A planted misconception is on A's list for 20% of students and on B's for 16%, which caps A's and B's misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was shown, B's lists plus its graph text (410 misconceptions and 40 constructs), and every planted misconception (100%) is in it. The random-guess column picks uniformly from those same sets.
 
 <sup>Footnote: cross-check with `gemini-3.6-flash` on seed 0 (A: n=3, B: n=2), first scoring method. **Indicative only, n too small to conclude.** The Gemini free tier allows 20 requests per model per day.</sup>
 
@@ -340,9 +345,11 @@ Candidate lists, averaged over the same students: 6.7 root-cause candidates (the
 **What the table says.**
 - **C wins on every metric.**
   - Root cause: 73% against 28–37% for the baselines and 18% for a random pick from their own lists.
-  - Misconceptions: 47% top-1 and 78% top-3, against at most 20% for any baseline.
+  - Misconceptions: 47% top-1 and 78% top-3, against at most 17% and 33% for any baseline (B+).
   - It asks fewer questions (5.3 against 6) and answers in about 50 ms instead of 7–114 s.
-- **B+ tests knowledge against traversal.** On seed 0, the only seed it ran on, B+ beats B on root cause (37% against 27%), so the graph's knowledge does help an LLM. It's still far from C (67% on seed 0). Pasting the graph into the prompt doesn't reproduce what traversing it does, and it makes each call about 15× slower.
+- **B+ tests knowledge against traversal.** On seed 0, the only seed it ran on:
+  - **Against B:** B+ beats B on root cause (37% against 27%) and top-3 misconception (33% against 23%), and ties it on top-1 (17%). So the graph's knowledge does help an LLM.
+  - **Against C:** it's still far behind (67% root cause, 50% top-1, 73% top-3 on seed 0). Pasting the graph into the prompt doesn't reproduce what traversing it does, and it makes each call about 15× slower than B.
 - **B+ is not close to C on any metric**, so no claim needs narrowing on that count.
 - **Session-2 recall** is 56% for C against 10% for B and B+ (whose openings are identical) and 0% for A.
   - The eval's figure comes from the embedding judge applied to the real opening text.

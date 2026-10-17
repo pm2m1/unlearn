@@ -705,23 +705,24 @@ function evalTable(r, title) {
       return el("th", {}, el("div", { text: l }), n ? el("div", { class: "muted", style: "font-weight:400;font-size:12px", text: `n=${n}, seed${seeds.length > 1 ? "s" : ""} ${seeds.join(", ")}` }) : null);
     }))),
       el("tbody", {}, rows.map(([label, key, u]) => el("tr", {}, el("td", { text: label }), conds.map(([c]) => cell(c, key, u)))))),
-    ...notes, el("p", { class: "muted", text: `Simulator bias: ${m.simulator_bias}.` })];
+    ...notes, ...(m.bplus_rescored ? [el("p", { class: "muted", text: `Correction: ${m.bplus_rescored}.` })] : []),
+    el("p", { class: "muted", text: `Simulator bias: ${m.simulator_bias}.` })];
 }
 
 function randomView(r) {
   const seeds = Object.keys(r.per_seed);
   const avg = (f) => seeds.reduce((a, s) => a + f(r.per_seed[s]), 0) / seeds.length;
-  const pct = (x) => `${Math.round(100 * x)}%`;
-  const row = (label, key) => el("tr", {}, el("td", { text: label }),
-    el("td", { text: pct(avg((p) => p.A[key])) }), el("td", { text: pct(avg((p) => p.B_and_Bplus[key])) }));
+  const pct = (x) => (x < 0.1 ? `${(100 * x).toFixed(1)}%` : `${Math.round(100 * x)}%`);
+  const conds = ["A", "B", "B+"];
+  const row = (label, key) => el("tr", {}, el("td", { text: label }), ...conds.map((c) => el("td", { text: pct(avg((p) => p[c][key])) })));
   const sz = (k) => avg((p) => p.candidate_list_sizes[k]).toFixed(1);
   return [el("h2", { text: "Random guess from the same candidate lists" }),
-    el("p", { class: "muted", text: `Expected score of picking uniformly from what A and B/B+ are shown, over the same students (seeds ${seeds.join(", ")}). Lists: ${sz("prerequisites")} root-cause candidates, ${sz("A_misconceptions")} misconceptions for A, ${sz("B_misconceptions")} for B/B+. C has no list; it searches the whole graph.` }),
-    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, ["Metric", "A's lists", "B, B+ lists"].map((h) => el("th", { text: h })))),
+    el("p", { class: "muted", text: `Expected score of picking uniformly from what each condition is scored on, over the same students (seeds ${seeds.join(", ")}). A and B: ${sz("prerequisites")} root-cause candidates, ${sz("A_misconceptions")} misconceptions for A, ${sz("B_misconceptions")} for B. B+ is scored on every id it was shown: ${sz("Bplus_misconceptions")} misconceptions and ${sz("Bplus_constructs")} constructs. C has no list; it searches the whole graph.` }),
+    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, ["Metric", "A", "B", "B+"].map((h) => el("th", { text: h })))),
       el("tbody", {}, row("Top-1 misconception", "top1_misconception"), row("Top-3 misconception", "top3_misconception"),
         row("Root-cause accuracy", "root_cause_accuracy"),
-        el("tr", {}, el("td", { text: "Planted misconception on the list" }), el("td", { text: pct(avg((p) => p.planted_misconception_on_list.A)) }),
-          el("td", { text: pct(avg((p) => p.planted_misconception_on_list.B_and_Bplus)) }))))];
+        el("tr", {}, el("td", { text: "Planted misconception on the list" }),
+          ...conds.map((c) => el("td", { text: pct(avg((p) => p.planted_misconception_on_list[c])) })))))];
 }
 
 function concurrencyView(r) {

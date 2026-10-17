@@ -69,3 +69,21 @@ def test_call_cap_stops_cleanly(fake_llm):
     result = json.loads((out / "pytest_capped.json").read_text())
     total = result["meta"]["llm_calls"]["calls"] + result["meta"]["calibration"]["calls"]
     assert total <= 4 and "cap" in result["meta"]["stopped"]  # the cap includes the calibration calls
+
+
+def test_bplus_is_scored_on_every_id_it_was_shown(monkeypatch):
+    from eval.simulator import Simulator
+    BL.reset_stats()  # no call cap left over from another test
+    judge = BL.Judge("class_template")
+    graph_text = BL.graph_as_text("class_template")
+    sim = Simulator(seed=0)
+    student = Simulator(seed=0).student("s01")
+    answers = BL.answer_session(student, BL.pool_questions(sim, student))
+    constructs = BL.prerequisite_candidates(sim, student, judge.construct_names)
+    retrieved = {i for i, _ in BL.retrieved(judge, answers)}
+    only_in_graph = next(i for i, _ in graph_text.misconceptions if i not in retrieved)
+    fake = llm.Provider("fake", "FAKE", "http://unused", "FAKE_MODEL", "fake-1")
+    reply = json.dumps({"misconception_ids": [only_in_graph], "root_cause_id": constructs[0][0]})
+    monkeypatch.setattr(llm, "complete", lambda provider, messages: (reply, False))
+    assert BL.condition_b(fake, judge, answers, constructs)["predicted"] == []                     # B: not offered
+    assert BL.condition_b(fake, judge, answers, constructs, graph_text)["predicted"] == [only_in_graph]  # B+: shown

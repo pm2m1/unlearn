@@ -41,12 +41,16 @@ def cell(summary, c, m, unit, multi):
     return f"{fmt(v['mean'], unit)} ({lo}–{hi})"
 
 
-def random_column(rb, seeds):
-    """Mean over the seeds each condition ran: root cause is the same list for A/B/B+, misconceptions differ."""
-    def mean(key, sub):
-        xs = [rb["per_seed"][str(s)][sub][key] for s in seeds if str(s) in rb["per_seed"]]
+def random_column(rb, seeds_of):
+    """Expected score of a uniform pick from what each condition is scored on, over the seeds it ran."""
+    def mean(key, c):
+        xs = [rb["per_seed"][str(s)][c][key] for s in seeds_of[c] if str(s) in rb["per_seed"]]
         return sum(xs) / len(xs) if xs else None
     return mean
+
+
+def rfmt(x):
+    return "–" if x is None else f"{100 * x:.1f}%" if x < 0.1 else f"{100 * x:.0f}%"
 
 
 def block() -> str:
@@ -57,32 +61,31 @@ def block() -> str:
     seeds_of = meta.get("seeds_per_condition") or {c: meta["seeds"] for c in conds}
     n = meta["n_per_condition"]
     head = "| Metric | " + " | ".join(f"{LABELS[c]} (n={n[c]}, seeds {', '.join(map(str, seeds_of[c]))})" for c in conds) \
-           + " | Random guess (A / B, B+ lists) |"
+           + " | Random guess (A / B / B+) |"
     lines = [head, "|" + " --- |" * (len(conds) + 2)]
-    rnd = random_column(rb, meta["seeds"])
+    rnd = random_column(rb, seeds_of)
     for label, m, unit in ROWS:
         cells = [cell(summary, c, m, unit, len(seeds_of[c]) > 1) for c in conds]
-        if m in ("top1_misconception", "top3_misconception"):
-            r = f"{fmt(rnd(m, 'A'), '%')} / {fmt(rnd(m, 'B_and_Bplus'), '%')}"
-        elif m == "root_cause_accuracy":
-            r = fmt(rnd(m, "A"), "%")
+        if m in ("top1_misconception", "top3_misconception", "root_cause_accuracy"):
+            r = " / ".join(rfmt(rnd(m, c)) for c in ("A", "B", "B+"))
         else:
             r = "–"
         lines.append(f"| {label} | " + " | ".join(cells) + f" | {r} |")
     sizes = {k: sum(rb["per_seed"][str(s)]["candidate_list_sizes"][k] for s in meta["seeds"]) / len(meta["seeds"])
-             for k in ("prerequisites", "A_misconceptions", "B_misconceptions")}
+             for k in ("prerequisites", "A_misconceptions", "B_misconceptions", "Bplus_misconceptions", "Bplus_constructs")}
     on_list = {k: sum(rb["per_seed"][str(s)]["planted_misconception_on_list"][k] for s in meta["seeds"]) / len(meta["seeds"])
-               for k in ("A", "B_and_Bplus")}
+               for k in ("A", "B", "B+")}
     lines += ["", f"Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: "
               f"`{meta['llm'].split(' / ')[-1]}` (local, Ollama, thinking off), one model, no fallback. C: template wording; "
               "its metrics come from the graph.", "",
               f"Candidate lists, averaged over the same students: {sizes['prerequisites']:.1f} root-cause candidates "
               f"(the target's prerequisites), {sizes['A_misconceptions']:.1f} misconception candidates for A and "
-              f"{sizes['B_misconceptions']:.0f} for B and B+. A planted misconception is on A's list for "
-              f"{100 * on_list['A']:.0f}% of students and on B's for {100 * on_list['B_and_Bplus']:.0f}%, which caps A's "
-              "and B's misconception scores whatever the model does. **B+ is capped by the same list:** its prompt "
-              "lists every misconception with its ID, but only IDs on B's retrieved list are scored, so a planted "
-              "misconception it names from the graph text counts as wrong."]
+              f"{sizes['B_misconceptions']:.0f} for B. A planted misconception is on A's list for "
+              f"{100 * on_list['A']:.0f}% of students and on B's for {100 * on_list['B']:.0f}%, which caps A's and B's "
+              "misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was "
+              f"shown, B's lists plus its graph text ({sizes['Bplus_misconceptions']:.0f} misconceptions and "
+              f"{sizes['Bplus_constructs']:.0f} constructs), and every planted misconception "
+              f"({100 * on_list['B+']:.0f}%) is in it. The random-guess column picks uniformly from those same sets."]
     cc_path = RESULTS / "crosscheck.json"
     if cc_path.exists():
         cc = json.loads(cc_path.read_text())

@@ -7,19 +7,27 @@
         "top3_misconception": 0.07,
         "root_cause_accuracy": 0.19
       },
-      "B_and_Bplus": {
+      "B": {
         "top1_misconception": 0.03,
         "top3_misconception": 0.09,
         "root_cause_accuracy": 0.19
       },
+      "B+": {
+        "top1_misconception": 0.005,
+        "top3_misconception": 0.015,
+        "root_cause_accuracy": 0.025
+      },
       "candidate_list_sizes": {
         "prerequisites": 6.533,
         "A_misconceptions": 9.667,
-        "B_misconceptions": 10
+        "B_misconceptions": 10,
+        "Bplus_misconceptions": 410,
+        "Bplus_constructs": 40
       },
       "planted_misconception_on_list": {
         "A": 0.233,
-        "B_and_Bplus": 0.3
+        "B": 0.3,
+        "B+": 1
       },
       "n": 30
     },
@@ -29,19 +37,27 @@
         "top3_misconception": 0.068,
         "root_cause_accuracy": 0.173
       },
-      "B_and_Bplus": {
+      "B": {
         "top1_misconception": 0.01,
         "top3_misconception": 0.03,
         "root_cause_accuracy": 0.173
       },
+      "B+": {
+        "top1_misconception": 0.005,
+        "top3_misconception": 0.015,
+        "root_cause_accuracy": 0.025
+      },
       "candidate_list_sizes": {
         "prerequisites": 6.7,
         "A_misconceptions": 9.667,
-        "B_misconceptions": 10
+        "B_misconceptions": 10,
+        "Bplus_misconceptions": 410,
+        "Bplus_constructs": 40
       },
       "planted_misconception_on_list": {
         "A": 0.2,
-        "B_and_Bplus": 0.1
+        "B": 0.1,
+        "B+": 1
       },
       "n": 30
     },
@@ -51,19 +67,27 @@
         "top3_misconception": 0.058,
         "root_cause_accuracy": 0.165
       },
-      "B_and_Bplus": {
+      "B": {
         "top1_misconception": 0.007,
         "top3_misconception": 0.02,
         "root_cause_accuracy": 0.165
       },
+      "B+": {
+        "top1_misconception": 0.005,
+        "top3_misconception": 0.016,
+        "root_cause_accuracy": 0.025
+      },
       "candidate_list_sizes": {
         "prerequisites": 6.967,
         "A_misconceptions": 9,
-        "B_misconceptions": 10
+        "B_misconceptions": 10,
+        "Bplus_misconceptions": 410,
+        "Bplus_constructs": 40
       },
       "planted_misconception_on_list": {
         "A": 0.167,
-        "B_and_Bplus": 0.067
+        "B": 0.067,
+        "B+": 1
       },
       "n": 30
     }

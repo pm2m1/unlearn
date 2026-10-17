@@ -8,8 +8,9 @@ each condition is shown:
   top-1 misconception   |planted ∩ candidates| / |candidates|
   top-3 misconception   1 - C(n-k, 3) / C(n, 3)  for n candidates of which k are planted (picks without replacement)
 A's misconception list is the one retrieved for its last wrong answer (A's diagnosis is that call's); a student with
-no wrong answer gets no A diagnosis, so 0. B and B+ share the session's top-10. C searches the whole graph, so it has
-no list and no random-guess score. Writes eval/results/random_baseline.json.
+no wrong answer gets no A diagnosis, so 0. B's is the session's top-10. B+ is scored on every id it was shown: B's
+lists plus every misconception and construct in its graph text. C searches the whole graph, so it has no list and no
+random-guess score. Writes eval/results/random_baseline.json.
 """
 
 import argparse
@@ -41,6 +42,8 @@ def main(argv=None) -> int:
     recreate_graph("class_template", g)
     try:
         judge = BL.Judge(g)
+        graph_text = BL.graph_as_text(g)
+        g_mids, g_cids = {i for i, _ in graph_text.misconceptions}, {i for i, _ in graph_text.constructs}
         per_seed = {}
         for seed in [int(s) for s in a.seeds.split(",")]:
             sim = Simulator(seed=seed)
@@ -53,9 +56,13 @@ def main(argv=None) -> int:
                 wrong = [x for x in answers if not x[2]]
                 a_cands = [i for i, _ in BL.retrieved(judge, wrong[-1:])] if wrong else []
                 b_cands = [i for i, _ in BL.retrieved(judge, answers)]
-                ka, kb = len(planted & set(a_cands)), len(planted & set(b_cands))
+                p_cands, p_roots = set(b_cands) | g_mids, {c for c, _ in prereqs} | g_cids
+                ka, kb, kp = len(planted & set(a_cands)), len(planted & set(b_cands)), len(planted & p_cands)
                 rows.append({
                     "root": 1 / len(prereqs) if student.root_cause in {c for c, _ in prereqs} else 0.0,
+                    "p_root": 1 / len(p_roots) if student.root_cause in p_roots else 0.0,
+                    "p_top1": kp / len(p_cands), "p_top3": top_k_hit(len(p_cands), kp, 3),
+                    "n_p": len(p_cands), "n_p_roots": len(p_roots), "p_has_planted": kp > 0,
                     "a_top1": ka / len(a_cands) if a_cands else 0.0, "a_top3": top_k_hit(len(a_cands), ka, 3),
                     "b_top1": kb / len(b_cands) if b_cands else 0.0, "b_top3": top_k_hit(len(b_cands), kb, 3),
                     "n_prereqs": len(prereqs), "n_a": len(a_cands), "n_b": len(b_cands),
@@ -63,10 +70,13 @@ def main(argv=None) -> int:
             mean = lambda key: round(statistics.mean(r[key] for r in rows), 3)  # noqa: E731
             per_seed[seed] = {
                 "A": {"top1_misconception": mean("a_top1"), "top3_misconception": mean("a_top3"), "root_cause_accuracy": mean("root")},
-                "B_and_Bplus": {"top1_misconception": mean("b_top1"), "top3_misconception": mean("b_top3"), "root_cause_accuracy": mean("root")},
+                "B": {"top1_misconception": mean("b_top1"), "top3_misconception": mean("b_top3"), "root_cause_accuracy": mean("root")},
+                "B+": {"top1_misconception": mean("p_top1"), "top3_misconception": mean("p_top3"), "root_cause_accuracy": mean("p_root")},
                 "candidate_list_sizes": {"prerequisites": mean("n_prereqs"), "A_misconceptions": mean("n_a"),
-                                         "B_misconceptions": mean("n_b")},
-                "planted_misconception_on_list": {"A": mean("a_has_planted"), "B_and_Bplus": mean("b_has_planted")},
+                                         "B_misconceptions": mean("n_b"), "Bplus_misconceptions": mean("n_p"),
+                                         "Bplus_constructs": mean("n_p_roots")},
+                "planted_misconception_on_list": {"A": mean("a_has_planted"), "B": mean("b_has_planted"),
+                                                  "B+": mean("p_has_planted")},
                 "n": len(rows)}
             print(f"seed {seed}: {json.dumps(per_seed[seed])}")
     finally:
