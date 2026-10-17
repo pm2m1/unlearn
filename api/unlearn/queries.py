@@ -104,6 +104,17 @@ WHERE c.id IN $cids
 RETURN m.id AS mid, m.name AS mname, c.id AS cid, e.pct AS pct
 """
 
+# SEEN_IN.w: the misconception's share of its weight within this graph's constructs, pct / sum(pct).
+# Run on class_template after the slice is loaded, so the sum covers exactly the class slice. root_cause
+# weights evidence by w: a misconception spread over several slice constructs counts less on each, but one
+# whose Eedi weight mostly sits outside the slice is no longer penalised for that.
+SET_SEEN_IN_WEIGHTS = """
+MATCH (m:Misconception)-[si:SEEN_IN]->(:Construct)
+WITH m, sum(si.pct) AS total
+MATCH (m)-[si:SEEN_IN]->(:Construct)
+SET si.w = CASE WHEN total > 0 THEN si.pct / total ELSE 0.0 END
+"""
+
 LOAD_REQUIRES = """
 UNWIND $rows AS r
 MATCH (a:Construct {id:r.construct_id}), (b:Construct {id:r.prereq_id})
@@ -254,7 +265,7 @@ MATCH p = (c)-[:REQUIRES*1..4]->(pre:Construct)
 WHERE NOT (s)-[:MASTERED]->(pre)
 WITH s, pre, min(length(p)) AS depth
 OPTIONAL MATCH (s)-[e:SHOWED]->(m:Misconception)-[si:SEEN_IN]->(pre)
-WITH pre, depth, sum(coalesce(e.count, 0) * coalesce(e.confidence, 0.0) * coalesce(si.pct, 0.0) / 100.0) AS evidence, collect(DISTINCT m.name) AS miscs
+WITH pre, depth, sum(coalesce(e.count, 0) * coalesce(e.confidence, 0.0) * coalesce(si.w, 0.0)) AS evidence, collect(DISTINCT m.name) AS miscs
 WHERE evidence > 0
 RETURN pre.id AS id, pre.name AS name, depth, evidence, miscs
 ORDER BY evidence DESC, depth DESC LIMIT 3
@@ -422,6 +433,11 @@ CREATE (t)-[:ABOUT]->(s), (t)-[:ASSIGNED_TO]->(a)
 RETURN t.id AS id
 """
 
+SHOWED_ON_WEIGHTS = """
+MATCH (:Misconception {id:$mid})-[si:SEEN_IN]->(c:Construct)
+RETURN c.id AS cid, si.pct AS pct, si.w AS w ORDER BY cid
+"""
+
 STUDENT_SHOWED = """
 MATCH (:Student {id:$sid})-[e:SHOWED]->(m:Misconception)
 RETURN m.id AS mid, m.name AS name, e.count AS count, e.confidence AS confidence
@@ -473,11 +489,11 @@ RETURN t.id AS id, t.kind AS kind, t.state AS state, a.name AS agent, length(p) 
 ORDER BY step
 """
 
-# The student's misconceptions on one construct, strongest weighted evidence first (root_cause's weighting).
+# The student's misconceptions on one construct, strongest weighted evidence first (root_cause's weighting, si.w).
 SHOWED_ON = """
 MATCH (:Student {id:$sid})-[e:SHOWED]->(m:Misconception)-[si:SEEN_IN]->(:Construct {id:$cid})
 RETURN m.id AS mid, m.name AS name, e.count AS count, e.confidence AS confidence,
-       e.count * e.confidence * si.pct / 100.0 AS evidence
+       e.count * e.confidence * si.w AS evidence
 ORDER BY evidence DESC, m.id
 """
 

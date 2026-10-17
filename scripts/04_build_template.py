@@ -67,6 +67,7 @@ def main():
     run_batched(GRAPH, Q.LOAD_MISCONCEPTIONS, [
         {"mid": r["mid"], "mname": r["mname"], "cid": r["cid"], "pct": r["pct"]} for r in seen_in
     ])
+    run(GRAPH, Q.SET_SEEN_IN_WEIGHTS)
     run_batched(GRAPH, Q.LOAD_REQUIRES, [
         {"construct_id": r["construct_id"], "prereq_id": r["prereq_id"], "note": r["note"], "confidence": r["confidence"]}
         for r in requires

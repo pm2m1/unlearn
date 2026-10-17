@@ -19,10 +19,10 @@ leader is the deepest suspect with nothing unasked below it, or after MAX_QUESTI
 from unlearn import tools
 from unlearn.agents.base import Agent
 
-# root_cause evidence is weighted by SEEN_IN.pct (Phase 3 step 0). Two hits on a prerequisite distractor of
-# median weight (pct 66.7) score 1.5 * 0.667 = 1.0, so the SPEC's 1.5 / 0.5 scale by 2/3 to 1.0 / 0.33.
-EVIDENCE_MIN = 1.0
-LEAD_MIN = 0.33
+# root_cause evidence is weighted by SEEN_IN.w (share of the misconception's pct within the slice). The median
+# prerequisite distractor has w = 1.0, so two hits score 1.5 * 1.0 = 1.5: the SPEC's own 1.5 / 0.5 bar again.
+EVIDENCE_MIN = 1.5
+LEAD_MIN = 0.5
 MAX_QUESTIONS = 6
 
 

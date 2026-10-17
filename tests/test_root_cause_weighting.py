@@ -1,5 +1,6 @@
-"""root_cause weights evidence by SEEN_IN.pct, so a generic misconception spread over many prerequisites
-can't outvote one that is concentrated on a single prerequisite.
+"""root_cause weights evidence by SEEN_IN.w (pct / the misconception's pct summed over the slice), so a
+generic misconception spread over many prerequisites can't outvote one concentrated on a single prerequisite.
+Here each misconception's pct already sums to 100 over the fixture, so w = pct / 100.
 
 Target 10 REQUIRES 11, 12, 13, 14 and 15 (all one hop).
   901 generic:  SEEN_IN 11, 12, 13, 14 at pct 25 each. Shown 3 times -> 3 * 0.875 * 0.25 = 0.656 on each.
@@ -31,6 +32,7 @@ def weighted_class():
          "subtopic": "Fixture", "construct_id": c, "construct": n} for c, n in CONSTRUCTS.items()])
     run_batched(name, Q.LOAD_MISCONCEPTIONS, [
         {"mid": m, "mname": NAMES[m], "cid": c, "pct": p} for m, c, p in SEEN_IN])
+    run(name, Q.SET_SEEN_IN_WEIGHTS)
     run_batched(name, Q.LOAD_REQUIRES, [
         {"construct_id": TARGET, "prereq_id": c, "note": "fixture", "confidence": "high"} for c in CONSTRUCTS if c != TARGET])
     run_batched(name, Q.LOAD_QUESTIONS, [
@@ -60,3 +62,12 @@ def test_shown_counts_are_unweighted(weighted_class):
     # The weighting lives in root_cause only; SHOWED still counts raw hits.
     rows, _ = run(f"class_{weighted_class}", Q.STUDENT_SHOWED, {"sid": "sw"})
     assert {r["mid"]: r["count"] for r in rows} == {901: 3, 902: 2}
+
+
+def test_weight_is_share_within_the_slice(weighted_class):
+    # A misconception whose Eedi weight mostly sits outside the slice keeps its full share inside it.
+    name = f"class_{weighted_class}"
+    run_batched(name, Q.LOAD_MISCONCEPTIONS, [{"mid": 903, "mname": "Mostly elsewhere", "cid": 15, "pct": 20.0}])
+    run(name, Q.SET_SEEN_IN_WEIGHTS)
+    rows, _ = run(name, Q.SHOWED_ON_WEIGHTS, {"mid": 903})
+    assert rows == [{"cid": 15, "pct": 20.0, "w": 1.0}]

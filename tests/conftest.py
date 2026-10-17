@@ -45,6 +45,7 @@ def build_class(name: str, embed_misconceptions: bool = False) -> None:
     run_batched(name, Q.LOAD_MISCONCEPTIONS, [
         {"mid": m, "mname": n, "cid": m // 100, "pct": 100.0} for m, n in MISCONCEPTIONS.items()
     ])
+    run(name, Q.SET_SEEN_IN_WEIGHTS)
     run_batched(name, Q.LOAD_REQUIRES, [
         {"construct_id": a, "prereq_id": b, "note": "fixture", "confidence": "high"} for a, b in REQUIRES
     ])
