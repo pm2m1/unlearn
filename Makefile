@@ -21,3 +21,11 @@ test:
 
 topics:
 	$(PY) scripts/topics.py
+
+latency:
+	$(PY) eval/latency.py --class demo --warm-sessions
+	$(PY) scripts/05_new_class.py --id demo --students 30
+
+demo:
+	$(PY) scripts/demo_session.py --class demo --student $(or $(STUDENT),s01)
+	$(PY) scripts/demo_session.py --class demo --student $(or $(STUDENT),s01) --session 2

@@ -1,0 +1,132 @@
+{
+  "class_graph": "class_demo",
+  "calls_per_tool": 50,
+  "warmup_calls": 3,
+  "warm_sessions": true,
+  "measured": "wall clock around the Python tool function (client round trip + receipt), localhost",
+  "host": {
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.12.14",
+    "redis_version": "8.10.2"
+  },
+  "falkordb_image": "falkordb/falkordb:v4.20.7",
+  "notes": {
+    "diagnose_text": "includes embedding the explanation with all-MiniLM-L6-v2 on CPU",
+    "bridges": "runs betweenness on the curriculum graph (2,258 constructs), not the class graph",
+    "decide": "approved assign_practice, so it includes the executor and its Event"
+  },
+  "tools": {
+    "record_attempt": {
+      "n": 50,
+      "p50_ms": 1.22,
+      "p95_ms": 1.69,
+      "mean_ms": 1.28,
+      "max_ms": 4.41
+    },
+    "diagnose_text": {
+      "n": 50,
+      "p50_ms": 3.89,
+      "p95_ms": 4.63,
+      "mean_ms": 3.97,
+      "max_ms": 5.24
+    },
+    "next_question": {
+      "n": 50,
+      "p50_ms": 0.45,
+      "p95_ms": 0.92,
+      "mean_ms": 0.55,
+      "max_ms": 1.1
+    },
+    "root_cause": {
+      "n": 50,
+      "p50_ms": 0.97,
+      "p95_ms": 1.1,
+      "mean_ms": 0.97,
+      "max_ms": 1.58
+    },
+    "probe_frontier": {
+      "n": 50,
+      "p50_ms": 0.59,
+      "p95_ms": 0.7,
+      "mean_ms": 0.56,
+      "max_ms": 0.76
+    },
+    "learning_path": {
+      "n": 50,
+      "p50_ms": 0.68,
+      "p95_ms": 0.75,
+      "mean_ms": 0.69,
+      "max_ms": 0.83
+    },
+    "recall": {
+      "n": 50,
+      "p50_ms": 0.4,
+      "p95_ms": 0.48,
+      "mean_ms": 0.4,
+      "max_ms": 0.61
+    },
+    "pick_skill": {
+      "n": 50,
+      "p50_ms": 0.67,
+      "p95_ms": 0.75,
+      "mean_ms": 0.68,
+      "max_ms": 0.83
+    },
+    "update_skill": {
+      "n": 50,
+      "p50_ms": 0.59,
+      "p95_ms": 0.65,
+      "mean_ms": 0.6,
+      "max_ms": 0.66
+    },
+    "cohorts": {
+      "n": 50,
+      "p50_ms": 1.67,
+      "p95_ms": 1.81,
+      "mean_ms": 1.69,
+      "max_ms": 1.84
+    },
+    "keystones": {
+      "n": 50,
+      "p50_ms": 0.81,
+      "p95_ms": 0.96,
+      "mean_ms": 0.83,
+      "max_ms": 1.15
+    },
+    "bridges": {
+      "n": 50,
+      "p50_ms": 35.87,
+      "p95_ms": 40.89,
+      "mean_ms": 36.39,
+      "max_ms": 41.39
+    },
+    "claim": {
+      "n": 50,
+      "p50_ms": 0.38,
+      "p95_ms": 0.5,
+      "mean_ms": 0.39,
+      "max_ms": 0.55
+    },
+    "handoff": {
+      "n": 50,
+      "p50_ms": 0.33,
+      "p95_ms": 0.39,
+      "mean_ms": 0.33,
+      "max_ms": 0.41
+    },
+    "propose": {
+      "n": 50,
+      "p50_ms": 0.33,
+      "p95_ms": 0.36,
+      "mean_ms": 0.33,
+      "max_ms": 0.52
+    },
+    "decide": {
+      "n": 50,
+      "p50_ms": 1.09,
+      "p95_ms": 1.2,
+      "mean_ms": 1.11,
+      "max_ms": 1.26
+    }
+  }
+}

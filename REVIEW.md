@@ -164,4 +164,113 @@ A number line from 0 to 1 is split into 10 equal gaps. An arrow points to the 7t
 ## 5. Things to watch later
 - **Shared misconceptions spread evidence.** *Fixed in Phase 3 step 0: `root_cause` now weights each hit by `SEEN_IN.pct / 100`, tested in `tests/test_root_cause_weighting.py`; Diagnoser thresholds rescaled to 1.0 / 0.33.* Original note: `root_cause` counts SHOWED evidence on every construct a misconception is SEEN_IN. Generic ones like 13957 "Confuses factors and multiples" are SEEN_IN 342, 345, 331 and 338 at once, so one wrong answer adds evidence to all four.
 - **`diagnose_text` can return fewer than 3 rows.** It over-fetches 25 of the 410 template misconceptions, then filters to the construct, so constructs with only a few misconceptions may come back short.
-- **The image's default `TIMEOUT 1000`** (from Phase 1) has not been hit by any test or seed step so far. I have not benchmarked tool latency yet.
+- **The image's default `TIMEOUT 1000`** (from Phase 1) is far from being hit. The slowest tool, `bridges`, runs at p95 41 ms. Every class-graph tool is under 5 ms p95 (measured in Phase 3, table in section 6).
+
+## 6. Phase 3 review items
+
+### Latency (measured, `eval/results/latency.json`)
+Setup:
+- 50 calls per tool after 3 warm-ups, on `class_demo` (30 students).
+- Before timing, every student ran one simulated session (seed 0), so the reads see real SHOWED/ATTEMPTED state.
+- Timing is wall clock around the Python tool function, so it includes the localhost round trip and building the receipt.
+- FalkorDB v4.20.7 in Docker on macOS.
+- `class_demo` was rebuilt clean afterwards.
+
+| Tool | p50 ms | p95 ms |
+| --- | ---: | ---: |
+| `record_attempt` | 1.22 | 1.69 |
+| `diagnose_text` | 3.89 | 4.63 |
+| `next_question` | 0.45 | 0.92 |
+| `root_cause` | 0.97 | 1.10 |
+| `probe_frontier` | 0.59 | 0.70 |
+| `learning_path` | 0.68 | 0.75 |
+| `recall` | 0.40 | 0.48 |
+| `pick_skill` | 0.67 | 0.75 |
+| `update_skill` | 0.59 | 0.65 |
+| `cohorts` | 1.67 | 1.81 |
+| `keystones` | 0.81 | 0.96 |
+| `bridges` | 35.87 | 40.89 |
+| `claim` | 0.38 | 0.50 |
+| `handoff` | 0.33 | 0.39 |
+| `propose` | 0.33 | 0.36 |
+| `decide` | 1.09 | 1.20 |
+
+- `diagnose_text` includes embedding the explanation on CPU.
+- `bridges` runs betweenness on the full curriculum graph.
+- `decide` was measured on approved `assign_practice`, so it includes the executor and its Event.
+
+### The Diagnoser does not probe deepest-first (deviation, please confirm)
+The SPEC's loop probes `probe_frontier`'s deepest unprobed prerequisites first. On the simulator (seed 0, 30 students) that got the planted root top-1 in **8/30** (top-3 16/30). Targets have up to 9 prerequisites, roots are usually 1–2 hops down, and the 6-question budget went on deep constructs the student already knew.
+
+The Diagnoser now searches top-down using `learning_path` rows:
+- It asks about the closest unasked prerequisite first.
+- A correct answer rules out that construct and everything it depends on.
+- A wrong answer makes it a suspect, and the search continues below it.
+- It confirms the deepest suspect before stopping.
+
+`probe_frontier` is kept as the fallback. All tools and queries are unchanged.
+
+Results, top-1 (top-3) over 30 students:
+
+| Policy | Seed 0 | Seed 1 | Seed 2 |
+| --- | --- | --- | --- |
+| SPEC deepest-first | 8/30 (16/30) | — | — |
+| Top-down search | 17/30 (27/30) | 23/30 (27/30) | 19/30 (25/30) |
+
+This is an informal check, not the eval harness. The SPEC deepest-first policy was only measured on seed 0.
+
+### `pct` weighting makes roots with generic misconceptions hard to find (decision needed)
+Step 0's evidence formula weights each hit by `SEEN_IN.pct / 100`. It does what you asked: in `tests/test_root_cause_weighting.py`, a specific misconception beats a generic one spread over 4 prerequisites.
+
+But some prerequisites only have generic Eedi misconceptions:
+- 3342 (fraction notation): its distractors' `pct` values are 25, 21, 20, 10, 5.9 and 1.5.
+- 3378 (times tables): mostly under 6, except two (100 and 50).
+
+Two hits on 3342 score at most 0.375, while one hit on a construct that depends on it, with a `pct` 100 misconception, scores 0.5. So `root_cause` ranks the dependant first.
+
+With a noiseless simulated student (every answer follows the planted state), across every planted (root, target ≥2 hops) pair:
+- 3342 was found 1/24 times.
+- 3378 was found 8/19 times.
+- Every other root was found 46/49 times.
+
+Options, none applied yet:
+- (a) Normalise `pct` within the class slice (divide by the misconception's total `pct` over the slice's constructs).
+- (b) Normalise per construct (divide by the construct's highest distractor `pct`).
+- (c) Keep the formula and rank by depth among candidates above an evidence floor.
+
+I'd try (a) first: it keeps your "generic spread counts less" property, and it stops penalising constructs whose misconceptions also appear outside the slice.
+
+### Other Phase 3 deviations and choices
+15. **Task carries `construct_id` and `session`.** The SPEC's Task has neither, but every agent needs both.
+    - `CREATE_TASK` sets them.
+    - `HANDOFF` copies them from `prev` in the same write. A follow-up query would leave a window where a worker claims a task that has no context yet.
+16. **`COHORTS_WCC` also returns `ids`** next to the aliases, so the Teacher can propose for those students.
+17. **`pick_skill` also returns the skill's `steps`** (`SKILL_STEPS`).
+18. **`propose` validates the payload:**
+    - `regroup` needs 2 or more students.
+    - `skip_ahead` and `assign_practice` need an integer `construct_id`.
+19. **The approval executor reads its targets from the graph.** It uses the Proposal's `FOR` edges, not the caller's payload.
+    - `regroup` creates `(:Group)-[:HAS_MEMBER]->(:Student)`.
+    - `skip_ahead` creates `MASTERED {evidence:'teacher_override'}`, ON CREATE only, so an earned MASTERED is never overwritten.
+    - `assign_practice` creates `(:Assignment)-[:FOR]->(:Student)` and `-[:PRACTICES]->(:Construct)`.
+    - The Event hangs off the Proposal (`(:Proposal)-[:HAD_EVENT]->(:Event)`), since no student Session is involved.
+    - Reject sets state only.
+20. **Tutor escalation rule.** `SHOWED` confidence never drops, so "confidence stays > 0.6" would escalate everyone. The Tutor hands off to the Teacher when the check answer is **wrong** and the root's top misconception confidence is above 0.6. Otherwise the chain ends at the Tutor.
+21. **Teacher agent choice.**
+    - It proposes `regroup` when the student is in a WCC cohort, otherwise `assign_practice` on the student's root cause.
+    - It never proposes `skip_ahead` from a review task (that kind is allowed through MCP and tested).
+    - It also runs `root_cause` to get the construct for the payload; the SPEC lists only cohorts, keystones and bridges.
+22. **LLM receipt check.**
+    - The model must wrap names in `[[...]]`. Each marked name must be a value in that turn's tool rows.
+    - Any known construct or misconception name of 15+ characters that appears unmarked must be in the rows too. A substring of a row value counts.
+    - Invented names that are neither marked nor in the vocabulary can't be caught by any deterministic check. The template is the backstop.
+23. **LLM models** (checked against each provider's docs on 2026-10-17):
+    - Groq `llama-3.3-70b-versatile`.
+    - Gemini `gemini-3.8-flash`.
+    - OpenRouter `google/gemma-4-31b-it:free`. OpenRouter lists no free Llama 70B model now.
+    - Free-tier rate limits aren't on Groq's or Google's public pages; they only appear in each account's console.
+    - **`.env` has no API keys, so no live provider call has been made.** Everything so far, demo included, ran in template mode.
+24. **`mcp==1.30.0`, not 2.x.** mcp 2.x renamed `FastMCP` to `MCPServer`. 1.30.0 runs the SPEC's code as written. `openai==3.24.0` (newest release at least two weeks old).
+25. **`.env` is loaded by repo path** in `db.py` and `llm.py`, so the MCP server works from any working directory (the test starts it from `/`).
+26. **Demo helpers:** `reset_student` (session 1 of `demo_session.py` replays from scratch), `sessions`, `chain`, `proposals`, `showed_on` and `name_vocabulary`. All their Cypher is in `queries.py`.
+27. **The simulator reads the curated files, not the graph.** It is the ground truth, so it must not share the agents' queries. It has a `noiseless` mode used only by the end-to-end tests.
