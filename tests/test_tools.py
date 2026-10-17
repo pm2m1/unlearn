@@ -95,10 +95,18 @@ def test_cohorts_group_students_sharing_a_gap(planted):
 
 
 def test_next_question_prefers_unprobed(planted):
-    row = T.next_question(planted, "sb", 4)["rows"]
-    assert row == []  # Ben attempted both construct-4 questions
-    row = T.next_question(planted, "sb", 2)["rows"][0]
+    row = T.next_question(planted, "sb", 4, "sb-1")["rows"]
+    assert row == []  # Ben attempted both construct-4 questions in session sb-1
+    row = T.next_question(planted, "sb", 2, "sb-1")["rows"][0]
     assert row["id"] == "q-2-2" and row["probes"] == 2 and row["unprobed"] == 1
+
+
+def test_next_question_reasks_in_a_later_session(planted):
+    # In session sb-2, earlier attempts are allowed again: least recently attempted first.
+    assert T.next_question(planted, "sb", 4, "sb-2")["rows"][0]["id"] == "q-4-1"
+    # Never-attempted beats attempted-long-ago: Ben did q-2-1 only.
+    row = T.next_question(planted, "sb", 2, "sb-2")["rows"][0]
+    assert row["id"] == "q-2-2" and row["fresh"] is True
 
 
 def test_learning_path_and_shortest_chain(planted):

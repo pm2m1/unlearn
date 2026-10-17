@@ -38,7 +38,7 @@ class Tutor(Agent):
         # root_cause chain (target -> ... -> root), which depends on the root.
         check = None
         for construct in [root["id"]] + list(reversed(root["chain_ids"][:-1])):
-            rows = self.call(task_id, tools.next_question, c, sid, construct)["rows"]
+            rows = self.call(task_id, tools.next_question, c, sid, construct, sess)["rows"]
             if rows:
                 check = (construct, rows[0])
                 break

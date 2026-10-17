@@ -85,7 +85,7 @@ def main(argv=None) -> None:
     results["record_attempt"] = measure(lambda i: T.record_attempt(
         c, "s01", questions[i % len(questions)], "A", f"bench-{run_id}"), n)
     results["diagnose_text"] = measure(lambda i: T.diagnose_text(c, 410, explanations[i % len(explanations)]), n)
-    results["next_question"] = measure(lambda i: T.next_question(c, sid_of(i), root_of[sid_of(i)]), n)
+    results["next_question"] = measure(lambda i: T.next_question(c, sid_of(i), root_of[sid_of(i)], f"bench-{run_id}"), n)
     results["root_cause"] = measure(lambda i: T.root_cause(c, sid_of(i), target_of(i)), n)
     results["probe_frontier"] = measure(lambda i: T.probe_frontier(c, sid_of(i), target_of(i)), n)
     results["learning_path"] = measure(lambda i: T.learning_path(c, sid_of(i), target_of(i), root_of[sid_of(i)]), n)

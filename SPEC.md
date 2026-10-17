@@ -300,18 +300,20 @@ ORDER BY score ASC LIMIT 3
 
 Test on 3 known examples whether `score` is a distance (lower is closer) or a similarity, and fix the `ORDER BY` to match.
 
-**`next_question`** picks the unattempted question whose wrong options probe the most misconceptions the student hasn't shown yet:
+**`next_question`** picks a question on the construct that hasn't been asked in the *current* session. Never-attempted questions come first, then the least recently attempted. Ties go to the question whose wrong options probe the most misconceptions the student hasn't shown yet. Excluding only this session's attempts lets session 2 ask about the root cause again, even though there are only 3 questions per construct:
 
 ```
 MATCH (s:Student {id:$sid})
 MATCH (q:Question)-[:ASSESSES]->(:Construct {id:$cid})
-WHERE NOT (s)-[:ATTEMPTED]->(q)
+WHERE NOT (s)-[:ATTEMPTED {session:$sess}]->(q)
+OPTIONAL MATCH (s)-[a:ATTEMPTED]->(q)
+WITH s, q, max(a.ts) AS last_ts
 MATCH (o:Option)-[:OPTION_OF]->(q)
 OPTIONAL MATCH (o)-[:INDICATES]->(m:Misconception)
 OPTIONAL MATCH (s)-[e:SHOWED]->(m)
-WITH q, count(DISTINCT m) AS probes, sum(CASE WHEN m IS NOT NULL AND e IS NULL THEN 1 ELSE 0 END) AS unprobed
-RETURN q.id AS id, q.text AS text, probes, unprobed
-ORDER BY unprobed DESC, probes DESC LIMIT 1
+WITH q, last_ts, count(DISTINCT m) AS probes, sum(CASE WHEN m IS NOT NULL AND e IS NULL THEN 1 ELSE 0 END) AS unprobed
+RETURN q.id AS id, q.text AS text, probes, unprobed, last_ts, last_ts IS NULL AS fresh
+ORDER BY fresh DESC, last_ts ASC, unprobed DESC, probes DESC LIMIT 1
 ```
 
 ### Root cause (the hero tool)

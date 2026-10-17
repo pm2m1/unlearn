@@ -89,10 +89,11 @@ def diagnose_text(class_id: str, construct_id: int, explanation: str) -> dict:
     return r.done(rows, _ids("Misconception", [x["id"] for x in rows]) + _ids("Construct", [construct_id]))
 
 
-def next_question(class_id: str, student_id: str, construct_id: int) -> dict:
-    """The unattempted question on this construct that probes the most unshown misconceptions."""
+def next_question(class_id: str, student_id: str, construct_id: int, session_id: str) -> dict:
+    """A question on this construct not yet asked in this session: never-attempted first, then least recently
+    attempted, then the one whose options probe the most misconceptions the student hasn't shown."""
     r = _Receipt(graph_name(class_id))
-    rows = r.run(Q.NEXT_QUESTION, {"sid": student_id, "cid": construct_id})
+    rows = r.run(Q.NEXT_QUESTION, {"sid": student_id, "cid": construct_id, "sess": session_id})
     for row in rows:
         row["unprobed"] = int(row["unprobed"])  # sum() comes back as a float
         row["options"] = r.run(Q.QUESTION_OPTIONS, {"qid": row["id"]})

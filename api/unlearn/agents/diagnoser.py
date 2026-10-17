@@ -40,6 +40,7 @@ class Diagnoser(Agent):
         c = self.class_id
         ctx = self.call(task_id, tools.task_context, c, task_id)["rows"][0]
         sid, cid, sess = ctx["student_id"], ctx["construct_id"], ctx["session"]
+        self._session = sess
 
         rec = self.call(task_id, tools.recall, c, sid)
         self.say(task_id, "recall", {"recall": rec["rows"], "session_n": ctx["session_n"]}, rec["rows"])
@@ -78,7 +79,7 @@ class Diagnoser(Agent):
         self.call(task_id, tools.handoff, c, task_id, sid, "Tutor", "remediate", f"{sess}-remediate")
 
     def _ask_on(self, task_id: str, sid: str, construct: int):
-        rows = self.call(task_id, tools.next_question, self.class_id, sid, construct)["rows"]
+        rows = self.call(task_id, tools.next_question, self.class_id, sid, construct, self._session)["rows"]
         return (construct, rows[0]) if rows else None
 
     def _choose(self, task_id, sid, cid, rc_rows, ruled_out, suspects, exhausted):
