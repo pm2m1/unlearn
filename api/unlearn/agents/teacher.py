@@ -2,7 +2,8 @@
 
 SPEC steps: cohorts, keystones, bridges -> propose. It can only propose an allowlisted kind; nothing
 changes until a human calls decide(approved).
-  regroup          the student shares a confident misconception with others (a WCC cohort)
+  regroup          the student shares a confident misconception with others (a WCC cohort); it supersedes any
+                   pending regroup whose students it contains (tools.propose)
   assign_practice  otherwise: practice on the student's diagnosed root cause
 skip_ahead is allowed by the gate but never chosen here: a review task is about a student who is stuck.
 """
@@ -29,11 +30,11 @@ class Teacher(Agent):
         pid = f"p-{task_id}"
         if group:
             kind, students = "regroup", sorted(group["ids"])
-            aliases = group["students"]
-            shared = self.call(task_id, tools.recall, c, sid)["rows"]
-            facts = {"kind": kind, "students": aliases, "shared": [r["misconception"] for r in shared[:2]]}
+            # The misconceptions the cohort's links are made of, the most widely shared first.
+            shared = sorted(set(group["shared"]), key=lambda m: (-group["shared"].count(m), m))[:2]
+            facts = {"kind": kind, "students": group["students"], "shared": shared}
             payload = {"group_id": f"g-{task_id}", "construct_id": root["id"] if root else None}
-            turn = [groups, shared]
+            turn = [groups]
         else:
             if root is None:
                 self.note(task_id, "no cohort and no root cause: nothing to propose")

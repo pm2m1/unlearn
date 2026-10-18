@@ -44,6 +44,7 @@ GROUPS = {
         ("CLAIM", "`claim`: oldest submitted task for an agent; exactly one worker wins", "per-graph write serialisation"),
         ("HANDOFF", "`handoff`: close a task, open the next, keep the chain and its context", "CREATE + SET in one write"),
         ("PROPOSE", "`propose`: a pending Proposal for the teacher", "CREATE + UNWIND"),
+        ("SUPERSEDE_REGROUPS", "`propose` (regroup): supersede pending regroups whose students it contains", "list predicate `all()`"),
         ("DECIDE", "`decide`: approve or reject a pending proposal", "conditional MATCH + SET"),
     ],
     "Approval executor (runs only after `decide(approved)`)": [

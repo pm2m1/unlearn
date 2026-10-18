@@ -110,7 +110,11 @@ async function loadClass() {
   syncTarget();
   renderScoreboard();
   $("#class-name").textContent = state.classId;
-  $("#class-summary").textContent = `${s.students.length} simulated students · ${s.students.reduce((a, x) => a + x.sessions, 0)} sessions so far`;
+  showSummary(s.students);
+}
+
+function showSummary(students) {
+  $("#class-summary").textContent = `${students.length} simulated students · ${students.reduce((a, x) => a + x.sessions, 0)} sessions so far`;
 }
 
 function syncTarget() {
@@ -622,6 +626,8 @@ async function decide(p, decision, card) {
 async function simulateAll() {
   const btn = $("#simulate-all-btn");
   setBusy(btn, true, "Simulating 60 sessions…");
+  // The count climbs while the simulation runs (it can take minutes on a small host); refresh just the summary.
+  const tick = setInterval(() => api(`/classes/${state.classId}/students`).then((s) => showSummary(s.students)).catch(() => {}), 2000);
   try {
     const out = await api(`/classes/${state.classId}/simulate-all?sessions=2`, { method: "POST" });
     toast(`Simulated ${out.sessions} sessions in ${out.seconds}s · planted root cause named in ${out.root_cause_hits}/${out.sessions}`);
@@ -629,6 +635,7 @@ async function simulateAll() {
   } catch (e) {
     toast(e.message);
   } finally {
+    clearInterval(tick);
     setBusy(btn, false, "Simulate the class (2 sessions each)");
   }
 }

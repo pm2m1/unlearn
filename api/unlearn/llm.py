@@ -196,8 +196,8 @@ def template(kind: str, facts: dict) -> str:
     if kind == "proposal":
         who = _join(facts.get("students") or [])
         if facts["kind"] == "regroup":
-            return (f"Proposal: group {who} together; WCC puts them in one cohort linked by shared confident "
-                    f"misconceptions. This student's include: {_join(facts.get('shared') or [])}.")
+            return (f"Proposal: group {who} together; WCC puts them in one cohort. These students share confident "
+                    f"misconceptions, including: {_join(facts.get('shared') or [])}.")
         if facts["kind"] == "assign_practice":
             return f"Proposal: assign {who} practice on {facts['construct_name']}, the diagnosed root cause."
         return f"Proposal: let {who} skip ahead past {facts['construct_name']}."

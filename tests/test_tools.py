@@ -10,6 +10,7 @@ Asha and Chen share misconception 301; Ben shares nothing with confidence > 0.6.
 import pytest
 
 from unlearn import tools as T
+from unlearn.db import run
 
 TARGET = 1
 
@@ -145,6 +146,25 @@ def test_handoff_and_approval_gate(planted):
     assert (row["kind"], row["payload"]) == ("regroup", {"group_id": "g-1"})
     assert row["applied"]["group_id"] == "g-1" and sorted(row["applied"]["members"]) == ["sa", "sc"]
     assert T.decide(planted, "p-1", "rejected", ts=5)["rows"] == []  # no longer pending
+
+
+def test_larger_regroup_supersedes_pending_regroups_it_contains(fixture_class):
+    c = fixture_class
+    T.propose(c, "p-ab", "regroup", {"group_id": "g-ab"}, ["sa", "sb"], ts=10)
+    T.propose(c, "p-cd", "regroup", {"group_id": "g-cd"}, ["sc", "sd"], ts=11)  # sd isn't in the new group
+    T.propose(c, "p-pr", "assign_practice", {"construct_id": 3}, ["sa"], ts=12)  # other kinds are left alone
+    assert T.propose(c, "p-abc", "regroup", {"group_id": "g-abc"}, ["sa", "sb", "sc"], ts=13)["rows"][0]["superseded"] == ["p-ab"]
+    mine = {"p-ab", "p-cd", "p-pr", "p-abc"}
+    states = {p["id"]: p["state"] for p in T.proposals(c, None)["rows"] if p["id"] in mine}
+    assert states == {"p-ab": "superseded", "p-cd": "pending", "p-pr": "pending", "p-abc": "pending"}
+    # kept for history, pointing at its replacement, and no longer approvable
+    rows, _ = run(f"class_{c}", "MATCH (:Proposal {id:'p-ab'})-[:SUPERSEDED_BY]->(n:Proposal) RETURN n.id AS id")
+    assert rows == [{"id": "p-abc"}]
+    assert T.decide(c, "p-ab", "approved")["rows"] == []
+    # the same students again: the newer proposal is the one left pending
+    assert T.propose(c, "p-abc2", "regroup", {"group_id": "g-abc2"}, ["sc", "sb", "sa"], ts=14)["rows"][0]["superseded"] == ["p-abc"]
+    assert [p["id"] for p in T.proposals(c, "pending")["rows"] if p["kind"] == "regroup"
+            and p["id"] in mine | {"p-abc2"}] == ["p-cd", "p-abc2"]
 
 
 # --- diagnose_text: is `score` a distance (lower = closer) or a similarity? ---

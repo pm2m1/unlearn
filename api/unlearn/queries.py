@@ -407,11 +407,17 @@ CREATE (a)-[:SHARES_GAP {miscs: miscs}]->(b)
 """
 
 # Added to SPEC: `ids` alongside the aliases, so the Teacher agent can propose for those students.
+# shared: the confident misconceptions on the cohort's SHARES_GAP links, one entry per linked pair.
 COHORTS_WCC = """
 CALL algo.WCC({nodeLabels: ['Student'], relationshipTypes: ['SHARES_GAP']}) YIELD node, componentId
-WITH componentId, collect(node.alias) AS students, collect(node.id) AS ids
-WHERE size(students) > 1
-RETURN componentId, students, ids ORDER BY size(students) DESC
+WITH componentId, collect(node) AS members
+WHERE size(members) > 1
+UNWIND members AS a
+OPTIONAL MATCH (a)-[g:SHARES_GAP]->(:Student)
+WITH componentId, members, collect(g.miscs) AS links
+RETURN componentId, [m IN members | m.alias] AS students, [m IN members | m.id] AS ids,
+       reduce(acc = [], l IN links | acc + l) AS shared
+ORDER BY size(students) DESC
 """
 
 KEYSTONES = """
@@ -456,6 +462,18 @@ PROPOSE = """
 CREATE (p:Proposal {id:$id, kind:$kind, state:'pending', payload:$json, created_ts:$ts})
 WITH p UNWIND $sids AS sid
 MATCH (s:Student {id:sid}) CREATE (p)-[:FOR]->(s)
+"""
+
+# A new regroup replaces every pending regroup whose students it contains, so one per cohort stays pending.
+# Superseded proposals stay in the graph, pointing at the one that replaced them.
+SUPERSEDE_REGROUPS = """
+MATCH (new:Proposal {id:$id}), (old:Proposal {kind:'regroup', state:'pending'})-[:FOR]->(s:Student)
+WHERE old.id <> $id
+WITH new, old, collect(s.id) AS members
+WHERE all(m IN members WHERE m IN $sids)
+SET old.state = 'superseded', old.decided_ts = $ts
+CREATE (old)-[:SUPERSEDED_BY]->(new)
+RETURN old.id AS id
 """
 
 DECIDE = """

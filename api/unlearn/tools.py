@@ -248,10 +248,13 @@ def propose(class_id: str, proposal_id: str, kind: str, payload: dict, student_i
     if kind in ("skip_ahead", "assign_practice") and not isinstance(payload.get("construct_id"), int):
         raise ValueError(f"{kind} needs an integer payload['construct_id']")
     r = _Receipt(graph_name(class_id))
-    r.run(Q.PROPOSE, {"id": proposal_id, "kind": kind, "json": json.dumps(payload), "sids": student_ids,
-                      "ts": ts if ts is not None else now_ms()})
-    rows = [{"id": proposal_id, "kind": kind, "state": "pending"}]
-    return r.done(rows, _ids("Proposal", [proposal_id]) + _ids("Student", student_ids))
+    ts = ts if ts is not None else now_ms()
+    r.run(Q.PROPOSE, {"id": proposal_id, "kind": kind, "json": json.dumps(payload), "sids": student_ids, "ts": ts})
+    superseded = []
+    if kind == "regroup":
+        superseded = [x["id"] for x in r.run(Q.SUPERSEDE_REGROUPS, {"id": proposal_id, "sids": student_ids, "ts": ts})]
+    rows = [{"id": proposal_id, "kind": kind, "state": "pending", "superseded": superseded}]
+    return r.done(rows, _ids("Proposal", [proposal_id, *superseded]) + _ids("Student", student_ids))
 
 
 def decide(class_id: str, proposal_id: str, decision: str, ts: int | None = None) -> dict:

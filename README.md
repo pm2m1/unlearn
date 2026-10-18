@@ -136,6 +136,7 @@ FalkorDB serialises writes per graph, so classes don't queue behind each other's
 (:Task)-[:ASSIGNED_TO]->(:Agent)
 (:Task)-[:HANDED_OFF_FROM]->(:Task)
 (:Proposal {id,kind,state,payload})-[:FOR]->(:Student)                  // waits for teacher approval
+(:Proposal)-[:SUPERSEDED_BY]->(:Proposal)                              // a larger regroup replaced a pending one
 (:Proposal)-[:HAD_EVENT]->(:Event)                                     // logged when an approval is applied
 (:Group {id})-[:HAS_MEMBER]->(:Student)                                // applied regroup
 (:Assignment {id,ts,proposal})-[:FOR]->(:Student), (:Assignment)-[:PRACTICES]->(:Construct)
@@ -168,7 +169,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 ## Every query
 
 <!-- queries:start -->
-114 queries, all parameterised, all in [`api/unlearn/queries.py`](api/unlearn/queries.py).
+115 queries, all parameterised, all in [`api/unlearn/queries.py`](api/unlearn/queries.py).
 
 **Agent tools (the 16 tools and the queries they run)**
 
@@ -200,6 +201,7 @@ It walks up to four prerequisite hops back from the skill the student is working
 | `CLAIM` | `claim`: oldest submitted task for an agent; exactly one worker wins | per-graph write serialisation |
 | `HANDOFF` | `handoff`: close a task, open the next, keep the chain and its context | CREATE + SET in one write |
 | `PROPOSE` | `propose`: a pending Proposal for the teacher | CREATE + UNWIND |
+| `SUPERSEDE_REGROUPS` | `propose` (regroup): supersede pending regroups whose students it contains | list predicate `all()` |
 | `DECIDE` | `decide`: approve or reject a pending proposal | conditional MATCH + SET |
 
 **Approval executor (runs only after `decide(approved)`)**
