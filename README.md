@@ -2,6 +2,10 @@
 
 **Live demo: [unlearn-ejdh.onrender.com](https://unlearn-ejdh.onrender.com)** (free tier: the first load can take about a minute) · **Code: [github.com/pm2m1/unlearn](https://github.com/pm2m1/unlearn)**
 
+![Asha answers a few questions and Unlearn walks the prerequisite graph down to the skill that broke](docs/img/hero.gif)
+
+*Asha answers five questions; Unlearn walks her `REQUIRES` chain and lights up the root cause in amber: lowest common multiple, two levels below the topic she got wrong.*
+
 > **Remove-FalkorDB test:** without the graph there is no misconception-to-concept grounding, no prerequisite root-cause traversal, no per-class memory, no agent handoffs and no cohort grouping. It collapses into generic chat.
 
 <!-- PARTH: rewrite in your own words -->
@@ -23,6 +27,14 @@ Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory an
   Then open **http://localhost:8000**. For the video's two students, run `docker compose exec api python scripts/demo_scenario.py` and open `http://localhost:8000/?class=demo_video`.
 - **No API keys needed.** Without them every reply is a template built from the graph's rows. The diagnosis, memory and receipts are the same either way.
 - **Explaining it to someone:** [docs/EXPLAIN.md](docs/EXPLAIN.md) is a one-page cheat sheet.
+
+## Screenshots
+
+<table>
+<tr><td width="50%" valign="top"><img src="docs/img/recall.png" alt="Asha's second session opens with a Last time you banner"><br><sub><b>Memory across sessions.</b> Asha's second session opens with what the first one found, read back from her <code>SHOWED</code> edges in the graph, not from a chat log.</sub></td><td width="50%" valign="top"><img src="docs/img/receipts.png" alt="The receipts drawer showing the root_cause tool call and its Cypher"><br><sub><b>Receipts.</b> Every claim opens the exact Cypher, parameters and rows behind it: here <code>root_cause</code> walking <code>REQUIRES*1..4</code> below the topic.</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/img/teacher.png" alt="Teacher view with pending proposals, cohorts and keystones"><br><sub><b>Teacher view.</b> Cohorts from <code>algo.WCC</code> over shared misconceptions, keystones from PageRank over <code>REQUIRES</code>, and proposals that wait for a human.</sub></td><td width="50%" valign="top"><img src="docs/img/chat.png" alt="Teacher chat answering Which cohorts do I have with its tool chip"><br><sub><b>Teacher chat.</b> The model can only call graph tools; the reply shows which tool it used (<code>cohorts</code>), and every name in it is checked against that tool's rows.</sub></td></tr>
+<tr><td width="50%" valign="top"><img src="docs/img/eval.png" alt="Eval tab with the main results table and 95% intervals"><br><sub><b>Eval.</b> Graph traversal against vector RAG and no memory on the same simulated students, with 95% bootstrap intervals. Root cause needs the prerequisite walk.</sub></td><td width="50%" valign="top"><img src="docs/img/dark.png" alt="The same diagnosis in dark theme"><br><sub><b>Dark theme.</b> The same diagnosis; the amber root-cause chain is a path through the graph, restyled in place.</sub></td></tr>
+</table>
 
 ## How Unlearn maps to the tracks
 
