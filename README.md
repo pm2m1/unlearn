@@ -8,8 +8,7 @@
 
 > **Remove-FalkorDB test:** without the graph there is no misconception-to-concept grounding, no prerequisite root-cause traversal, no per-class memory, no agent handoffs and no cohort grouping. It collapses into generic chat.
 
-<!-- PARTH: rewrite in your own words -->
-Two students both score 40% on fractions and need opposite fixes. Asha can't find a lowest common multiple, a skill from a different topic, two steps below the question she got wrong. Ben changes only the denominator when he makes an equivalent fraction. A chat tutor sees two 40%s. Unlearn asks a few adaptive questions, traces each wrong answer back through a graph of prerequisites to the skill that actually broke, and remembers it next session. Every claim it makes comes with the Cypher query that proves it.
+Two students both score 40% on fractions and need opposite fixes. Asha can’t find a lowest common multiple, a skill from another topic two steps below the question. Ben changes only the denominator when he makes an equivalent fraction. A chat tutor sees two 40%s. Unlearn asks a few adaptive questions, traces each wrong answer back through a graph of prerequisites to the skill that actually broke, remembers it next session, and shows the Cypher behind every claim.
 
 Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory and Coordination** (primary) and **01 Agents That Act on Connected Data** (secondary).
 
@@ -62,8 +61,7 @@ Each row is a track's official key-focus item. "Partial" means some of it is met
 
 ## Why I built this
 
-<!-- PARTH: rewrite in your own words -->
-A percentage tells a teacher how much went wrong, never why. Most wrong answers in maths aren't random: they're a misconception, and the misconception usually lives in an earlier skill. Eedi's misconception graph maps thousands of those misconceptions to the skills they show up in. Add the links between skills, and "why" becomes a graph traversal instead of a guess.
+I wanted an agent problem where the answer really depends on connections, not on one record. Maths mistakes are exactly that: a wrong answer points to a misconception, which lives in a skill, which depends on other skills. The Eedi Misconceptions Graph gave me 8,117 real misconceptions to build on, and FalkorDB let me give every class its own graph and run WCC, PageRank and betweenness as agent tools instead of writing them myself.
 
 ## How it works
 
