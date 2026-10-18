@@ -1,10 +1,10 @@
-"""The README's table of every Cypher query in api/unlearn/queries.py, with its purpose and the FalkorDB feature
+"""The table of every Cypher query (docs/QUERIES.md) in api/unlearn/queries.py, with its purpose and the FalkorDB feature
 or algorithm it relies on.
 
     python scripts/readme_queries.py            # print the table
-    python scripts/readme_queries.py --write    # replace the block between the markers in README.md
+    python scripts/readme_queries.py --write    # replace the block between the markers in docs/QUERIES.md
 
-tests/test_readme.py fails if a query in queries.py is missing here, so the README can't fall behind.
+tests/test_readme.py fails if a query in queries.py is missing here, so docs/QUERIES.md can't fall behind.
 """
 
 import sys
@@ -151,7 +151,7 @@ GROUPS = {
 
 def table() -> str:
     lines = [f"{sum(len(v) for v in GROUPS.values())} queries, all parameterised, all in "
-             "[`api/unlearn/queries.py`](api/unlearn/queries.py).", ""]
+             "[`api/unlearn/queries.py`](../api/unlearn/queries.py).", ""]
     for group, rows in GROUPS.items():
         lines += [f"**{group}**", "", "| Query | Purpose | FalkorDB feature |", "| --- | --- | --- |"]
         lines += [f"| `{n}` | {p} | {f} |" for n, p, f in rows]
@@ -173,12 +173,12 @@ def main(argv=None) -> int:
         print(f"out of sync with queries.py: missing {sorted(missing)}, unknown {sorted(extra)}", file=sys.stderr)
         return 1
     if argv and "--write" in argv:
-        readme = ROOT / "README.md"
+        readme = ROOT / "docs" / "QUERIES.md"
         s = readme.read_text()
         head, rest = s.split(START, 1)
         _, tail = rest.split(END, 1)
         readme.write_text(f"{head}{START}\n{table()}{END}{tail}")
-        print("README.md query table updated")
+        print("docs/QUERIES.md query table updated")
     else:
         print(table())
     return 0

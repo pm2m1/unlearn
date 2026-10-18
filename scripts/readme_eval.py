@@ -1,7 +1,7 @@
-"""The README's eval tables, generated from eval/results/*.json so the numbers can't drift from the data.
+"""The eval tables in docs/EVALUATION.md, generated from eval/results/*.json so the numbers can't drift from the data.
 
     python scripts/readme_eval.py            # print the block
-    python scripts/readme_eval.py --write    # replace the block between the markers in README.md
+    python scripts/readme_eval.py --write    # replace the block between the markers in docs/EVALUATION.md
 
 Reads eval.json (A, B, B+, C), random_baseline.json (random guess from the same candidate lists) and
 crosscheck.json (the tiny Gemini Flash cross-check, shown only as a footnote).
@@ -138,7 +138,7 @@ def block() -> str:
     on_list = {k: sum(rb["per_seed"][str(s)]["planted_misconception_on_list"][k] for s in meta["seeds"]) / len(meta["seeds"])
                for k in ("A", "B", "B+")}
     note = ("Mean with its 95% bootstrap interval in brackets: 1000 resamples of students, from the saved per-student "
-            "predictions (`eval/bootstrap.py`); the per-seed min–max is in [`eval/results/eval.md`](eval/results/eval.md). "
+            "predictions (`eval/bootstrap.py`); the per-seed min–max is in [`eval/results/eval.md`](../eval/results/eval.md). "
             if ev.get("bootstrap") else "Mean (min–max across seeds) where a condition ran on more than one seed. ")
     lines += ["", note + "Model for A, B and B+: "
               f"`{meta['llm'].split(' / ')[-1]}` (local, Ollama, thinking off), one model, no fallback. C: template wording; "
@@ -179,12 +179,12 @@ def block() -> str:
 def main(argv=None) -> int:
     text = block()
     if argv and "--write" in argv:
-        readme = ROOT / "README.md"
+        readme = ROOT / "docs" / "EVALUATION.md"
         s = readme.read_text()
         head, rest = s.split(START, 1)
         _, tail = rest.split(END, 1)
         readme.write_text(f"{head}{START}\n{text}{END}{tail}")
-        print("README.md eval tables updated")
+        print("docs/EVALUATION.md eval tables updated")
     else:
         print(text)
     return 0
