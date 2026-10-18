@@ -123,9 +123,15 @@ Same simulated students for every condition: 90 per condition (30 × seeds 0–2
 | Top-1 misconception | 7% [2–12] | 7% [2–12] | **48% [38–58]** |
 | p50 latency per diagnosis | 14.9 s (n=50) | 7.5 s (n=120) | **50 ms (n=90)** |
 
+Simulated students; the root-cause advantage is not yet confirmed on real data (see Real-data results).
+
 - **Simulator noise.** The simulator reads the same option-to-misconception map Unlearn does, which favours it. With noise added, C at p = 0.2 still beats every clean baseline; at p = 0.4 it doesn't.
 - **Tool routing.** The teacher chat's model called exactly the expected tools for 30/30 dev and 10/10 held-out questions (an easy test; see the caveats).
 - **Everything else** (B+ with the whole graph in the prompt, seed-0 table, random baseline, design checks, concurrency and latency): [docs/EVALUATION.md](docs/EVALUATION.md).
+
+### Real-data results (Eedi NeurIPS 2020, 10,049 held-out students)
+
+On real students, adding the prerequisite graph to a correctness-only model raised next-answer AUC by a small but clear +0.0055 [95% CI +0.0046, +0.0066] (pre-registered primary test; +0.0060 with the unreviewed 12-edge graph). Contrary to our pre-registered expectation, the gain comes from later quizzes, not cold start. We found no evidence yet that the diagnosed root cause beats a random or BKT-chosen one (Task B, mostly underpowered). This tests a reduced, correctness-only version of Unlearn at SubTopic level; its misconception reasoning is untested on real data. Full report: [eval/real/RESULTS.md](eval/real/RESULTS.md).
 
 ## Tracks
 

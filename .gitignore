@@ -6,3 +6,5 @@ __pycache__/
 .pytest_cache/
 .cache/
 .DS_Store
+# Eedi NeurIPS 2020 data (CC BY-NC-ND 4.0): never commit it or anything per-student derived from it
+data/external/
