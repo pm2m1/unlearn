@@ -10,7 +10,7 @@
 
 ## Licence
 
-**CC BY-NC-ND 4.0**, as stated by Eedi on the project page above. The zip itself carries no licence file. The challenge guide adds that the question images were shared for the competition only.
+**CC BY-NC-ND 4.0**: stated on the project page above, read by Parth on 2026-10-18; the page later returned 404. The zip itself carries no licence file. The challenge guide adds that the question images were shared for the competition only.
 
 What that means here:
 

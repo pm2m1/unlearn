@@ -1,20 +1,20 @@
-kind,from_subtopic,from_name,to_subtopic,to_name,n_construct_edges,construct_edges,decision,note
-edge,219,Factors and Highest Common Factor,204,Mental Multiplication and Division,2,331>3378(high); 331>164(high),keep,
-edge,220,Multiples and Lowest Common Multiple,204,Mental Multiplication and Division,1,342>3378(high),keep,
-edge,226,Equivalent Fractions,204,Mental Multiplication and Division,1,409>3378(high),keep,
-edge,226,Equivalent Fractions,227,Simplifying Fractions,2,408>3342(high); 409>3342(high),drop,"cycle with 227 -> 226; keep Simplifying requires Equivalent, drop Equivalent requires Simplifying"
-edge,227,Simplifying Fractions,219,Factors and Highest Common Factor,2,410>338(medium); 411>338(high),keep,
-edge,227,Simplifying Fractions,226,Equivalent Fractions,2,410>409(high); 411>409(high),keep,
-edge,228,Ordering Fractions,204,Mental Multiplication and Division,1,3839>3193(high),keep,
-edge,228,Ordering Fractions,220,Multiples and Lowest Common Multiple,1,415>345(high),keep,
-edge,228,Ordering Fractions,226,Equivalent Fractions,3,414>409(high); 415>409(high); 3587>408(low),keep,
-edge,228,Ordering Fractions,227,Simplifying Fractions,3,413>3342(high); 3320>3342(high); 420>3342(high),keep,
-edge,230,Adding and Subtracting Fractions,220,Multiples and Lowest Common Multiple,6,425>342(high); 433>342(high); 426>345(high); 434>345(high); 427>345(high); 435>345(high),keep,
-edge,230,Adding and Subtracting Fractions,226,Equivalent Fractions,4,425>409(high); 433>409(high); 427>409(high); 435>409(high),keep,
-edge,230,Adding and Subtracting Fractions,227,Simplifying Fractions,2,424>3342(high); 432>3342(high),keep,
-unmapped,225,Fractions of an Amount,,,0,,outside graph,Fractions SubTopic with none of our 40 constructs
-unmapped,229,Converting Mixed Number and Improper Fractions,,,0,,outside graph,Fractions SubTopic with none of our 40 constructs
-unmapped,231,Multiplying Fractions,,,0,,outside graph,Fractions SubTopic with none of our 40 constructs
-unmapped,232,Dividing Fractions,,,0,,outside graph,Fractions SubTopic with none of our 40 constructs
-unmapped,1162,Fractions-Others,,,0,,outside graph,Fractions SubTopic with none of our 40 constructs
-unmapped,1982,Mixed operation Fractions,,,0,,outside graph,Fractions SubTopic with none of our 40 constructs
+kind,from_subtopic,from_name,to_subtopic,to_name,n_construct_edges,construct_edges,decision,in_sensitivity,note
+edge,219,Factors and Highest Common Factor,204,Mental Multiplication and Division,2,331>3378(high); 331>164(high),keep,yes,
+edge,220,Multiples and Lowest Common Multiple,204,Mental Multiplication and Division,1,342>3378(high),keep,yes,
+edge,226,Equivalent Fractions,204,Mental Multiplication and Division,1,409>3378(high),keep,yes,
+edge,226,Equivalent Fractions,227,Simplifying Fractions,2,408>3342(high); 409>3342(high),drop,no,"only from 3342 Read fractions, which Eedi files under 227; also makes the 226 <-> 227 cycle"
+edge,227,Simplifying Fractions,219,Factors and Highest Common Factor,2,410>338(medium); 411>338(high),keep,yes,
+edge,227,Simplifying Fractions,226,Equivalent Fractions,2,410>409(high); 411>409(high),keep,yes,
+edge,228,Ordering Fractions,204,Mental Multiplication and Division,1,3839>3193(high),drop,yes,one construct edge (3839 > 3193) collapsed onto the broadest SubTopic; 228 already reaches 204 via 226 and 220
+edge,228,Ordering Fractions,220,Multiples and Lowest Common Multiple,1,415>345(high),keep,yes,
+edge,228,Ordering Fractions,226,Equivalent Fractions,3,414>409(high); 415>409(high); 3587>408(low),keep,yes,
+edge,228,Ordering Fractions,227,Simplifying Fractions,3,413>3342(high); 3320>3342(high); 420>3342(high),drop,yes,"only from 3342 Read fractions, not Simplifying"
+edge,230,Adding and Subtracting Fractions,220,Multiples and Lowest Common Multiple,6,425>342(high); 433>342(high); 426>345(high); 434>345(high); 427>345(high); 435>345(high),keep,yes,
+edge,230,Adding and Subtracting Fractions,226,Equivalent Fractions,4,425>409(high); 433>409(high); 427>409(high); 435>409(high),keep,yes,
+edge,230,Adding and Subtracting Fractions,227,Simplifying Fractions,2,424>3342(high); 432>3342(high),drop,yes,"only from 3342 Read fractions, not Simplifying"
+unmapped,225,Fractions of an Amount,,,0,,outside graph,,Fractions SubTopic with none of our 40 constructs
+unmapped,229,Converting Mixed Number and Improper Fractions,,,0,,outside graph,,Fractions SubTopic with none of our 40 constructs
+unmapped,231,Multiplying Fractions,,,0,,outside graph,,Fractions SubTopic with none of our 40 constructs
+unmapped,232,Dividing Fractions,,,0,,outside graph,,Fractions SubTopic with none of our 40 constructs
+unmapped,1162,Fractions-Others,,,0,,outside graph,,Fractions SubTopic with none of our 40 constructs
+unmapped,1982,Mixed operation Fractions,,,0,,outside graph,,Fractions SubTopic with none of our 40 constructs
