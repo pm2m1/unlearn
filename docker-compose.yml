@@ -8,7 +8,7 @@ x-falkordb: &falkordb
   # Pinned: last 4.x patch older than two weeks. 6.0.x (new Rust engine) avoided per SPEC risks.
   image: falkordb/falkordb:v4.20.7
   environment:
-    - REDIS_ARGS=--requirepass ${FALKOR_PASSWORD}
+    - REDIS_ARGS=--requirepass ${FALKOR_PASSWORD:?set FALKOR_PASSWORD in .env - run cp .env.example .env first}
     # The image default is "MAX_QUEUED_QUERIES 25 TIMEOUT 1000 RESULTSET_SIZE 10000". 25 queued queries is
     # too few: 60 concurrent simulated students (eval/concurrency.py) got "Max pending queries exceeded".
     # Setting FALKORDB_ARGS replaces the default, so the other two settings are restated unchanged.
@@ -16,7 +16,7 @@ x-falkordb: &falkordb
   volumes:
     - falkor-data:/var/lib/falkordb/data
   healthcheck:
-    test: ["CMD-SHELL", "redis-cli -a '${FALKOR_PASSWORD}' --no-auth-warning ping | grep -q PONG"]
+    test: ["CMD-SHELL", "redis-cli -a '${FALKOR_PASSWORD:?set FALKOR_PASSWORD in .env - run cp .env.example .env first}' --no-auth-warning ping | grep -q PONG"]
     interval: 5s
     timeout: 3s
     retries: 10
@@ -30,7 +30,7 @@ x-api: &api
   environment: &api-env
     FALKOR_HOST: falkordb
     FALKOR_PORT: "6379"
-    FALKOR_PASSWORD: ${FALKOR_PASSWORD}
+    FALKOR_PASSWORD: ${FALKOR_PASSWORD:?set FALKOR_PASSWORD in .env - run cp .env.example .env first}
     GROQ_API_KEY: ${GROQ_API_KEY:-}
     GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
