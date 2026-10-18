@@ -1,6 +1,6 @@
 # Unlearn
 
-**Live demo: [unlearn-ejdh.onrender.com](https://unlearn-ejdh.onrender.com)** (free tier: the first load can take about a minute) · **Code: [github.com/pm2m1/unlearn](https://github.com/pm2m1/unlearn)**
+**Live demo: [unlearn-ejdh.onrender.com](https://unlearn-ejdh.onrender.com)** (free tier: the first load can take about a minute) · **Code: [github.com/pm2m1/unlearn](https://github.com/pm2m1/unlearn)** · **Blog: [I gave an AI tutor a map of 8,117 ways students get maths wrong](https://dev.to/pm2m1/i-gave-an-ai-tutor-a-map-of-8117-ways-students-get-maths-wrong-240i)**
 
 ![Asha answers a few questions and Unlearn walks the prerequisite graph down to the skill that broke](docs/img/hero.gif)
 
@@ -118,6 +118,10 @@ Three kinds of graph live in one FalkorDB instance:
 - `class_<id>`: one per classroom, made with `GRAPH.COPY`, which carries all 9 indexes, including the vector index.
 
 FalkorDB serialises writes per graph, so classes don't queue behind each other's writes (measured below).
+
+![Unlearn's graph model, with Asha's root-cause path in amber](docs/img/graph-model.png)
+
+*Amber is Asha's real path: she `SHOWED` a misconception `SEEN_IN` the topic, which `REQUIRES` two levels down to the lowest common multiple, where her diagnosis found the evidence. Grey shows the model's other relationship types. Drawn by [`docs/graph_model.py`](docs/graph_model.py).*
 
 ```
 // Curriculum (in curriculum and class graphs)
