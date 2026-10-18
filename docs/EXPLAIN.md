@@ -1,6 +1,6 @@
 # Unlearn in one page
 
-**Pitch.** Asha and Ben both score 40% on fractions. Asha can't find a lowest common multiple, a skill from another topic two steps below the question she got wrong. Ben changes only the denominator when he makes an equivalent fraction. Unlearn asks a few adaptive questions, walks a prerequisite graph back to the skill that broke, remembers it next session, and shows the Cypher behind every claim.
+**Summary.** Asha and Ben both score 40% on fractions. Asha can't find a lowest common multiple, a skill from another topic two steps below the question she got wrong. Ben changes only the denominator when he makes an equivalent fraction. Unlearn asks a few adaptive questions, walks a prerequisite graph back to the skill that broke, remembers it next session, and shows the Cypher behind every claim.
 
 ## The graph model
 
@@ -17,7 +17,7 @@
     - `Skill -[:HAS_STEP]-> Step` with a `success_rate` (procedural);
     - `Session` / `Event`.
   - **Coordination:** `Task` (claimed, handed off), `Proposal` (waits for a human), `Agent`.
-- **One sentence for judges:** the agents keep no state in Python. Each HTTP request runs one step, and that step reads its state back from the graph.
+- **In one sentence:** the agents keep no state in Python. Each HTTP request runs one step, and that step reads its state back from the graph.
 
 ## `root_cause`, line by line
 
@@ -80,11 +80,11 @@ Root 345 after 5 questions, 2 levels down.
   | Strongest first | 56% | 31% |
   | **Root first (current)** | **68%** | **45%** |
 
-- **Say it plainly:** the rule was chosen after seeing these numbers. The cost is precision, because one-off slips get named too.
+- **Note:** the rule was chosen after seeing these numbers. The cost is precision, because one-off slips get named too.
 
 ## Why FalkorDB (and what B+ shows)
 
-- **The obvious objection:** "just paste the graph into the prompt." That is condition **B+**: B's prompt plus every `REQUIRES` edge and every construct's misconceptions with their weights (~22k tokens), on the same local model (qwen3.5 27B).
+- **A natural question:** why not "just paste the graph into the prompt"? That is condition **B+**: B's prompt plus every `REQUIRES` edge and every construct's misconceptions with their weights (~22k tokens), on the same local model (qwen3.5 27B).
 - **Result:**
 
   B+ ran on seed 0 only, so every comparison with it uses seed 0's 30 students (the same students in each column):
@@ -100,7 +100,7 @@ Root 345 after 5 questions, 2 levels down.
 
   Over all three seeds (90 students), without B+: C scores 72% on root cause against 37% for B and 32% for A.
 
-  The graph's *knowledge* helps an LLM a little. The *traversal* (rule out, descend, weigh evidence, remember) is what gets you to the root.
+  The graph's *knowledge* helps an LLM a little. The *traversal* (rule out, descend, weigh evidence, remember) is what finds the root.
 - **What the graph does that a prompt can't:**
   - Memory persists across sessions (`SHOWED`, `Event`).
   - Agents coordinate through `Task` and `Proposal` nodes. `CLAIM` is race-safe.
@@ -108,7 +108,7 @@ Root 345 after 5 questions, 2 levels down.
   - Vector search, WCC, PageRank, betweenness and shortest paths run in the same engine as the memory.
 - **Remove-FalkorDB test:** take the graph away and there's no grounding, no root-cause traversal, no memory and no handoffs. It's a chatbot.
 
-## Known weaknesses (say them before a judge does)
+## Known weaknesses
 
 - **Synthetic students.**
   - All 90 eval students are simulated. The simulator picks wrong answers through the same option-to-misconception map Unlearn reads, which favours Unlearn.

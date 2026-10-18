@@ -25,7 +25,7 @@ Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory an
 
   Then open **http://localhost:8000**. For the video's two students, run `docker compose exec api python scripts/demo_scenario.py` and open `http://localhost:8000/?class=demo_video`.
 - **No API keys needed.** Without them every reply is a template built from the graph's rows. The diagnosis, memory and receipts are the same either way.
-- **Explaining it to someone:** [docs/EXPLAIN.md](docs/EXPLAIN.md) is a one-page cheat sheet.
+- **One-page explainer:** [docs/EXPLAIN.md](docs/EXPLAIN.md) covers the graph model, the root-cause query, the search, the evidence weighting, the recall rule and the known weaknesses.
 
 ## Screenshots
 
