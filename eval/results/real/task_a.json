@@ -1,0 +1,791 @@
+{
+  "meta": {
+    "split": "test students (pre-registered)",
+    "commit": "9e28178bd92d13dd178e481011fac34881de9854",
+    "uncommitted_changes": false,
+    "data": {
+      "questions_one_subtopic": 2420,
+      "questions_several_subtopics_dropped": 59,
+      "students": 50247,
+      "answers": 1622755,
+      "train_students": 40198,
+      "test_students": 10049,
+      "train_answers": 1296571,
+      "test_answers": 326184,
+      "answers_per_subtopic": {
+        "204": 452714,
+        "219": 184862,
+        "220": 206924,
+        "226": 186327,
+        "227": 115791,
+        "228": 173323,
+        "230": 302814
+      },
+      "blocks": 334369,
+      "median_answers_per_student": 22.0,
+      "median_quizzes_per_student": 5.0
+    },
+    "run_at": "2026-10-18 22:56:00"
+  },
+  "all": {
+    "n_answers": 326184,
+    "n_students": 10049,
+    "models": {
+      "M0": {
+        "auc": 0.689,
+        "logloss": 0.582,
+        "accuracy": 0.6941,
+        "auc_ci": [
+          0.6851,
+          0.6925
+        ],
+        "logloss_ci": [
+          0.5776,
+          0.5867
+        ],
+        "accuracy_ci": [
+          0.6896,
+          0.6985
+        ]
+      },
+      "M0b": {
+        "auc": 0.6373,
+        "logloss": 0.6078,
+        "accuracy": 0.6775,
+        "auc_ci": [
+          0.6326,
+          0.6418
+        ],
+        "logloss_ci": [
+          0.603,
+          0.6126
+        ],
+        "accuracy_ci": [
+          0.6728,
+          0.6826
+        ]
+      },
+      "M1": {
+        "auc": 0.6357,
+        "logloss": 0.6063,
+        "accuracy": 0.6785,
+        "auc_ci": [
+          0.6311,
+          0.6402
+        ],
+        "logloss_ci": [
+          0.602,
+          0.6107
+        ],
+        "accuracy_ci": [
+          0.6738,
+          0.6832
+        ]
+      },
+      "M2": {
+        "auc": 0.7164,
+        "logloss": 0.5674,
+        "accuracy": 0.7046,
+        "auc_ci": [
+          0.7129,
+          0.72
+        ],
+        "logloss_ci": [
+          0.5628,
+          0.5721
+        ],
+        "accuracy_ci": [
+          0.7005,
+          0.7087
+        ]
+      },
+      "M2-nograph": {
+        "auc": 0.7108,
+        "logloss": 0.5704,
+        "accuracy": 0.7018,
+        "auc_ci": [
+          0.7072,
+          0.7144
+        ],
+        "logloss_ci": [
+          0.5657,
+          0.5751
+        ],
+        "accuracy_ci": [
+          0.6977,
+          0.706
+        ]
+      },
+      "M3": {
+        "auc": 0.644,
+        "logloss": 0.6042,
+        "accuracy": 0.6795,
+        "auc_ci": [
+          0.6392,
+          0.6486
+        ],
+        "logloss_ci": [
+          0.6,
+          0.6083
+        ],
+        "accuracy_ci": [
+          0.675,
+          0.6842
+        ]
+      },
+      "M2 (12 edges)": {
+        "auc": 0.7168,
+        "logloss": 0.5671,
+        "accuracy": 0.7049,
+        "auc_ci": [
+          0.7133,
+          0.7205
+        ],
+        "logloss_ci": [
+          0.5625,
+          0.5718
+        ],
+        "accuracy_ci": [
+          0.7009,
+          0.709
+        ]
+      },
+      "M3 (12 edges)": {
+        "auc": 0.6444,
+        "logloss": 0.6042,
+        "accuracy": 0.6795,
+        "auc_ci": [
+          0.6396,
+          0.649
+        ],
+        "logloss_ci": [
+          0.6,
+          0.6083
+        ],
+        "accuracy_ci": [
+          0.6749,
+          0.6842
+        ]
+      }
+    },
+    "differences": {
+      "M2 - M1": {
+        "auc_diff": 0.0807,
+        "ci": [
+          0.0766,
+          0.0846
+        ],
+        "verdict": "better"
+      },
+      "M2 - M2-nograph": {
+        "auc_diff": 0.0055,
+        "ci": [
+          0.0046,
+          0.0066
+        ],
+        "verdict": "better"
+      },
+      "M3 - M1": {
+        "auc_diff": 0.0083,
+        "ci": [
+          0.0071,
+          0.0095
+        ],
+        "verdict": "better"
+      },
+      "M0b - M1": {
+        "auc_diff": 0.0016,
+        "ci": [
+          0.0009,
+          0.0024
+        ],
+        "verdict": "negligible"
+      },
+      "M1 - M0": {
+        "auc_diff": -0.0533,
+        "ci": [
+          -0.0589,
+          -0.048
+        ],
+        "verdict": "worse"
+      },
+      "M2 (12 edges) - M1": {
+        "auc_diff": 0.0811,
+        "ci": [
+          0.0772,
+          0.085
+        ],
+        "verdict": "better"
+      },
+      "M2 (12 edges) - M2-nograph": {
+        "auc_diff": 0.006,
+        "ci": [
+          0.0051,
+          0.007
+        ],
+        "verdict": "better"
+      },
+      "M3 (12 edges) - M1": {
+        "auc_diff": 0.0087,
+        "ci": [
+          0.0075,
+          0.0099
+        ],
+        "verdict": "better"
+      }
+    }
+  },
+  "first 2 quizzes": {
+    "n_answers": 110133,
+    "n_students": 10049,
+    "models": {
+      "M0": {
+        "auc": 0.6951,
+        "logloss": 0.5814,
+        "accuracy": 0.692,
+        "auc_ci": [
+          0.6903,
+          0.6996
+        ],
+        "logloss_ci": [
+          0.5768,
+          0.586
+        ],
+        "accuracy_ci": [
+          0.688,
+          0.6961
+        ]
+      },
+      "M0b": {
+        "auc": 0.5841,
+        "logloss": 0.6274,
+        "accuracy": 0.6643,
+        "auc_ci": [
+          0.5792,
+          0.5893
+        ],
+        "logloss_ci": [
+          0.623,
+          0.6315
+        ],
+        "accuracy_ci": [
+          0.6594,
+          0.6696
+        ]
+      },
+      "M1": {
+        "auc": 0.5835,
+        "logloss": 0.6253,
+        "accuracy": 0.6656,
+        "auc_ci": [
+          0.5785,
+          0.5889
+        ],
+        "logloss_ci": [
+          0.6213,
+          0.6288
+        ],
+        "accuracy_ci": [
+          0.6606,
+          0.6712
+        ]
+      },
+      "M2": {
+        "auc": 0.7021,
+        "logloss": 0.5772,
+        "accuracy": 0.6958,
+        "auc_ci": [
+          0.6975,
+          0.7066
+        ],
+        "logloss_ci": [
+          0.5726,
+          0.5818
+        ],
+        "accuracy_ci": [
+          0.6917,
+          0.7
+        ]
+      },
+      "M2-nograph": {
+        "auc": 0.7014,
+        "logloss": 0.5777,
+        "accuracy": 0.6953,
+        "auc_ci": [
+          0.6968,
+          0.7059
+        ],
+        "logloss_ci": [
+          0.5732,
+          0.5822
+        ],
+        "accuracy_ci": [
+          0.6911,
+          0.6994
+        ]
+      },
+      "M3": {
+        "auc": 0.5865,
+        "logloss": 0.6247,
+        "accuracy": 0.6657,
+        "auc_ci": [
+          0.5816,
+          0.5918
+        ],
+        "logloss_ci": [
+          0.6207,
+          0.6281
+        ],
+        "accuracy_ci": [
+          0.6607,
+          0.6712
+        ]
+      },
+      "M2 (12 edges)": {
+        "auc": 0.7022,
+        "logloss": 0.5772,
+        "accuracy": 0.6957,
+        "auc_ci": [
+          0.6976,
+          0.7067
+        ],
+        "logloss_ci": [
+          0.5726,
+          0.5817
+        ],
+        "accuracy_ci": [
+          0.6915,
+          0.6999
+        ]
+      },
+      "M3 (12 edges)": {
+        "auc": 0.587,
+        "logloss": 0.6246,
+        "accuracy": 0.6655,
+        "auc_ci": [
+          0.5821,
+          0.5921
+        ],
+        "logloss_ci": [
+          0.6206,
+          0.6281
+        ],
+        "accuracy_ci": [
+          0.6605,
+          0.6709
+        ]
+      }
+    },
+    "differences": {
+      "M2 - M1": {
+        "auc_diff": 0.1186,
+        "ci": [
+          0.1124,
+          0.1243
+        ],
+        "verdict": "better"
+      },
+      "M2 - M2-nograph": {
+        "auc_diff": 0.0006,
+        "ci": [
+          0.0004,
+          0.0009
+        ],
+        "verdict": "negligible"
+      },
+      "M3 - M1": {
+        "auc_diff": 0.003,
+        "ci": [
+          0.0021,
+          0.0039
+        ],
+        "verdict": "negligible"
+      },
+      "M0b - M1": {
+        "auc_diff": 0.0006,
+        "ci": [
+          -0.0001,
+          0.0012
+        ],
+        "verdict": "no detectable difference"
+      },
+      "M1 - M0": {
+        "auc_diff": -0.1116,
+        "ci": [
+          -0.1178,
+          -0.1048
+        ],
+        "verdict": "worse"
+      },
+      "M2 (12 edges) - M1": {
+        "auc_diff": 0.1186,
+        "ci": [
+          0.1125,
+          0.1245
+        ],
+        "verdict": "better"
+      },
+      "M2 (12 edges) - M2-nograph": {
+        "auc_diff": 0.0007,
+        "ci": [
+          0.0005,
+          0.001
+        ],
+        "verdict": "negligible"
+      },
+      "M3 (12 edges) - M1": {
+        "auc_diff": 0.0035,
+        "ci": [
+          0.0025,
+          0.0045
+        ],
+        "verdict": "negligible"
+      }
+    }
+  },
+  "later quizzes": {
+    "n_answers": 216051,
+    "n_students": 8073,
+    "models": {
+      "M0": {
+        "auc": 0.6856,
+        "logloss": 0.5823,
+        "accuracy": 0.6951,
+        "auc_ci": [
+          0.6809,
+          0.6902
+        ],
+        "logloss_ci": [
+          0.5767,
+          0.5884
+        ],
+        "accuracy_ci": [
+          0.6894,
+          0.7005
+        ]
+      },
+      "M0b": {
+        "auc": 0.6615,
+        "logloss": 0.5978,
+        "accuracy": 0.6843,
+        "auc_ci": [
+          0.6557,
+          0.6671
+        ],
+        "logloss_ci": [
+          0.5917,
+          0.6041
+        ],
+        "accuracy_ci": [
+          0.6785,
+          0.6902
+        ]
+      },
+      "M1": {
+        "auc": 0.6589,
+        "logloss": 0.5966,
+        "accuracy": 0.6851,
+        "auc_ci": [
+          0.6534,
+          0.6645
+        ],
+        "logloss_ci": [
+          0.591,
+          0.6023
+        ],
+        "accuracy_ci": [
+          0.6792,
+          0.6908
+        ]
+      },
+      "M2": {
+        "auc": 0.7234,
+        "logloss": 0.5623,
+        "accuracy": 0.7091,
+        "auc_ci": [
+          0.719,
+          0.7278
+        ],
+        "logloss_ci": [
+          0.5565,
+          0.5684
+        ],
+        "accuracy_ci": [
+          0.704,
+          0.7142
+        ]
+      },
+      "M2-nograph": {
+        "auc": 0.7159,
+        "logloss": 0.5666,
+        "accuracy": 0.7051,
+        "auc_ci": [
+          0.7116,
+          0.7202
+        ],
+        "logloss_ci": [
+          0.5606,
+          0.573
+        ],
+        "accuracy_ci": [
+          0.6998,
+          0.7102
+        ]
+      },
+      "M3": {
+        "auc": 0.6691,
+        "logloss": 0.5937,
+        "accuracy": 0.6866,
+        "auc_ci": [
+          0.6632,
+          0.6748
+        ],
+        "logloss_ci": [
+          0.5885,
+          0.5993
+        ],
+        "accuracy_ci": [
+          0.6808,
+          0.6921
+        ]
+      },
+      "M2 (12 edges)": {
+        "auc": 0.7241,
+        "logloss": 0.5619,
+        "accuracy": 0.7096,
+        "auc_ci": [
+          0.7198,
+          0.7285
+        ],
+        "logloss_ci": [
+          0.556,
+          0.5681
+        ],
+        "accuracy_ci": [
+          0.7044,
+          0.7146
+        ]
+      },
+      "M3 (12 edges)": {
+        "auc": 0.6696,
+        "logloss": 0.5938,
+        "accuracy": 0.6866,
+        "auc_ci": [
+          0.6639,
+          0.6753
+        ],
+        "logloss_ci": [
+          0.5885,
+          0.5992
+        ],
+        "accuracy_ci": [
+          0.6808,
+          0.6921
+        ]
+      }
+    },
+    "differences": {
+      "M2 - M1": {
+        "auc_diff": 0.0645,
+        "ci": [
+          0.0597,
+          0.0692
+        ],
+        "verdict": "better"
+      },
+      "M2 - M2-nograph": {
+        "auc_diff": 0.0076,
+        "ci": [
+          0.0063,
+          0.009
+        ],
+        "verdict": "better"
+      },
+      "M3 - M1": {
+        "auc_diff": 0.0101,
+        "ci": [
+          0.0087,
+          0.0117
+        ],
+        "verdict": "better"
+      },
+      "M0b - M1": {
+        "auc_diff": 0.0026,
+        "ci": [
+          0.0015,
+          0.0037
+        ],
+        "verdict": "negligible"
+      },
+      "M1 - M0": {
+        "auc_diff": -0.0267,
+        "ci": [
+          -0.0337,
+          -0.0202
+        ],
+        "verdict": "worse"
+      },
+      "M2 (12 edges) - M1": {
+        "auc_diff": 0.0651,
+        "ci": [
+          0.0604,
+          0.0698
+        ],
+        "verdict": "better"
+      },
+      "M2 (12 edges) - M2-nograph": {
+        "auc_diff": 0.0082,
+        "ci": [
+          0.0069,
+          0.0096
+        ],
+        "verdict": "better"
+      },
+      "M3 (12 edges) - M1": {
+        "auc_diff": 0.0106,
+        "ci": [
+          0.0091,
+          0.0123
+        ],
+        "verdict": "better"
+      }
+    }
+  },
+  "contrasts": {
+    "(M2 - M2-nograph) on first 2 quizzes minus on later quizzes": {
+      "auc_diff": -0.0069,
+      "ci": [
+        -0.0083,
+        -0.0057
+      ]
+    },
+    "(M2 (12 edges) - M2-nograph) on first 2 quizzes minus on later quizzes": {
+      "auc_diff": -0.0074,
+      "ci": [
+        -0.0089,
+        -0.0062
+      ]
+    }
+  },
+  "bkt": {
+    "204": {
+      "L0": 0.5442,
+      "T": 0.0081,
+      "S": 0.1089,
+      "G": 0.4797,
+      "iterations": 43
+    },
+    "219": {
+      "L0": 0.4632,
+      "T": 0.0123,
+      "S": 0.1294,
+      "G": 0.4663,
+      "iterations": 88
+    },
+    "220": {
+      "L0": 0.3838,
+      "T": 0.0161,
+      "S": 0.1092,
+      "G": 0.4055,
+      "iterations": 60
+    },
+    "226": {
+      "L0": 0.5766,
+      "T": 0.0123,
+      "S": 0.1325,
+      "G": 0.4237,
+      "iterations": 48
+    },
+    "227": {
+      "L0": 0.5467,
+      "T": 0.017,
+      "S": 0.1469,
+      "G": 0.3932,
+      "iterations": 47
+    },
+    "228": {
+      "L0": 0.4382,
+      "T": 0.0087,
+      "S": 0.1683,
+      "G": 0.3984,
+      "iterations": 62
+    },
+    "230": {
+      "L0": 0.5335,
+      "T": 0.0143,
+      "S": 0.1466,
+      "G": 0.3848,
+      "iterations": 40
+    }
+  },
+  "m2": {
+    "primary": {
+      "coef": [
+        1.0138,
+        -0.0552,
+        0.6577,
+        -0.0488
+      ],
+      "intercept": -0.0552,
+      "features": [
+        "logit(M0)",
+        "evidence at X",
+        "mastered X",
+        "prerequisite suspicion"
+      ]
+    },
+    "nograph": {
+      "coef": [
+        1.0136,
+        -0.0586,
+        0.6667
+      ],
+      "intercept": -0.1011
+    },
+    "sensitivity": {
+      "coef": [
+        1.0121,
+        -0.0547,
+        0.6576,
+        -0.0502
+      ],
+      "intercept": -0.0483,
+      "features": [
+        "logit(M0)",
+        "evidence at X",
+        "mastered X",
+        "prerequisite suspicion"
+      ]
+    }
+  },
+  "m3": {
+    "primary": {
+      "beta": 0.2,
+      "train_loglik": {
+        "0": -783919.0,
+        "0.1": -781453.8,
+        "0.2": -781335.9,
+        "0.3": -781621.9,
+        "0.5": -782389.1,
+        "0.75": -783243.4,
+        "1": -783913.3,
+        "1.5": -784860.7,
+        "2": -785499.8
+      }
+    },
+    "sensitivity": {
+      "beta": 0.2,
+      "train_loglik": {
+        "0": -783919.0,
+        "0.1": -781323.5,
+        "0.2": -781299.7,
+        "0.3": -781709.5,
+        "0.5": -782695.0,
+        "0.75": -783746.6,
+        "1": -784555.2,
+        "1.5": -785686.0,
+        "2": -786447.1
+      }
+    }
+  }
+}

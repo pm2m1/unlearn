@@ -1,0 +1,388 @@
+{
+  "meta": {
+    "split": "test students (pre-registered)",
+    "commit": "9e28178bd92d13dd178e481011fac34881de9854",
+    "uncommitted_changes": false,
+    "data": {
+      "questions_one_subtopic": 2420,
+      "questions_several_subtopics_dropped": 59,
+      "students": 50247,
+      "answers": 1622755,
+      "train_students": 40198,
+      "test_students": 10049,
+      "train_answers": 1296571,
+      "test_answers": 326184,
+      "answers_per_subtopic": {
+        "204": 452714,
+        "219": 184862,
+        "220": 206924,
+        "226": 186327,
+        "227": 115791,
+        "228": 173323,
+        "230": 302814
+      },
+      "blocks": 334369,
+      "median_answers_per_student": 22.0,
+      "median_quizzes_per_student": 5.0
+    },
+    "run_at": "2026-10-18 22:56:00"
+  },
+  "k=5, primary": {
+    "n_test_students": 10049,
+    "n_diagnosed": 1410,
+    "roots": {
+      "204": 749,
+      "219": 130,
+      "220": 170,
+      "226": 361
+    },
+    "unlearn": {
+      "n_evaluable": 278,
+      "lift": 0.0644,
+      "lift_ci": [
+        0.0224,
+        0.1051
+      ],
+      "adjusted_lift": 0.0412,
+      "adjusted_lift_ci": [
+        0.0003,
+        0.0814
+      ],
+      "underpowered": true
+    },
+    "random": {
+      "n_evaluable": 575,
+      "lift": 0.0335,
+      "lift_ci": [
+        0.005,
+        0.0621
+      ],
+      "adjusted_lift": 0.017,
+      "adjusted_lift_ci": [
+        -0.011,
+        0.0453
+      ]
+    },
+    "bkt": {
+      "n_evaluable": 415,
+      "lift": 0.072,
+      "lift_ci": [
+        0.0389,
+        0.1057
+      ],
+      "adjusted_lift": 0.042,
+      "adjusted_lift_ci": [
+        0.0102,
+        0.0753
+      ],
+      "underpowered": true
+    },
+    "unlearn_confident": {
+      "n_evaluable": 135,
+      "lift": 0.0379,
+      "lift_ci": [
+        -0.0332,
+        0.1037
+      ],
+      "adjusted_lift": 0.031,
+      "adjusted_lift_ci": [
+        -0.0411,
+        0.0959
+      ]
+    },
+    "unlearn - random": {
+      "n_paired": 205,
+      "lift": 0.0361,
+      "lift_ci": [
+        0.001,
+        0.0735
+      ],
+      "adjusted_lift": 0.0298,
+      "adjusted_lift_ci": [
+        -0.0058,
+        0.0663
+      ]
+    },
+    "unlearn - bkt": {
+      "n_paired": 266,
+      "lift": -0.0089,
+      "lift_ci": [
+        -0.0219,
+        0.0022
+      ],
+      "adjusted_lift": -0.0045,
+      "adjusted_lift_ci": [
+        -0.0175,
+        0.0064
+      ]
+    }
+  },
+  "k=10, primary": {
+    "n_test_students": 10049,
+    "n_diagnosed": 2323,
+    "roots": {
+      "204": 1136,
+      "219": 242,
+      "220": 489,
+      "226": 456
+    },
+    "unlearn": {
+      "n_evaluable": 409,
+      "lift": 0.077,
+      "lift_ci": [
+        0.0411,
+        0.1139
+      ],
+      "adjusted_lift": 0.0454,
+      "adjusted_lift_ci": [
+        0.0104,
+        0.0816
+      ],
+      "underpowered": true
+    },
+    "random": {
+      "n_evaluable": 783,
+      "lift": 0.0415,
+      "lift_ci": [
+        0.0168,
+        0.0651
+      ],
+      "adjusted_lift": 0.0212,
+      "adjusted_lift_ci": [
+        -0.0026,
+        0.0444
+      ]
+    },
+    "bkt": {
+      "n_evaluable": 544,
+      "lift": 0.0695,
+      "lift_ci": [
+        0.0384,
+        0.0983
+      ],
+      "adjusted_lift": 0.0372,
+      "adjusted_lift_ci": [
+        0.0067,
+        0.0672
+      ]
+    },
+    "unlearn_confident": {
+      "n_evaluable": 253,
+      "lift": 0.0667,
+      "lift_ci": [
+        0.0154,
+        0.1143
+      ],
+      "adjusted_lift": 0.0387,
+      "adjusted_lift_ci": [
+        -0.0124,
+        0.0878
+      ]
+    },
+    "unlearn - random": {
+      "n_paired": 326,
+      "lift": -0.0043,
+      "lift_ci": [
+        -0.0418,
+        0.0299
+      ],
+      "adjusted_lift": -0.009,
+      "adjusted_lift_ci": [
+        -0.0465,
+        0.0247
+      ]
+    },
+    "unlearn - bkt": {
+      "n_paired": 373,
+      "lift": -0.0049,
+      "lift_ci": [
+        -0.016,
+        0.0059
+      ],
+      "adjusted_lift": -0.0056,
+      "adjusted_lift_ci": [
+        -0.0169,
+        0.0053
+      ]
+    }
+  },
+  "k=5, sensitivity": {
+    "n_test_students": 10049,
+    "n_diagnosed": 1641,
+    "roots": {
+      "204": 733,
+      "219": 215,
+      "220": 131,
+      "226": 329,
+      "227": 233
+    },
+    "unlearn": {
+      "n_evaluable": 453,
+      "lift": 0.0686,
+      "lift_ci": [
+        0.0341,
+        0.1027
+      ],
+      "adjusted_lift": 0.0393,
+      "adjusted_lift_ci": [
+        0.0056,
+        0.0716
+      ],
+      "underpowered": true
+    },
+    "random": {
+      "n_evaluable": 819,
+      "lift": 0.0616,
+      "lift_ci": [
+        0.0361,
+        0.0865
+      ],
+      "adjusted_lift": 0.0304,
+      "adjusted_lift_ci": [
+        0.0065,
+        0.0552
+      ]
+    },
+    "bkt": {
+      "n_evaluable": 620,
+      "lift": 0.0772,
+      "lift_ci": [
+        0.0489,
+        0.1077
+      ],
+      "adjusted_lift": 0.0401,
+      "adjusted_lift_ci": [
+        0.0137,
+        0.0697
+      ]
+    },
+    "unlearn_confident": {
+      "n_evaluable": 204,
+      "lift": 0.0613,
+      "lift_ci": [
+        0.0074,
+        0.1153
+      ],
+      "adjusted_lift": 0.0487,
+      "adjusted_lift_ci": [
+        -0.0062,
+        0.1022
+      ]
+    },
+    "unlearn - random": {
+      "n_paired": 419,
+      "lift": -0.0021,
+      "lift_ci": [
+        -0.0166,
+        0.0141
+      ],
+      "adjusted_lift": -0.0053,
+      "adjusted_lift_ci": [
+        -0.0183,
+        0.0089
+      ]
+    },
+    "unlearn - bkt": {
+      "n_paired": 442,
+      "lift": -0.0087,
+      "lift_ci": [
+        -0.0164,
+        -0.0014
+      ],
+      "adjusted_lift": -0.0057,
+      "adjusted_lift_ci": [
+        -0.0134,
+        0.0014
+      ]
+    }
+  },
+  "k=10, sensitivity": {
+    "n_test_students": 10049,
+    "n_diagnosed": 2699,
+    "roots": {
+      "204": 1089,
+      "219": 501,
+      "220": 375,
+      "226": 398,
+      "227": 336
+    },
+    "unlearn": {
+      "n_evaluable": 643,
+      "lift": 0.0902,
+      "lift_ci": [
+        0.0623,
+        0.1185
+      ],
+      "adjusted_lift": 0.0509,
+      "adjusted_lift_ci": [
+        0.0239,
+        0.0783
+      ]
+    },
+    "random": {
+      "n_evaluable": 1065,
+      "lift": 0.0695,
+      "lift_ci": [
+        0.0483,
+        0.0904
+      ],
+      "adjusted_lift": 0.0334,
+      "adjusted_lift_ci": [
+        0.013,
+        0.0534
+      ]
+    },
+    "bkt": {
+      "n_evaluable": 802,
+      "lift": 0.0838,
+      "lift_ci": [
+        0.0583,
+        0.1074
+      ],
+      "adjusted_lift": 0.0436,
+      "adjusted_lift_ci": [
+        0.0187,
+        0.0668
+      ]
+    },
+    "unlearn_confident": {
+      "n_evaluable": 359,
+      "lift": 0.0769,
+      "lift_ci": [
+        0.0333,
+        0.114
+      ],
+      "adjusted_lift": 0.0503,
+      "adjusted_lift_ci": [
+        0.007,
+        0.0876
+      ]
+    },
+    "unlearn - random": {
+      "n_paired": 610,
+      "lift": 0.0036,
+      "lift_ci": [
+        -0.0089,
+        0.017
+      ],
+      "adjusted_lift": 0.0008,
+      "adjusted_lift_ci": [
+        -0.0117,
+        0.0133
+      ]
+    },
+    "unlearn - bkt": {
+      "n_paired": 616,
+      "lift": -0.0009,
+      "lift_ci": [
+        -0.007,
+        0.0054
+      ],
+      "adjusted_lift": 0.0002,
+      "adjusted_lift_ci": [
+        -0.0055,
+        0.0061
+      ]
+    }
+  }
+}
