@@ -37,6 +37,7 @@ STATIC = Path(__file__).resolve().parent / "static"
 RESULTS = ROOT / "eval" / "results"
 SIM_SEED = int(os.getenv("UNLEARN_SIM_SEED", "0"))
 TEACHER_POLL_S = 0.5
+STARTED_AT = int(time.time() * 1000)  # a restart (free hosting restarts idle services) resets the demo state
 _CLASS_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -186,7 +187,7 @@ def health():
             v = int(fields.get("ver"))
             version = f"{v // 10000}.{v // 100 % 100}.{v % 100}"
     return {"ok": True, "graphs": graphs, "node_counts": counts, "falkordb_version": version,
-            "receipts_stored": receipts.size(), "self_heal": getattr(app.state, "heal_log", [])}
+            "receipts_stored": receipts.size(), "self_heal": getattr(app.state, "heal_log", []), "started_at": STARTED_AT}
 
 
 # --- class lists for the UI ------------------------------------------------------
@@ -201,7 +202,13 @@ def students(cid: str):
     rows = tools.class_students(_class(cid))["rows"]
     for r in rows:
         r["default_target"] = _sim(r["id"], cid).target
-    return {"students": rows}
+    return {"students": rows, "server_started_at": STARTED_AT}
+
+
+@app.get("/classes/{cid}/students/{sid}/recall")
+def student_recall(cid: str, sid: str):
+    """What session 2 would open with, so the Student view can show it as soon as a student is picked."""
+    return _tool_view(tools.recall(_class(cid), sid), "Diagnoser", "recall")
 
 
 @app.get("/classes/{cid}/targets")

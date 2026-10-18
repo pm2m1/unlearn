@@ -88,7 +88,7 @@ function renderScoreboard() {
   $("#scoreboard").hidden = !withCheck.length;
   $("#scores").replaceChildren(...withCheck.map((s) => el("button", {
     class: `score${s.id === $("#student-select").value ? " active" : ""}`,
-    onclick: () => { $("#student-select").value = s.id; syncTarget(); renderScoreboard(); },
+    onclick: () => { $("#student-select").value = s.id; switchStudent(); },
   }, el("div", { class: "who", text: s.alias }),
      el("div", { class: "pct", text: `${Math.round((100 * s.check.correct) / s.check.total)}%` }),
      el("div", { class: "frac", text: `${s.check.correct} of ${s.check.total} right` }))));
@@ -101,8 +101,10 @@ async function loadClass() {
   state.targets = t.targets;
   state.targetNames = Object.fromEntries(t.targets.map((x) => [x.id, x.name]));
   const sel = $("#student-select");
+  const current = sel.value;  // a reload (after a session ends) keeps the student on screen selected
   sel.replaceChildren(...s.students.map((x) => el("option", { value: x.id, text: `${x.alias} · ${x.id}${x.sessions ? ` · ${x.sessions} session${x.sessions > 1 ? "s" : ""}` : ""}` })));
-  const wanted = new URLSearchParams(location.search).get("student") || (state.aliases.s18 ? "s18" : s.students[0]?.id);
+  const wanted = [current, new URLSearchParams(location.search).get("student"), state.aliases.s18 ? "s18" : null, s.students[0]?.id]
+    .find((x) => x && state.aliases[x]);
   if (state.aliases[wanted]) sel.value = wanted;
   const groups = {};
   for (const x of t.targets) (groups[x.subtopic] ||= []).push(x);
@@ -111,10 +113,21 @@ async function loadClass() {
   syncTarget();
   renderScoreboard();
   $("#class-name").textContent = state.classId;
-  showSummary(s.students);
+  showSummary(s);
 }
 
-function showSummary(students) {
+// The free host restarts an idle service, which resets the demo. Say so instead of showing stale numbers.
+function noteServer(startedAt) {
+  if (!startedAt) return;
+  if (state.serverStartedAt && startedAt !== state.serverStartedAt) {
+    clearSession();
+    toast("The demo server restarted (free hosting sleeps after 15 minutes idle), so the demo state was reset.");
+  }
+  state.serverStartedAt = startedAt;
+}
+
+function showSummary({ students, server_started_at: startedAt }) {
+  noteServer(startedAt);
   $("#class-summary").textContent = `${students.length} simulated students · ${count(students.reduce((a, x) => a + x.sessions, 0), "session")} so far`;
 }
 
@@ -133,6 +146,29 @@ function resetStudentView() {
   $("#explain-text").value = "";
   state.pending = null;
   state.asked = 0;
+}
+
+// Switching student, or a server restart: nothing from the previous session stays on screen.
+function clearSession() {
+  resetStudentView();
+  state.session = null;
+  $("#q-score").textContent = "";
+  $("#graph-title").textContent = "Start a session to see the prerequisite graph";
+  $("#graph-empty").hidden = false;
+  if (state.cy) state.cy.elements().remove();
+}
+
+async function switchStudent() {
+  clearSession();
+  syncTarget();
+  renderScoreboard();
+  const sid = $("#student-select").value;
+  try {
+    const rec = await api(`/classes/${state.classId}/students/${sid}/recall`);
+    if ($("#student-select").value === sid && !state.session) showRecall(rec.rows);
+  } catch (e) {
+    toast(e.message);
+  }
 }
 
 async function startSession() {
@@ -577,24 +613,35 @@ function closeDrawer() {
 async function loadTeacher() {
   const c = state.classId;
   const who = (ids) => ids.map((id) => state.aliases[id] || id);
-  const [co, ks, br, ps] = await Promise.all([
+  // Each card loads on its own: one slow or failed query (bridges takes seconds on a small host) can't blank the
+  // others. The class summary is re-read too, so the session count and the cards come from the same moment.
+  const [co, ks, br, ps, st] = await Promise.allSettled([
     api(`/classes/${c}/cohorts`), api(`/classes/${c}/keystones`), api(`/classes/${c}/bridges`), api(`/classes/${c}/proposals?state=pending`),
-  ]).catch((e) => { toast(e.message); return []; });
-  if (!co) return;
-  state.teacherReceipts = { cohorts: co.receipt.id, keystones: ks.receipt.id, bridges: br.receipt.id };
+    api(`/classes/${c}/students`),
+  ]);
+  const failed = (box, r) => $(box).replaceChildren(el("div", { class: "empty", text: `Could not load this: ${r.reason?.message || r.reason}. Click Refresh to try again.` }));
+  if (st.status === "fulfilled") showSummary(st.value);
+  state.teacherReceipts = Object.fromEntries([["cohorts", co], ["keystones", ks], ["bridges", br]]
+    .filter(([, r]) => r.status === "fulfilled").map(([k, r]) => [k, r.value.receipt.id]));
 
-  $("#cohorts").replaceChildren(...(co.rows.length ? co.rows.map((g) =>
+  if (co.status === "fulfilled") $("#cohorts").replaceChildren(...(co.value.rows.length ? co.value.rows.map((g) =>
     el("div", { class: "cohort" }, g.students.map((s) => el("span", { class: "chip", text: s })))) :
     [el("div", { class: "empty", text: "No cohorts yet: no two students share a confident misconception. Simulate the class to fill this in." })]));
+  else failed("#cohorts", co);
 
-  const maxK = Math.max(...ks.rows.map((k) => k.score), 1e-9);
-  $("#keystones").replaceChildren(...ks.rows.map((k) => el("li", {}, el("div", {}, el("div", { text: k.name }), el("div", { class: "bar", style: `width:${(100 * k.score / maxK).toFixed(0)}%` })))));
-  const maxB = Math.max(...br.rows.map((b) => b.score), 1e-9);
+  if (ks.status === "fulfilled") {
+    const maxK = Math.max(...ks.value.rows.map((k) => k.score), 1e-9);
+    $("#keystones").replaceChildren(...ks.value.rows.map((k) => el("li", {}, el("div", {}, el("div", { text: k.name }), el("div", { class: "bar", style: `width:${(100 * k.score / maxK).toFixed(0)}%` })))));
+  } else failed("#keystones", ks);
   $("#bridges").classList.add("bridges");
-  $("#bridges").replaceChildren(...br.rows.map((b) => el("li", {}, el("div", {}, el("div", { text: b.name }), el("div", { class: "bar", style: `width:${(100 * b.score / maxB).toFixed(0)}%` })))));
+  if (br.status === "fulfilled") {
+    const maxB = Math.max(...br.value.rows.map((b) => b.score), 1e-9);
+    $("#bridges").replaceChildren(...br.value.rows.map((b) => el("li", {}, el("div", {}, el("div", { text: b.name }), el("div", { class: "bar", style: `width:${(100 * b.score / maxB).toFixed(0)}%` })))));
+  } else failed("#bridges", br);
 
-  $("#proposals").replaceChildren(...(ps.rows.length ? ps.rows.map((p) => proposalCard(p, who)) :
+  if (ps.status === "fulfilled") $("#proposals").replaceChildren(...(ps.value.rows.length ? ps.value.rows.map((p) => proposalCard(p, who)) :
     [el("div", { class: "empty", text: "No pending proposals. The Teacher agent writes one when a Tutor escalates a student." })]));
+  else failed("#proposals", ps);
 }
 
 function proposalCard(p, who) {
@@ -629,15 +676,15 @@ async function simulateAll() {
   const btn = $("#simulate-all-btn");
   setBusy(btn, true, "Simulating 60 sessions…");
   // The count climbs while the simulation runs (it can take minutes on a small host); refresh just the summary.
-  const tick = setInterval(() => api(`/classes/${state.classId}/students`).then((s) => showSummary(s.students)).catch(() => {}), 2000);
+  const tick = setInterval(() => api(`/classes/${state.classId}/students`).then(showSummary).catch(() => {}), 2000);
   try {
     const out = await api(`/classes/${state.classId}/simulate-all?sessions=2`, { method: "POST" });
     toast(`Simulated ${out.sessions} sessions in ${out.seconds}s · planted root cause named in ${out.root_cause_hits}/${out.sessions}`);
-    await Promise.all([loadClass(), loadTeacher()]);
   } catch (e) {
     toast(e.message);
   } finally {
     clearInterval(tick);
+    await Promise.all([loadClass(), loadTeacher()]).catch(() => {});  // even if the request itself failed
     setBusy(btn, false, "Simulate the class (2 sessions each)");
   }
 }
@@ -857,7 +904,7 @@ function toast(msg) {
 document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
   $("#start-btn").addEventListener("click", startSession);
-  $("#student-select").addEventListener("change", () => { syncTarget(); renderScoreboard(); });
+  $("#student-select").addEventListener("change", switchStudent);
   $("#simulate-btn").addEventListener("click", () => submitAnswer(null, true));
   $("#tutor-btn").addEventListener("click", startTutor);
   $("#autoplay").addEventListener("change", () => { if ($("#autoplay").checked && state.pending) autoplayNext(); });
