@@ -1,0 +1,23 @@
+# Render Blueprint: one free web service built from deploy/Dockerfile.render (FalkorDB + API in one container).
+# Free tier: 512 MB RAM, no persistent disk, sleeps after 15 minutes idle; demo state resets on every restart.
+services:
+  - type: web
+    name: unlearn
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false            # set it in the dashboard; without it every reply is a template
+      - key: FALKOR_PASSWORD
+        generateValue: true
+      - key: UNLEARN_RATE_LIMIT_PER_IP
+        value: "60"            # requests per 10 minutes per address on the routes that can call the LLM
+      - key: UNLEARN_TRUST_PROXY
+        value: "1"             # Render's proxy sets X-Forwarded-For
+      - key: UNLEARN_LLM_DAILY_CAP
+        value: "40"            # uncached LLM calls per UTC day for this instance; then templates
+      - key: UNLEARN_SIMULATE_TEMPLATE
+        value: "1"             # "Simulate the class" runs 60 sessions: template words only

@@ -27,6 +27,7 @@ import hashlib
 import json
 import os
 import re
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -238,11 +239,40 @@ def provider_timeout(provider: Provider) -> float:
     return 180.0 if provider.keyless else TIMEOUT_S  # a local model may be loading into memory
 
 
+# A public deployment shares one free-tier quota: UNLEARN_LLM_DAILY_CAP caps uncached calls per UTC day for this
+# process (0 or unset: no cap). Past it, available() is empty and every reply is a template.
+_SPENT = {"day": "", "n": 0}
+_SPENT_LOCK = threading.Lock()
+
+
+def _spent_today() -> int:
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    if _SPENT["day"] != day:
+        _SPENT.update(day=day, n=0)
+    return _SPENT["n"]
+
+
+def daily_cap_reached() -> bool:
+    cap = int(os.getenv("UNLEARN_LLM_DAILY_CAP") or 0)
+    with _SPENT_LOCK:
+        return bool(cap) and _spent_today() >= cap
+
+
+def _spend() -> None:
+    """Count one uncached call, or raise once the daily cap is reached (the caller falls back to the template)."""
+    cap = int(os.getenv("UNLEARN_LLM_DAILY_CAP") or 0)
+    with _SPENT_LOCK:
+        if cap and _spent_today() >= cap:
+            raise RuntimeError("daily LLM call cap reached")
+        _SPENT["n"] += 1
+
+
 def complete(provider: Provider, messages: list[dict]) -> tuple[str, bool]:
     """One chat completion, cached on disk. Returns (text, from_cache)."""
     path = _cache_path(provider, messages)
     if path.exists():
         return json.loads(path.read_text())["text"], True
+    _spend()
     from openai import OpenAI
 
     client = OpenAI(api_key=provider.key, base_url=provider.base_url, timeout=provider_timeout(provider), max_retries=0)
@@ -258,7 +288,7 @@ def complete(provider: Provider, messages: list[dict]) -> tuple[str, bool]:
 
 
 def available() -> list[Provider]:
-    if os.getenv("UNLEARN_LLM", "auto") == "template":
+    if os.getenv("UNLEARN_LLM", "auto") == "template" or daily_cap_reached():
         return []
     now = time.time()
     return [p for p in app_providers() if p.key and _COOLDOWN.get((p.name, p.model), 0) <= now]
@@ -311,6 +341,7 @@ def write(kind: str, facts: dict, turn_rows: list, vocabulary: list[str], provid
 def chat_tools(provider: Provider, messages: list[dict], tool_specs: list[dict]) -> dict:
     """One tool-calling round. Returns {"content", "tool_calls": [{"id", "name", "arguments"}]}. Not cached:
     each round depends on live tool rows."""
+    _spend()
     from openai import OpenAI
 
     from openai import BadRequestError

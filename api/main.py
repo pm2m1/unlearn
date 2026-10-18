@@ -8,21 +8,24 @@ missing) and starts one Teacher worker that claims `review` tasks from every cla
 """
 
 import asyncio
+import functools
 import json
 import logging
 import os
 import re
+import threading
 import time
+from collections import deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from eval.simulator import Simulator
-from unlearn import heal, receipts, tools
+from unlearn import heal, llm, receipts, tools
 from unlearn.agents import runner
 from unlearn.agents.base import StepError
 from unlearn.agents.teacher_chat import chat
@@ -90,6 +93,44 @@ async def _step_error(_, exc: StepError):
 
 
 # --- helpers -------------------------------------------------------------------
+
+# --- optional limits for a public deployment (deploy/render.yaml sets them; unset, nothing is limited) ------------
+# UNLEARN_RATE_LIMIT_PER_IP  requests per IP per RATE_WINDOW_S on the routes that can call the LLM; over it, 429
+# UNLEARN_TRUST_PROXY=1      take the client IP from X-Forwarded-For (behind the host's proxy). The header can be
+#                            spoofed, so llm.py's UNLEARN_LLM_DAILY_CAP is what bounds the quota overall.
+# UNLEARN_SIMULATE_TEMPLATE=1  the simulation routes write template words only (they run whole sessions)
+RATE_WINDOW_S = 600
+_HITS: dict[str, deque] = {}
+_HITS_LOCK = threading.Lock()
+TEMPLATE_WRITER = functools.partial(llm.write, providers=[])
+
+
+def _client_ip(request: Request) -> str:
+    fwd = request.headers.get("x-forwarded-for", "") if os.getenv("UNLEARN_TRUST_PROXY") == "1" else ""
+    return fwd.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+
+
+def llm_rate_limit(request: Request) -> None:
+    limit = int(os.getenv("UNLEARN_RATE_LIMIT_PER_IP") or 0)
+    if not limit:
+        return
+    ip, now = _client_ip(request), time.monotonic()
+    with _HITS_LOCK:
+        if len(_HITS) > 10_000:  # forget idle addresses so the table stays small
+            for k in [k for k, q in _HITS.items() if not q or now - q[-1] > RATE_WINDOW_S]:
+                del _HITS[k]
+        hits = _HITS.setdefault(ip, deque())
+        while hits and now - hits[0] > RATE_WINDOW_S:
+            hits.popleft()
+        if len(hits) >= limit:
+            wait = int(RATE_WINDOW_S - (now - hits[0])) + 1
+            raise HTTPException(429, f"This demo allows {limit} requests per {RATE_WINDOW_S // 60} minutes from one "
+                                     f"address. Try again in {wait} s.", headers={"Retry-After": str(wait)})
+        hits.append(now)
+
+
+LIMITED = [Depends(llm_rate_limit)]
+
 
 def _class(cid: str) -> str:
     if not _CLASS_ID.match(cid) or tools.graph_name(cid) not in list_graphs():
@@ -187,7 +228,7 @@ class AnswerBody(BaseModel):
     simulate: bool = Field(False, description="let the seeded simulator pick the key for this student")
 
 
-@app.post("/classes/{cid}/students/{sid}/sessions")
+@app.post("/classes/{cid}/students/{sid}/sessions", dependencies=LIMITED)
 def start_session(cid: str, sid: str, body: StartBody | None = None):
     _class(cid)
     target = body.construct_id if body and body.construct_id else _sim(sid, cid).target
@@ -196,7 +237,7 @@ def start_session(cid: str, sid: str, body: StartBody | None = None):
     return _with_receipts({**out, "class_id": cid, "student_id": sid, "target": target}, col)
 
 
-@app.post("/sessions/{sess}/answer")
+@app.post("/sessions/{sess}/answer", dependencies=LIMITED)
 def answer(sess: str, body: AnswerBody):
     cid, sid = _session_class(sess)
     key = body.key
@@ -233,7 +274,7 @@ def diagnosis(sess: str):
             "candidates": rc["rows"], "receipt_id": rid}
 
 
-@app.post("/sessions/{sess}/remediate")
+@app.post("/sessions/{sess}/remediate", dependencies=LIMITED)
 def remediate(sess: str):
     cid, sid = _session_class(sess)
     col = receipts.Collector()
@@ -245,24 +286,25 @@ def remediate(sess: str):
 
 def _simulate(cid: str, sid: str, sessions: int) -> list[dict]:
     student = _sim(sid, cid)
+    writer = TEMPLATE_WRITER if os.getenv("UNLEARN_SIMULATE_TEMPLATE") == "1" else llm.write
     out = []
     for _ in range(sessions):
         res = runner.run_session_sync(cid, sid, student.target, lambda _s, q: student.answer(q),
-                                      on_step=receipts.Collector())
+                                      on_step=receipts.Collector(), writer=writer)
         dx = [s for s in res.steps if s.agent == "Diagnoser" and s.tool == "root_cause"][-1].rows
         out.append({"session_id": res.session_id, "n": res.session_n, "chain": [c["kind"] for c in res.chain],
                     "diagnosed": dx[0]["id"] if dx else None, "planted": student.root_cause})
     return out
 
 
-@app.post("/classes/{cid}/students/{sid}/simulate")
+@app.post("/classes/{cid}/students/{sid}/simulate", dependencies=LIMITED)
 def simulate(cid: str, sid: str, sessions: int = Query(2, ge=1, le=5)):
     t0 = time.time()
     runs = _simulate(_class(cid), sid, sessions)
     return {"student_id": sid, "sessions": runs, "seconds": round(time.time() - t0, 2)}
 
 
-@app.post("/classes/{cid}/simulate-all")
+@app.post("/classes/{cid}/simulate-all", dependencies=LIMITED)
 def simulate_all(cid: str, sessions: int = Query(2, ge=1, le=5)):
     t0 = time.time()
     _class(cid)
@@ -320,7 +362,7 @@ class ChatBody(BaseModel):
     message: str = Field(..., min_length=1, max_length=1000)
 
 
-@app.post("/classes/{cid}/teacher/chat")
+@app.post("/classes/{cid}/teacher/chat", dependencies=LIMITED)
 def teacher_chat(cid: str, body: ChatBody):
     col = receipts.Collector()
     out = chat(_class(cid), body.message, on_step=col)

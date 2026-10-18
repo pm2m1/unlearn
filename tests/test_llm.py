@@ -73,6 +73,19 @@ def test_template_mode_skips_providers(monkeypatch):
     assert llm.available() == []
 
 
+def test_daily_cap_stops_uncached_calls(monkeypatch, tmp_path):
+    monkeypatch.setenv("UNLEARN_LLM", "auto")
+    monkeypatch.setenv("UNLEARN_LLM_DAILY_CAP", "2")
+    monkeypatch.setattr(llm, "_SPENT", {"day": "", "n": 0})
+    llm._spend()
+    llm._spend()
+    assert llm.daily_cap_reached() and llm.available() == []
+    with pytest.raises(RuntimeError, match="cap"):
+        llm._spend()
+    monkeypatch.setenv("UNLEARN_LLM_DAILY_CAP", "0")  # unset or 0: no cap
+    assert not llm.daily_cap_reached()
+
+
 def test_cache_key_is_stable_and_model_specific(monkeypatch, tmp_path):
     monkeypatch.setattr(llm, "CACHE_DIR", tmp_path)
     a, b = llm.PROVIDERS[0], llm.PROVIDERS[1]

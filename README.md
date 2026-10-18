@@ -9,8 +9,9 @@ Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory an
 
 ## Try it
 
+- **Live demo:** <link> (free tier: first load can take about 1 minute; demo state resets on restart)
 - **Demo video:** <link>
-- **No hosted deployment.** There was no budget for one, so Unlearn runs locally. With Docker installed, one command starts it once `.env` exists. Without `.env`, FalkorDB exits on startup because its password is empty. Full steps, including setting a real password, are in [Local setup](#local-setup):
+- **Run it locally.** With Docker installed, one command starts it once `.env` exists. Without `.env`, FalkorDB exits on startup because its password is empty. Full steps, including setting a real password, are in [Local setup](#local-setup):
 
   ```
   cp .env.example .env
@@ -487,6 +488,21 @@ Then open **http://localhost:8000**.
 - **A local model instead (dev profile only).** With [Ollama](https://ollama.com) running on the host, set `OLLAMA_BASE_URL=http://host.docker.internal:11434/v1` (and optionally `OLLAMA_MODEL`) in `.env` and run the `up` command again. The app then tries the local model first. The `prod` profile never passes it.
 
 Both containers bind to `127.0.0.1` in the `dev` profile. `docker compose --profile prod up -d --build --wait` publishes only the API on port 8000; FalkorDB has no published port.
+
+### The live demo (Render free tier)
+
+[`render.yaml`](render.yaml) deploys [`deploy/Dockerfile.render`](deploy/Dockerfile.render): one container running FalkorDB v4.20.7 on loopback and the API. The free tier has 512 MB of RAM, no disk, and sleeps after 15 minutes idle.
+- **Baked graphs.** `curriculum`, `class_template`, `class_demo` and `class_demo_video` are built at image build time and saved as `dump.rdb`, so a cold start loads them in seconds. Nothing is ever saved, so demo state resets on every restart.
+- **Measured locally under the free tier's limits** (`docker run --memory=512m --memory-swap=512m --cpus=0.1`):
+  - Healthy 19 s after start.
+  - `demo_scenario.py --verify 10` correct 10/10.
+  - Peak memory 381 MiB, over that run, a full session flow through the API and "Simulate the class".
+- **Slow at 0.1 CPU.** `bridges` (betweenness over the curriculum graph) takes about 7 s, so the image raises FalkorDB's query timeout to 30 s. "Simulate the class" (60 sessions) takes about 6 minutes.
+- **Protecting the free LLM quota:**
+  - `UNLEARN_RATE_LIMIT_PER_IP`: 60 requests per address per 10 minutes on the routes that can call the LLM; over that, a 429.
+  - `UNLEARN_LLM_DAILY_CAP`: 40 uncached LLM calls per day for the instance, after which replies are templates. A spoofed `X-Forwarded-For` can get past the per-address limit, but not this cap.
+  - `UNLEARN_SIMULATE_TEMPLATE`: simulations never call the LLM.
+  - All three are off unless set, so local runs are unaffected.
 
 ### Working on the code (host Python)
 

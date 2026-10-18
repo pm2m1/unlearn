@@ -111,6 +111,18 @@ def test_teacher_views_and_chat(client):
     assert client.get("/classes/nope/cohorts").status_code == 404
 
 
+def test_llm_routes_are_rate_limited_per_ip(client, monkeypatch):
+    monkeypatch.setenv("UNLEARN_RATE_LIMIT_PER_IP", "2")
+    monkeypatch.setattr(main, "_HITS", {})
+    chat = f"/classes/{CLASS_ID}/teacher/chat"
+    assert [client.post(chat, json={"message": "keystones"}).status_code for _ in range(2)] == [200, 200]
+    over = client.post(chat, json={"message": "keystones"})
+    assert over.status_code == 429 and int(over.headers["Retry-After"]) > 0 and "Try again" in over.json()["detail"]
+    assert client.get(f"/classes/{CLASS_ID}/cohorts").status_code == 200  # graph-only routes aren't limited
+    monkeypatch.setenv("UNLEARN_TRUST_PROXY", "1")  # behind a proxy, the forwarded address is the client
+    assert client.post(chat, json={"message": "keystones"}, headers={"X-Forwarded-For": "203.0.113.7"}).status_code == 200
+
+
 def test_heal_plan():
     assert plan({"curriculum", "class_template", "class_demo"}) == []
     assert plan({"curriculum", "class_template"}) == [["05_new_class.py", "--id", "demo", "--students", "30"]]
