@@ -312,6 +312,7 @@ def main(argv=None) -> int:
     ap.add_argument("--no-calibrate", action="store_true", help="skip the 5 timing calls (quota-limited cross-checks)")
     ap.add_argument("--merge", help="comma-separated result stems to combine into --out (e.g. eval_seed0,eval_seeds12)")
     ap.add_argument("--pool-latency", help="comma-separated result stems whose A/B/B+ timings to pool into --out")
+    ap.add_argument("--noise", type=float, default=0.0, help="simulator noise p (eval/simulator.py); 0 for the main eval")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     if a.merge:
@@ -365,7 +366,7 @@ def main(argv=None) -> int:
     writer = functools.partial(llm.write, providers=[])  # C: template wording, graph-derived metrics
     per_seed, raw, stopped = {}, {}, None
     for seed in seeds:
-        sim = Simulator(seed=seed)
+        sim = Simulator(seed=seed, noise=a.noise)
         sids = [f"s{i:02d}" for i in range(1, a.students + 1)]
         students = {sid: sim.student(sid) for sid in sids}
         class_id = f"{a.out}_s{seed}"  # per output, so a cross-check can run alongside the main eval
@@ -381,7 +382,7 @@ def main(argv=None) -> int:
             t0 = time.time()
             rows = []
             for sid in sids:
-                student = Simulator(seed=seed).student(sid)  # fresh answer stream per condition, same planted state
+                student = Simulator(seed=seed, noise=a.noise).student(sid)  # fresh answer stream per condition, same planted state
                 try:
                     r = run_c(class_id, student, writer, judge) if c == "C" else run_ab(c, provider, sim, student, judge, graph_text)
                 except BL.BudgetExceeded as e:
@@ -411,7 +412,8 @@ def main(argv=None) -> int:
                  "calibration": calibration, "stopped": stopped,
                  "not_run": {c: why or "not requested" for c in ORDER if c not in ran},
                  "judge": {"recall_max_distance": BL.RECALL_MAX_DISTANCE, "pool_questions": BL.POOL_QUESTIONS},
-                 "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C"},
+                 "simulator_bias": "the simulator uses Unlearn's option-to-misconception map, which favours C",
+                 "simulator_noise": a.noise},
         "per_seed": per_seed,
         "summary": summarise({s: v for s, v in per_seed.items()}, ran),
         "students": {seed: {c: [{k: v for k, v in r.items() if k not in ("raw",)} for r in rows]

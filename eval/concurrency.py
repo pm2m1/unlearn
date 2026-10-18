@@ -15,6 +15,13 @@ each other's writes.
                                                          ordinary sessions in B, or in A
    FalkorDB serialises writes per graph: probes should be unaffected by load on B and queue behind load on A.
 Writes eval/results/concurrency.json. The two graphs are deleted afterwards.
+
+    python eval/concurrency.py --scale-classes 10 [--students 30]
+
+3. Scale (only this part runs; its result is merged into concurrency.json under "scale"). N class graphs with
+   30 students each run sessions at the same time, looping until the probes are done. During that load, probe
+   writes go first into an extra idle class graph, then into busy class 1. Reports p50/p95 per class, total
+   queries per second over the load window, and any query errors (FalkorDB's pending-query queue is bounded).
 """
 
 import argparse
@@ -158,11 +165,85 @@ async def main_async(students: int, rounds: int) -> dict:
             "falkordb_image": "falkordb/falkordb:v4.20.7"}
 
 
+async def looping_student(graph, sim, sid: str, rounds: int, lat: list, errors: list, stop: asyncio.Event) -> None:
+    """A student who keeps running sessions until stopped (at least one), timing every query, counting errors."""
+    first = True
+    while first or not stop.is_set():
+        first = False
+        try:
+            await student_session(graph, sim, sid, rounds, lat, lat)
+        except Exception as e:  # e.g. "Max pending queries exceeded": report it, keep the load going
+            errors.append(type(e).__name__ + ": " + str(e)[:80])
+            await asyncio.sleep(0.05)
+
+
+async def scale_async(classes: list[str], idle: str, students: int, rounds: int) -> dict:
+    db = FalkorDB(host=os.getenv("FALKOR_HOST", "localhost"), port=int(os.getenv("FALKOR_PORT", "6379")),
+                  password=os.getenv("FALKOR_PASSWORD") or None, max_connections=len(classes) * students + 16)
+    sim = Simulator(seed=0)
+    await probes(idle, "warm")
+    idle_base = stats(await probes(idle, "idle-base"))
+    lat = {g: [] for g in classes}
+    errors: list[str] = []
+    stop = asyncio.Event()
+    t0 = time.perf_counter()
+    load = asyncio.gather(*[looping_student(db.select_graph(g), sim, f"s{i:02d}", rounds, lat[g], errors, stop)
+                            for g in classes for i in range(1, students + 1)])
+    await asyncio.sleep(0.5)  # let every class get going
+    into_idle = stats(await probes(idle, "idle-load"))
+    into_busy = stats(await probes(classes[0], "busy-load"))
+    stop.set()
+    await load
+    wall = time.perf_counter() - t0
+    await db.aclose() if hasattr(db, "aclose") else None
+    total = sum(len(v) for v in lat.values())
+    return {"classes": len(classes), "students_per_class": students, "rounds_per_session": rounds,
+            "load_window_s": round(wall, 2), "queries": total, "queries_per_s": round(total / wall),
+            "per_class": {g: stats(v) for g, v in lat.items()},
+            "all_classes": stats([x for v in lat.values() for x in v]),
+            "errors": len(errors), "error_kinds": sorted(set(errors))[:5],
+            "probe_writes": {"probes": PROBES, "idle_class_no_load": idle_base, "idle_class_during_load": into_idle,
+                             "busy_class_1_during_load": into_busy},
+            "host": f"one laptop, Docker Desktop VM with {os.cpu_count()} host CPUs; FalkorDB in Docker"}
+
+
+def scale(classes: int, students: int, rounds: int) -> int:
+    graphs = [f"class_conc_scale_{i:02d}" for i in range(1, classes + 1)]
+    idle = "class_conc_scale_idle"
+    for g in graphs + [idle]:
+        recreate_graph("class_template", g)
+        run_batched(g, Q.LOAD_STUDENTS, [{"id": f"s{i:02d}", "alias": f"s{i:02d}"} for i in range(1, students + 1)])
+    global _POOL
+    _POOL = concurrent.futures.ProcessPoolExecutor(max_workers=1)
+    try:
+        result = asyncio.run(scale_async(graphs, idle, students, rounds))
+    finally:
+        _POOL.shutdown()
+        for g in graphs + [idle]:
+            delete_graph(g)
+    saved = json.loads(OUT.read_text()) if OUT.exists() else {}
+    saved["scale"] = result
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(json.dumps(saved, indent=2) + "\n")
+    a, pw = result["all_classes"], result["probe_writes"]
+    print(f"{classes} classes x {students} students for {result['load_window_s']}s: {result['queries']} queries, "
+          f"{result['queries_per_s']}/s, all-class p50 {a['p50_ms']} / p95 {a['p95_ms']} ms, errors {result['errors']}")
+    for g, v in result["per_class"].items():
+        print(f"  {g}: p50 {v['p50_ms']} / p95 {v['p95_ms']} ms (n={v['n']})")
+    for k, v in pw.items():
+        if isinstance(v, dict):
+            print(f"  probe writes, {k}: p50 {v['p50_ms']} / p95 {v['p95_ms']} ms")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--students", type=int, default=30)
     ap.add_argument("--rounds", type=int, default=6)
+    ap.add_argument("--scale-classes", type=int, help="run only the scale test with this many class graphs")
     a = ap.parse_args(argv)
+    if a.scale_classes:
+        return scale(a.scale_classes, a.students, a.rounds)
     for g in GRAPHS:
         recreate_graph("class_template", g)
         run_batched(g, Q.LOAD_STUDENTS, [{"id": f"s{i:02d}", "alias": f"s{i:02d}"} for i in range(1, a.students + 1)])

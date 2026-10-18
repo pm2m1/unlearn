@@ -35,7 +35,7 @@ Each row is a track's official key-focus item. "Partial" means some of it is met
 | episodic, semantic and procedural memory | Partial | **Episodic:** every answer is an `ATTEMPTED` edge, and each session is a `Session` with `Event`s (attempt, explanation, diagnosis, remediation). **Semantic:** `SHOWED {count, confidence}` and `MASTERED`. **Procedural:** `Skill → Step` with a `success_rate` that every check answer updates, and the Tutor picks the best-rated skill. Partial because the procedures themselves don't change: the 8 skills and their steps are authored (`data/curated/skills.json`). Unlearn learns *which* skill works, never new steps. | `RECORD_ATTEMPT`, `START_SESSION`, `LOG_EVENT`; `UPDATE_SHOWED`, `MARK_MASTERED`; `PICK_SKILL`, `UPDATE_SKILL` |
 | persistent conversation history | Partial | What happened in each session persists in the graph across restarts: answers, explanations, the diagnosis and the remediation result. Session 2 opens from it. Partial because the wording isn't kept: the agents' messages aren't stored, so there is no transcript, and the teacher chat answers each message without the earlier turns. | `STUDENT_SESSIONS`, `RECALL`, `SESSION_ATTEMPTS`; `agents/teacher_chat.py` (one turn per call) |
 | shared state and handoffs between agents | Yes | Diagnoser, Tutor and Teacher coordinate only through graph state. A `Task` is claimed atomically, completed, and handed off (`HANDED_OFF_FROM`). The Teacher's `Proposal` waits for a human. Each HTTP step reads its state back from the graph; the agents keep none in Python. | `CREATE_TASK`, `CLAIM`, `CLAIM_TASK`, `HANDOFF`, `CHAIN`, `PROPOSE`, `DECIDE`; `tests/test_claim_race.py` |
-| high-concurrency reads and writes | Partial | 30 simulated students in each of two class graphs at once: p50 2.1 ms, p95 18 ms per query. Heavy writes on one class barely move another class's p50 (0.33 → 0.57 ms). Partial because it was measured at that small scale, on one laptop. Writes within one class graph queue behind each other (p50 294 ms under heavy writes on the same class), and the server's shared threads raise another class's p95 (0.38 → 28 ms). | `eval/concurrency.py`, [`eval/results/concurrency.json`](eval/results/concurrency.json), `CONC_PROBE_WRITE`, `CONC_HEAVY_WRITE` |
+| high-concurrency reads and writes | Partial | Ten class graphs with 30 students each, 300 sessions at once: 11,892 queries/s, p50 about 25 ms and p95 35–43 ms per class, 0 errors. With two classes, heavy writes on one class barely move another class's p50 (0.33 → 0.57 ms). Partial because it was all measured on one laptop. Writes within one class graph queue behind each other (p50 294 ms under heavy writes on the same class), and the server's shared threads raise another class's p95 (0.38 → 28 ms). | `eval/concurrency.py`, [`eval/results/concurrency.json`](eval/results/concurrency.json), `CONC_PROBE_WRITE`, `CONC_HEAVY_WRITE` |
 | separate memory per user or tenant | Yes | Each classroom (tenant) is its own graph, copied from `class_template` with `GRAPH.COPY`. Each student's memory is their own `SHOWED`, `MASTERED`, `ATTEMPTED` and `Session` edges inside it. There are no logins, so separation is by graph, not by access control. | `db.recreate_graph` (`GRAPH.COPY`), `scripts/05_new_class.py`, `tools.graph_name` |
 
 **Track 01: Agents That Act on Connected Data (secondary)**
@@ -357,15 +357,15 @@ It walks up to four prerequisite hops back from the skill the student is working
 <!-- eval:start -->
 | Metric | A. No memory (n=90, seeds 0, 1, 2) | B. Vector RAG (n=90, seeds 0, 1, 2) | B+. LLM + graph as text (n=30, seed 0) | C. Unlearn (n=90, seeds 0, 1, 2) | Random guess (A / B / B+) |
 | --- | --- | --- | --- | --- | --- |
-| Top-1 misconception | 7% (0%–10%) | 7% (3%–13%) | 23% | 48% (43%–50%) | 2.6% / 2.3% / 0.5% |
-| Top-3 misconception | 7% (0%–10%) | 13% (7%–27%) | 47% | 79% (73%–90%) | 7.5% / 6.8% / 1.5% |
-| Root-cause accuracy | 32% (27%–37%) | 37% (30%–50%) | 40% | 72% (63%–83%) | 23% / 23% / 2.5% |
-| Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.2 (5.1–5.2) | – |
-| Session-2 recall | 0% | 9% (7%–10%) | 7% | 57% (50%–70%) | – |
-| p50 latency per diagnosis | 14.9 s (n=50) | 7.5 s (n=120) | 113.8 s (n=60) | 50 ms (n=90) | – |
-| p95 latency per diagnosis | 32.4 s (n=50) | 9.2 s (n=120) | 130.8 s (n=60) | 61 ms (n=90) | – |
+| Top-1 misconception | 7% [2–12] | 7% [2–12] | 23% [10–40] | 48% [38–58] | 2.6% / 2.3% / 0.5% |
+| Top-3 misconception | 7% [2–12] | 13% [7–21] | 47% [27–63] | 79% [70–87] | 7.5% / 6.8% / 1.5% |
+| Root-cause accuracy | 32% [22–42] | 37% [27–47] | 40% [23–57] | 72% [63–81] | 23% / 23% / 2.5% |
+| Questions to diagnosis | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 5.2 [4.9–5.4] | – |
+| Session-2 recall | 0% [0–0] | 9% [3–16] | 7% [0–17] | 57% [47–67] | – |
+| p50 latency per diagnosis | 14.9 s [11.1–17.3] (n=50) | 7.5 s [7.3–7.8] (n=120) | 113.8 s [113.0–115.6] (n=60) | 50 ms [48–51] (n=90) | – |
+| p95 latency per diagnosis | 32.4 s [24.8–33.2] (n=50) | 9.2 s [8.6–10.2] (n=120) | 130.8 s [124.9–134.3] (n=60) | 61 ms [57–73] (n=90) | – |
 
-Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
+Mean with its 95% bootstrap interval in brackets: 1000 resamples of students, from the saved per-student predictions (`eval/bootstrap.py`); the per-seed min–max is in [`eval/results/eval.md`](eval/results/eval.md). Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
 
 Latency is p50 / p95 over every diagnosis timed with fresh LLM calls (cached ones are left out), pooled across the pre-review and post-review runs of the same model: n = 45 + 5 for A, 90 + 30 for B and 30 + 30 for B+. C makes no LLM calls; its latency is this run's 90 diagnoses. `n` in a latency cell is the number of diagnoses timed.
 
@@ -373,12 +373,12 @@ Latency is p50 / p95 over every diagnosis timed with fresh LLM calls (cached one
 
 | Seed 0 | A. No memory (n=30) | B. Vector RAG (n=30) | B+. LLM + graph as text (n=30) | C. Unlearn (n=30) |
 | --- | --- | --- | --- | --- |
-| Top-1 misconception | 10% | 13% | 23% | 50% |
-| Top-3 misconception | 10% | 27% | 47% | 73% |
-| Root-cause accuracy | 33% | 30% | 40% | 63% |
-| Questions to diagnosis | 6.0 | 6.0 | 6.0 | 5.2 |
-| Session-2 recall | 0% | 7% | 7% | 50% |
-| p50 latency per diagnosis | 18.0 s (n=25) | 8.5 s (n=36) | 113.8 s (n=60) | 50 ms (n=30) |
+| Top-1 misconception | 10% [0–23] | 13% [3–27] | 23% [10–40] | 50% [33–67] |
+| Top-3 misconception | 10% [0–23] | 27% [13–43] | 47% [27–63] | 73% [57–90] |
+| Root-cause accuracy | 33% [17–50] | 30% [13–47] | 40% [23–57] | 63% [47–80] |
+| Questions to diagnosis | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 5.2 [4.8–5.6] |
+| Session-2 recall | 0% [0–0] | 7% [0–17] | 7% [0–17] | 50% [33–67] |
+| p50 latency per diagnosis | 18.0 s [12.4–24.8] (n=25) | 8.5 s [8.1–8.6] (n=36) | 113.8 s [113.0–115.6] (n=60) | 50 ms [48–51] (n=30) |
 
 Candidate lists, averaged over the same students: 6.6 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B. A planted misconception is on A's list for 23% of students and on B's for 20%, which caps A's and B's misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was shown, B's lists plus its graph text (410 misconceptions and 40 constructs), and every planted misconception (100%) is in it. The random-guess column picks uniformly from those same sets.
 
@@ -399,13 +399,46 @@ Candidate lists, averaged over the same students: 6.6 root-cause candidates (the
 - **B+ tests knowledge against traversal.** It ran on seed 0 only, so it is compared on seed 0's 30 students (the seed-0 table above), never with the three-seed means:
   - **Against B:** B+ beats B on root cause (40% against 30%), top-1 misconception (23% against 13%) and top-3 (47% against 27%). So the graph's knowledge does help an LLM.
   - **Against C:** it's still far behind: 40% against 63% on root cause, 23% against 50% on top-1 and 47% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. On seed 0, a B+ diagnosis takes 114 s at p50 (n=60), against 8.5 s for B (n=36) and 50 ms for C (n=30).
-- **B+ is not close to C on any seed-0 metric**, so no claim needs narrowing on that count.
+- **B+ trails C on every seed-0 metric.** With 30 students, though, the intervals overlap on top-1, top-3 and root cause; only session-2 recall is clear-cut (50% [33–67] against 7% [0–17]).
+- **Uncertainty.** The bracketed 95% intervals settle the three-seed gap: C's root cause (72% [63–81]) doesn't overlap A's or B's (37% [27–47] at best). On seed 0's 30 students, C and B+ overlap on root cause (63% [47–80] against 40% [23–57]). That gap is suggestive, not conclusive.
 - **Session-2 recall.** Over seeds 0–2, C scores 57% against 9% for B and 0% for A. On seed 0, C scores 50% against 7% for both B and B+, whose openings are identical.
   - The eval's figure comes from the embedding judge applied to the real opening text.
   - The 68% in the recall table under "Design decisions worth knowing" counts the named IDs exactly. The two measure slightly different things.
 
-**Simulator bias, stated plainly.**
-- **It favours Unlearn.** The simulator picks wrong answers through the same option-to-misconception map Unlearn reads, and a real student's wrong answers are messier than the map. The noise (a 10% guess rate, 15% of planted misconceptions not picked) blunts that bias without removing it.
+### Is the simulator rigged in our favour?
+
+**Yes, partly, and here is how much it matters.**
+- **The bias.** The simulator picks wrong answers through the same option-to-misconception map Unlearn reads. A real student's wrong answers are messier than the map. The eval's built-in noise (a 10% guess rate, 15% of planted misconceptions not picked) blunts that bias without removing it.
+- **The stress test** (`eval/noise.py`, [`eval/results/noise.json`](eval/results/noise.json)). `noise=p` in `eval/simulator.py` adds answers the map can't explain:
+  - with probability p, a uniformly random wrong option that isn't one of the student's planted misconceptions;
+  - with probability p/2, a correct answer slips to a random wrong option.
+- **What was re-run.** Only C, with template wording and no LLM calls. A, B and B+ keep their clean-simulator scores, which flatters them: noise would hurt them too.
+
+| C under noise p (n=90, seeds 0–2) | Top-1 misconception | Top-3 misconception | Root cause | Session-2 recall |
+| --- | --- | --- | --- | --- |
+| p = 0 | 48% [38–58] | 79% [70–87] | 72% [63–81] | 59% [49–68] |
+| p = 0.2 | 31% [22–40] | 58% [47–68] | 52% [42–63] | 37% [27–47] |
+| p = 0.4 | 18% [10–26] | 28% [19–37] | 33% [23–44] | 17% [10–26] |
+| A, clean simulator (n=90) | 7% | 7% | 32% | 0% |
+| B, clean simulator (n=90) | 7% | 13% | 37% | 9% |
+| B+, clean simulator (seed 0, n=30) | 23% | 47% | 40% | 7% |
+
+| C on seed 0 only (n=30), to compare with B+ | Top-1 misconception | Top-3 misconception | Root cause | Session-2 recall |
+| --- | --- | --- | --- | --- |
+| p = 0 | 50% | 73% | 63% | 53% |
+| p = 0.2 | 37% | 67% | 67% | 50% |
+| p = 0.4 | 27% | 37% | 47% | 27% |
+
+Brackets are 95% bootstrap intervals over students.
+
+**What it shows.**
+- **C degrades steadily with noise**, as it should: it reads exactly the evidence the noise corrupts.
+- **At p = 0.2**, C still beats the clean A, B and B+ on every metric.
+- **At p = 0.4**, C no longer wins everywhere:
+  - Root cause (33% [23–44]) falls below clean B's 37% and only just clears A's 32%. The intervals overlap.
+  - On seed 0, its top-3 (37%) falls below B+'s 47%.
+  - It still beats every baseline on top-1 and session-2 recall.
+- **p = 0 reproduces the main table's top-1, top-3 and root cause exactly.** Its recall is 59% against the table's 57%: the session-2 opening's wording changed after the eval ran ("1 time", trimmed names), and that moves one student under the embedding judge.
 - **A stronger model may narrow the gap** on naming misconceptions. The baselines here run on a 27B local model.
 
 ### Concurrency (`eval/concurrency.py`, [`eval/results/concurrency.json`](eval/results/concurrency.json))
@@ -424,6 +457,13 @@ Candidate lists, averaged over the same students: 6.6 root-cause candidates (the
 
 - **Write locks are per graph.** A's writes don't queue behind B's writes, only behind A's own.
 - **Threads and CPU are shared.** A load that fills the server's query thread pool (`THREAD_COUNT` 15 here) slows every class equally.
+
+**Ten classes at once** (`python eval/concurrency.py --scale-classes 10`). Ten class graphs ran with 30 simulated students each, 300 sessions at the same time, for 2.44 s:
+- **Throughput:** 29,062 queries, 11,892 queries/s in total, with 0 errors.
+- **Per class:** p50 24.4–24.6 ms and p95 34.9–42.6 ms; every class within a few ms of the others.
+- **Probe writes** from a separate process: 0.33 ms p50 with no load, 4.44 / 8.82 ms (p50 / p95) into an idle eleventh class during the load, and 3.19 / 11.69 ms into busy class 1.
+- **What limits it:** the per-session timings include queueing in the single Python test client, which runs all 300 sessions on one event loop, and the server's 15 query threads, which every class shares.
+- **Where it ran:** one laptop, FalkorDB in Docker Desktop with 15 CPUs and `THREAD_COUNT` 15. It is not a multi-machine or production load test.
 
 Tool latency for all 16 tools, 50 calls each, is in [`eval/results/latency.json`](eval/results/latency.json). Every class-graph tool is under 5 ms at p95.
 

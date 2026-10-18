@@ -6346,5 +6346,455 @@
         }
       }
     }
+  },
+  "bootstrap": {
+    "resamples": 1000,
+    "seed": 0,
+    "level": 0.95,
+    "method": "Each student's score is recomputed from the saved predictions: A, B and B+ rows carry the planted state, and\nC's is rebuilt from the seeded simulator (planted state never depends on the answers). The pooled means must\nmatch the saved summary, or the script stops. Then 1000 resamples of students, with replacement, give the\n2.5th and 97.5th percentiles of each metric: overall (every seed the condition ran) and per seed. Latency\nintervals resample the same pooled timings the tables report (run_eval.py --pool-latency).",
+    "overall": {
+      "A": {
+        "top1_misconception": [
+          0.0222,
+          0.1222
+        ],
+        "top3_misconception": [
+          0.0222,
+          0.1222
+        ],
+        "root_cause_accuracy": [
+          0.2222,
+          0.4222
+        ],
+        "questions_to_diagnosis": [
+          6.0,
+          6.0
+        ],
+        "session2_recall": [
+          0.0,
+          0.0
+        ],
+        "latency_p50_ms": [
+          11108.5384,
+          17339.5881
+        ],
+        "latency_p95_ms": [
+          24833.8296,
+          33151.8309
+        ],
+        "latency_n": 50
+      },
+      "B": {
+        "top1_misconception": [
+          0.0222,
+          0.1222
+        ],
+        "top3_misconception": [
+          0.0667,
+          0.2111
+        ],
+        "root_cause_accuracy": [
+          0.2667,
+          0.4667
+        ],
+        "questions_to_diagnosis": [
+          6.0,
+          6.0
+        ],
+        "session2_recall": [
+          0.0333,
+          0.1556
+        ],
+        "latency_p50_ms": [
+          7292.6049,
+          7766.6535
+        ],
+        "latency_p95_ms": [
+          8644.9615,
+          10206.343
+        ],
+        "latency_n": 120
+      },
+      "B+": {
+        "top1_misconception": [
+          0.1,
+          0.4
+        ],
+        "top3_misconception": [
+          0.2667,
+          0.6333
+        ],
+        "root_cause_accuracy": [
+          0.2333,
+          0.5667
+        ],
+        "questions_to_diagnosis": [
+          6.0,
+          6.0
+        ],
+        "session2_recall": [
+          0.0,
+          0.1667
+        ],
+        "latency_p50_ms": [
+          113000.264,
+          115568.4477
+        ],
+        "latency_p95_ms": [
+          124872.6147,
+          134318.0722
+        ],
+        "latency_n": 60
+      },
+      "C": {
+        "top1_misconception": [
+          0.3778,
+          0.5778
+        ],
+        "top3_misconception": [
+          0.7,
+          0.8667
+        ],
+        "root_cause_accuracy": [
+          0.6333,
+          0.8111
+        ],
+        "questions_to_diagnosis": [
+          4.9222,
+          5.4222
+        ],
+        "session2_recall": [
+          0.4667,
+          0.6667
+        ],
+        "latency_p50_ms": [
+          48.4346,
+          50.5325
+        ],
+        "latency_p95_ms": [
+          56.5109,
+          72.7702
+        ],
+        "latency_n": 90
+      }
+    },
+    "per_seed": {
+      "0": {
+        "A": {
+          "top1_misconception": [
+            0.0,
+            0.2333
+          ],
+          "top3_misconception": [
+            0.0,
+            0.2333
+          ],
+          "root_cause_accuracy": [
+            0.1667,
+            0.5
+          ],
+          "questions_to_diagnosis": [
+            6.0,
+            6.0
+          ],
+          "session2_recall": [
+            0.0,
+            0.0
+          ],
+          "latency_p50_ms": [
+            12365.9541,
+            24761.8707
+          ],
+          "latency_p95_ms": [
+            30145.4431,
+            33643.3108
+          ],
+          "latency_n": 25
+        },
+        "B": {
+          "top1_misconception": [
+            0.0333,
+            0.2667
+          ],
+          "top3_misconception": [
+            0.1333,
+            0.4333
+          ],
+          "root_cause_accuracy": [
+            0.1333,
+            0.4667
+          ],
+          "questions_to_diagnosis": [
+            6.0,
+            6.0
+          ],
+          "session2_recall": [
+            0.0,
+            0.1667
+          ],
+          "latency_p50_ms": [
+            8062.2875,
+            8634.2711
+          ],
+          "latency_p95_ms": [
+            9270.6861,
+            10906.3935
+          ],
+          "latency_n": 36
+        },
+        "B+": {
+          "top1_misconception": [
+            0.1,
+            0.4
+          ],
+          "top3_misconception": [
+            0.2667,
+            0.6333
+          ],
+          "root_cause_accuracy": [
+            0.2333,
+            0.5667
+          ],
+          "questions_to_diagnosis": [
+            6.0,
+            6.0
+          ],
+          "session2_recall": [
+            0.0,
+            0.1667
+          ],
+          "latency_p50_ms": [
+            113000.264,
+            115568.4477
+          ],
+          "latency_p95_ms": [
+            124872.6147,
+            134318.0722
+          ],
+          "latency_n": 60
+        },
+        "C": {
+          "top1_misconception": [
+            0.3333,
+            0.6667
+          ],
+          "top3_misconception": [
+            0.5667,
+            0.9
+          ],
+          "root_cause_accuracy": [
+            0.4667,
+            0.8
+          ],
+          "questions_to_diagnosis": [
+            4.7667,
+            5.6333
+          ],
+          "session2_recall": [
+            0.3333,
+            0.6667
+          ],
+          "latency_p50_ms": [
+            47.8125,
+            51.0376
+          ],
+          "latency_p95_ms": [
+            52.9255,
+            70.0533
+          ],
+          "latency_n": 30
+        }
+      },
+      "1": {
+        "A": {
+          "top1_misconception": [
+            0.0,
+            0.0
+          ],
+          "top3_misconception": [
+            0.0,
+            0.0
+          ],
+          "root_cause_accuracy": [
+            0.2,
+            0.5333
+          ],
+          "questions_to_diagnosis": [
+            6.0,
+            6.0
+          ],
+          "session2_recall": [
+            0.0,
+            0.0
+          ],
+          "latency_p50_ms": [
+            8423.9769,
+            15563.2605
+          ],
+          "latency_p95_ms": [
+            15521.93,
+            19523.1785
+          ],
+          "latency_n": 17
+        },
+        "B": {
+          "top1_misconception": [
+            0.0,
+            0.1333
+          ],
+          "top3_misconception": [
+            0.0,
+            0.1667
+          ],
+          "root_cause_accuracy": [
+            0.3333,
+            0.6667
+          ],
+          "questions_to_diagnosis": [
+            6.0,
+            6.0
+          ],
+          "session2_recall": [
+            0.0,
+            0.2333
+          ],
+          "latency_p50_ms": [
+            6941.6694,
+            7495.7214
+          ],
+          "latency_p95_ms": [
+            7791.9078,
+            8568.2517
+          ],
+          "latency_n": 40
+        },
+        "C": {
+          "top1_misconception": [
+            0.3333,
+            0.6667
+          ],
+          "top3_misconception": [
+            0.8,
+            1.0
+          ],
+          "root_cause_accuracy": [
+            0.7,
+            0.9333
+          ],
+          "questions_to_diagnosis": [
+            4.6667,
+            5.5
+          ],
+          "session2_recall": [
+            0.5333,
+            0.8667
+          ],
+          "latency_p50_ms": [
+            45.2675,
+            50.7152
+          ],
+          "latency_p95_ms": [
+            54.959,
+            73.3937
+          ],
+          "latency_n": 30
+        }
+      },
+      "2": {
+        "A": {
+          "top1_misconception": [
+            0.0,
+            0.2333
+          ],
+          "top3_misconception": [
+            0.0,
+            0.2333
+          ],
+          "root_cause_accuracy": [
+            0.1,
+            0.4
+          ],
+          "questions_to_diagnosis": [
+            6.0,
+            6.0
+          ],
+          "session2_recall": [
+            0.0,
+            0.0
+          ],
+          "latency_p50_ms": [
+            8901.9625,
+            17196.7129
+          ],
+          "latency_p95_ms": [
+            14341.9124,
+            21446.8775
+          ],
+          "latency_n": 8
+        },
+        "B": {
+          "top1_misconception": [
+            0.0,
+            0.1
+          ],
+          "top3_misconception": [
+            0.0,
+            0.1667
+          ],
+          "root_cause_accuracy": [
+            0.1333,
+            0.4667
+          ],
+          "questions_to_diagnosis": [
+            6.0,
+            6.0
+          ],
+          "session2_recall": [
+            0.0,
+            0.2333
+          ],
+          "latency_p50_ms": [
+            6939.8031,
+            7450.2878
+          ],
+          "latency_p95_ms": [
+            7976.398,
+            8910.4668
+          ],
+          "latency_n": 44
+        },
+        "C": {
+          "top1_misconception": [
+            0.2667,
+            0.6
+          ],
+          "top3_misconception": [
+            0.5667,
+            0.9
+          ],
+          "root_cause_accuracy": [
+            0.5333,
+            0.8667
+          ],
+          "questions_to_diagnosis": [
+            4.7667,
+            5.6667
+          ],
+          "session2_recall": [
+            0.3333,
+            0.6667
+          ],
+          "latency_p50_ms": [
+            47.9246,
+            52.466
+          ],
+          "latency_p95_ms": [
+            56.2558,
+            73.0705
+          ],
+          "latency_n": 30
+        }
+      }
+    }
   }
 }

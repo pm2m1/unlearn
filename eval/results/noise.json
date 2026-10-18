@@ -1,0 +1,210 @@
+{
+  "method": "The simulator picks wrong answers through the same option-to-misconception map Unlearn reads. noise=p adds\nanswers that map can't explain (eval/simulator.py): a uniformly random wrong option outside the student's\nplanted misconceptions with probability p, and a correct answer slipping to a random wrong option with\nprobability p/2. Only C is re-run (template wording, no LLM calls). A, B and B+ are their saved clean-simulator\nscores from eval/results/eval.json; B+ ran on seed 0 only, so it is compared with C's seed 0 at the same p.",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "clean_baselines": {
+    "A": {
+      "top1_misconception": 0.067,
+      "top3_misconception": 0.067,
+      "root_cause_accuracy": 0.322,
+      "session2_recall": 0
+    },
+    "B": {
+      "top1_misconception": 0.066,
+      "top3_misconception": 0.134,
+      "root_cause_accuracy": 0.367,
+      "session2_recall": 0.089
+    },
+    "B+": {
+      "top1_misconception": 0.233,
+      "top3_misconception": 0.467,
+      "root_cause_accuracy": 0.4,
+      "session2_recall": 0.067
+    }
+  },
+  "levels": {
+    "0.0": {
+      "C": {
+        "top1_misconception": 0.478,
+        "top3_misconception": 0.789,
+        "root_cause_accuracy": 0.722,
+        "questions_to_diagnosis": 5.189,
+        "session2_recall": 0.589
+      },
+      "C_ci95": {
+        "top1_misconception": [
+          0.3778,
+          0.5778
+        ],
+        "top3_misconception": [
+          0.7,
+          0.8667
+        ],
+        "root_cause_accuracy": [
+          0.6333,
+          0.8111
+        ],
+        "questions_to_diagnosis": [
+          4.9222,
+          5.4222
+        ],
+        "session2_recall": [
+          0.4889,
+          0.6778
+        ]
+      },
+      "C_seed0": {
+        "top1_misconception": 0.5,
+        "top3_misconception": 0.733,
+        "root_cause_accuracy": 0.633,
+        "session2_recall": 0.533
+      },
+      "n": 90,
+      "beats_clean": {
+        "top1_misconception": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        },
+        "top3_misconception": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        },
+        "root_cause_accuracy": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        },
+        "session2_recall": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        }
+      }
+    },
+    "0.2": {
+      "C": {
+        "top1_misconception": 0.311,
+        "top3_misconception": 0.578,
+        "root_cause_accuracy": 0.522,
+        "questions_to_diagnosis": 5.389,
+        "session2_recall": 0.367
+      },
+      "C_ci95": {
+        "top1_misconception": [
+          0.2222,
+          0.4
+        ],
+        "top3_misconception": [
+          0.4667,
+          0.6778
+        ],
+        "root_cause_accuracy": [
+          0.4222,
+          0.6333
+        ],
+        "questions_to_diagnosis": [
+          5.1444,
+          5.5889
+        ],
+        "session2_recall": [
+          0.2667,
+          0.4667
+        ]
+      },
+      "C_seed0": {
+        "top1_misconception": 0.367,
+        "top3_misconception": 0.667,
+        "root_cause_accuracy": 0.667,
+        "session2_recall": 0.5
+      },
+      "n": 90,
+      "beats_clean": {
+        "top1_misconception": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        },
+        "top3_misconception": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        },
+        "root_cause_accuracy": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        },
+        "session2_recall": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        }
+      }
+    },
+    "0.4": {
+      "C": {
+        "top1_misconception": 0.178,
+        "top3_misconception": 0.278,
+        "root_cause_accuracy": 0.333,
+        "questions_to_diagnosis": 5.544,
+        "session2_recall": 0.167
+      },
+      "C_ci95": {
+        "top1_misconception": [
+          0.1,
+          0.2556
+        ],
+        "top3_misconception": [
+          0.1889,
+          0.3667
+        ],
+        "root_cause_accuracy": [
+          0.2333,
+          0.4444
+        ],
+        "questions_to_diagnosis": [
+          5.3333,
+          5.7444
+        ],
+        "session2_recall": [
+          0.1,
+          0.2556
+        ]
+      },
+      "C_seed0": {
+        "top1_misconception": 0.267,
+        "top3_misconception": 0.367,
+        "root_cause_accuracy": 0.467,
+        "session2_recall": 0.267
+      },
+      "n": 90,
+      "beats_clean": {
+        "top1_misconception": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        },
+        "top3_misconception": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": false
+        },
+        "root_cause_accuracy": {
+          "A": true,
+          "B": false,
+          "B+ (seed 0)": true
+        },
+        "session2_recall": {
+          "A": true,
+          "B": true,
+          "B+ (seed 0)": true
+        }
+      }
+    }
+  }
+}

@@ -759,9 +759,18 @@ function latencyOf(r, c, key, seeds) {
   return xs.length ? { v: xs.reduce((a, b) => a + b, 0) / xs.length, n: per.reduce((a, v) => a + (v.latency_n || 0), 0) } : null;
 }
 
+// eval/bootstrap.py's 95% interval for a cell, as " [38–58]" in the cell's unit; empty when the file has none.
+function ciText(r, c, key, seeds, unit) {
+  const b = r.bootstrap;
+  const ci = b && ((seeds ? b.per_seed?.[seeds[0]] : b.overall)?.[c] || {})[key];
+  if (!ci) return "";
+  const f = (x) => (unit === "%" ? Math.round(100 * x) : Number(x).toFixed(1));
+  return ` [${f(ci[0])}–${f(ci[1])}]`;
+}
+
 function latencyCell(r, c, key, seeds, fmt) {
   const x = latencyOf(r, c, key, seeds);
-  return x ? el("td", {}, el("strong", { text: fmt(x.v, "") }), el("span", { class: "muted", text: ` n=${x.n}` })) : el("td", { text: "–" });
+  return x ? el("td", {}, el("strong", { text: fmt(x.v, "") }), el("span", { class: "muted", text: `${ciText(r, c, key, seeds, "")} n=${x.n}` })) : el("td", { text: "–" });
 }
 
 // eval/design_checks.py: the recall-rule comparison and the stop-threshold check, as two small tables.
@@ -803,13 +812,15 @@ function evalTable(r, title) {
     if (!r.summary[c]) return el("td", { class: "muted", text: "not run" });
     if (m.startsWith("latency_")) return latencyCell(r, c, m, null, fmt);
     if (!v) return el("td", { text: "–" });
+    const ci = ciText(r, c, m, null, u);
+    if (ci) return el("td", {}, el("strong", { text: fmt(v.mean, u) }), el("span", { class: "muted", text: ci }));
     if (v.min === v.max) return el("td", {}, el("strong", { text: fmt(v.mean, u) }));
     return el("td", {}, el("strong", { text: fmt(v.mean, u) }), el("span", { class: "muted", text: ` ${fmt(v.min, u)}–${fmt(v.max, u)}` }));
   };
   const m = r.meta;
   const notes = Object.entries(m.not_run || {}).map(([c, why]) => el("p", { class: "muted", text: `${c} not run: ${why}.` }));
   return [el("h2", { text: title }),
-    el("p", { class: "muted", text: `${m.students} simulated students × seeds ${m.seeds.join(", ")} × ${m.sessions} sessions · mean, min–max across seeds · A/B model: ${m.llm || "none"} · C: template wording${m.stopped ? ` · stopped early: ${m.stopped}` : ""}` }),
+    el("p", { class: "muted", text: `${m.students} simulated students × seeds ${m.seeds.join(", ")} × ${m.sessions} sessions · ${r.bootstrap ? "mean [95% bootstrap interval over students]" : "mean, min–max across seeds"} · A/B model: ${m.llm || "none"} · C: template wording${m.stopped ? ` · stopped early: ${m.stopped}` : ""}` }),
     el("table", { class: "eval" }, el("thead", {}, el("tr", {}, el("th", { text: "Metric" }), conds.map(([c, l]) => {
       const n = r.meta.n_per_condition?.[c];
       const seeds = (r.meta.seeds_per_condition || {})[c] || r.meta.seeds;
@@ -841,7 +852,8 @@ function seedTables(r, conds, rows, fmt) {
       el("tbody", {}, rows.slice(0, 6).map(([label, key, u]) => el("tr", {}, el("td", { text: label }),
         ran.map(([c]) => {
           if (key.startsWith("latency_")) return latencyCell(r, c, key, seeds, fmt);
-          const v = val(c, key); return el("td", {}, el("strong", { text: v === null ? "–" : fmt(v, u) }));
+          const v = val(c, key);
+          return el("td", {}, el("strong", { text: v === null ? "–" : fmt(v, u) }), v === null ? null : el("span", { class: "muted", text: ciText(r, c, key, seeds, u) }));
         })))))];
 }
 

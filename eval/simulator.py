@@ -10,6 +10,11 @@ answer(question) picks an option key:
   3. On a known construct, answer correctly with probability 0.9.
   4. Otherwise pick a random wrong option.
 
+noise=p (default 0, the eval's setting) adds answers the option-to-misconception map doesn't explain: with
+probability p the answer is a uniformly random wrong option that indicates none of the student's planted
+misconceptions, and a correct answer slips to a random wrong option with probability p/2. At p = 0 no extra
+random numbers are drawn, so every existing run reproduces exactly.
+
 The simulator reads the curated files, not the graph: it is the ground truth the agents are scored
 against, so it must not share their queries. It does share the option-to-misconception map, which
 favours Unlearn (SPEC says to state this in the README).
@@ -49,6 +54,7 @@ class SimStudent:
     # Noiseless students draw their (only) random choice from a per-question seed, so the same question always
     # gets the same answer, however many requests or processes ask it. The demo scenario relies on this.
     per_question_seed: str | None = None
+    noise: float = 0.0
 
     def knows(self, construct_id: int) -> bool:
         return construct_id not in self.unknown
@@ -60,6 +66,15 @@ class SimStudent:
             self.rng = random.Random(f"{self.per_question_seed}:{q['id']}")
         options = q["options"]
         wrong = [o for o in options if not o.get("correct")]
+        if self.noise and self.rng.random() < self.noise:
+            unexplained = [o for o in wrong if o.get("misconception_id") not in self.misconceptions] or wrong
+            return self.rng.choice(unexplained)["key"]
+        key = self._rule_answer(q, options, wrong)
+        if self.noise and key == next(o for o in options if o.get("correct"))["key"] and self.rng.random() < self.noise / 2:
+            return self.rng.choice(wrong)["key"]
+        return key
+
+    def _rule_answer(self, q: dict, options: list[dict], wrong: list[dict]) -> str:
         if self.rng.random() < self.guess_rate:
             return self.rng.choice(options)["key"]
         planted = [o for o in wrong if o.get("misconception_id") in self.misconceptions]
@@ -74,11 +89,13 @@ class Simulator:
     """Builds reproducible students: the same seed and ids always give the same students and answers.
 
     noiseless=True drops the guess rate and makes the planted and known rules certain, for tests.
+    noise=p adds unexplained wrong answers and slips (see the module docstring); 0 by default.
     """
 
-    def __init__(self, seed: int = 0, noiseless: bool = False):
+    def __init__(self, seed: int = 0, noiseless: bool = False, noise: float = 0.0):
         self.seed = seed
         self.noiseless = noiseless
+        self.noise = noise
         self.rates = {"guess_rate": 0.0, "pick_planted": 1.0, "known_correct": 1.0} if noiseless else {}
         self.bank = load_bank()
         self.g = requires_graph(load_requires())  # edge a -> b means a REQUIRES b
@@ -119,7 +136,8 @@ class Simulator:
             planted = list(misconceptions)
         unknown = {root} | set(self.dependants(root))
         per_q = f"{self.seed}:{student_id}" if self.noiseless else None
-        return SimStudent(student_id, root, planted, target, unknown, self.bank, rng, **self.rates, per_question_seed=per_q)
+        return SimStudent(student_id, root, planted, target, unknown, self.bank, rng, **self.rates, per_question_seed=per_q,
+                          noise=self.noise)
 
     def cohort(self, student_ids: list[str]) -> list[SimStudent]:
         return [self.student(sid) for sid in student_ids]

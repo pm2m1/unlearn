@@ -46,3 +46,31 @@ def test_answer_rates(sim):
     expected = 0.1 * k / n_opts + 0.9 * (0.85 + 0.15 * k / (n_opts - 1))
     assert planted == pytest.approx(expected, abs=0.03)
     assert correct == pytest.approx(0.9 * 0.9 + 0.1 / len(known_q["options"]), abs=0.03)
+
+
+def test_noise_zero_is_the_eval_simulator_and_noise_adds_unexplained_answers():
+    from eval.simulator import Simulator
+    clean, zero, noisy = Simulator(seed=3), Simulator(seed=3, noise=0.0), Simulator(seed=3, noise=0.4)
+    qids = sorted(clean.bank)[:60]
+    a, b = clean.student("s07"), zero.student("s07")
+    assert [a.answer(q) for q in qids] == [b.answer(q) for q in qids]  # p = 0 draws nothing extra
+
+    def unexplained(sim):
+        n = 0
+        for sid in ("s01", "s02", "s03", "s04", "s05"):
+            st = sim.student(sid)
+            for q in qids:
+                key = st.answer(q)
+                opt = next(o for o in st.bank[q]["options"] if o["key"] == key)
+                n += not opt.get("correct") and opt.get("misconception_id") not in st.misconceptions
+        return n
+    assert unexplained(noisy) > unexplained(Simulator(seed=3)) * 1.5
+    assert noisy.student("s01").misconceptions == clean.student("s01").misconceptions  # planted state unchanged
+
+
+def test_bootstrap_interval_is_deterministic_and_brackets_the_mean():
+    from eval import bootstrap as BS
+    xs = [1.0] * 30 + [0.0] * 60
+    lo, hi = BS.interval(xs)
+    assert lo < sum(xs) / len(xs) < hi and BS.interval(xs) == [lo, hi]
+    assert BS.interval([5.0] * 20) == [5.0, 5.0]

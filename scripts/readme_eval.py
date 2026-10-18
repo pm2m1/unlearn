@@ -31,14 +31,33 @@ def fmt(x, unit):
     return f"{x:.1f}"
 
 
-def cell(summary, c, m, unit, multi):
+def ci_text(lo, hi, unit):
+    """A 95% bootstrap interval in the cell's unit, without repeating the % sign: [38–58]."""
+    if unit == "%":
+        return f"[{100 * lo:.0f}–{100 * hi:.0f}]"
+    if unit == "ms":
+        return f"[{lo / 1000:.1f}–{hi / 1000:.1f}]" if hi >= 1000 else f"[{lo:.0f}–{hi:.0f}]"
+    return f"[{lo:.1f}–{hi:.1f}]"
+
+
+def cell(summary, c, m, unit, multi, ci=None):
     v = (summary.get(c) or {}).get(m)
     if v is None:
         return "–"
+    if ci:
+        return f"{fmt(v['mean'], unit)} {ci_text(*ci, unit)}"
     if not multi or v["min"] == v["max"]:
         return fmt(v["mean"], unit)
     lo, hi = fmt(v["min"], unit), fmt(v["max"], unit)
     return f"{fmt(v['mean'], unit)} ({lo}–{hi})"
+
+
+def boot(ev, c, m, seeds=None):
+    """The 95% bootstrap interval eval/bootstrap.py saved for this cell, if any."""
+    b = ev.get("bootstrap")
+    if not b:
+        return None
+    return ((b["overall"] if seeds is None else b["per_seed"].get(str(seeds[0]), {})).get(c) or {}).get(m)
 
 
 def latency_cell(ev, c, m, seeds=None):
@@ -46,7 +65,10 @@ def latency_cell(ev, c, m, seeds=None):
     pooled = ev.get("latency_pooled")
     if pooled:
         v = (pooled["overall"] if seeds is None else pooled["per_seed"][str(seeds[0])]).get(c)
-        return "–" if not v or v[m.replace("latency_", "")] is None else f"{fmt(v[m.replace('latency_', '')], 'ms')} (n={v['n']})"
+        if not v or v[m.replace("latency_", "")] is None:
+            return "–"
+        ci = boot(ev, c, m, seeds)
+        return f"{fmt(v[m.replace('latency_', '')], 'ms')}{' ' + ci_text(*ci, 'ms') if ci else ''} (n={v['n']})"
     ps = ev["per_seed"]
     keys = [str(s) for s in (seeds or ev["meta"]["seeds"]) if c in ps.get(str(s), {})]
     xs = [ps[s][c][m] for s in keys if ps[s][c][m] is not None]
@@ -86,7 +108,8 @@ def seed_table(ev, conds, seeds_of) -> list[str]:
                     vals.append(latency_cell(ev, c, m, seeds))
                     continue
                 xs = [ps[str(s)][c][m] for s in seeds if ps[str(s)][c][m] is not None]
-                vals.append(fmt(sum(xs) / len(xs), unit) if xs else "–")
+                ci = boot(ev, c, m, seeds) if len(seeds) == 1 else None
+                vals.append((fmt(sum(xs) / len(xs), unit) + (f" {ci_text(*ci, unit)}" if ci else "")) if xs else "–")
             out.append(f"| {row_label} | " + " | ".join(vals) + " |")
     return out
 
@@ -103,7 +126,7 @@ def block() -> str:
     lines = [head, "|" + " --- |" * (len(conds) + 2)]
     rnd = random_column(rb, seeds_of)
     for label, m, unit in ROWS:
-        cells = [latency_cell(ev, c, m) if unit == "ms" else cell(summary, c, m, unit, len(seeds_of[c]) > 1)
+        cells = [latency_cell(ev, c, m) if unit == "ms" else cell(summary, c, m, unit, len(seeds_of[c]) > 1, boot(ev, c, m))
                  for c in conds]
         if m in ("top1_misconception", "top3_misconception", "root_cause_accuracy"):
             r = " / ".join(rfmt(rnd(m, c)) for c in ("A", "B", "B+"))
@@ -114,7 +137,10 @@ def block() -> str:
              for k in ("prerequisites", "A_misconceptions", "B_misconceptions", "Bplus_misconceptions", "Bplus_constructs")}
     on_list = {k: sum(rb["per_seed"][str(s)]["planted_misconception_on_list"][k] for s in meta["seeds"]) / len(meta["seeds"])
                for k in ("A", "B", "B+")}
-    lines += ["", f"Mean (min–max across seeds) where a condition ran on more than one seed. Model for A, B and B+: "
+    note = ("Mean with its 95% bootstrap interval in brackets: 1000 resamples of students, from the saved per-student "
+            "predictions (`eval/bootstrap.py`); the per-seed min–max is in [`eval/results/eval.md`](eval/results/eval.md). "
+            if ev.get("bootstrap") else "Mean (min–max across seeds) where a condition ran on more than one seed. ")
+    lines += ["", note + "Model for A, B and B+: "
               f"`{meta['llm'].split(' / ')[-1]}` (local, Ollama, thinking off), one model, no fallback. C: template wording; "
               "its metrics come from the graph."]
     pooled = ev.get("latency_pooled")
