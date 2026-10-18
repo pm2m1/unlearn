@@ -21,6 +21,30 @@ Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory an
 - **No API keys needed.** Without them every reply is a template built from the graph's rows. The diagnosis, memory and receipts are the same either way.
 - **Explaining it to someone:** [docs/EXPLAIN.md](docs/EXPLAIN.md) is a one-page cheat sheet.
 
+## How Unlearn maps to the tracks
+
+Each row is a track's official key-focus item. "Partial" means some of it is met, and the row says what is missing. Query names are in [`api/unlearn/queries.py`](api/unlearn/queries.py).
+
+**Track 02: Agent Memory and Coordination (primary)**
+
+| Key focus | Met? | What Unlearn does | Proof |
+| --- | --- | --- | --- |
+| episodic, semantic and procedural memory | Partial | **Episodic:** every answer is an `ATTEMPTED` edge, and each session is a `Session` with `Event`s (attempt, explanation, diagnosis, remediation). **Semantic:** `SHOWED {count, confidence}` and `MASTERED`. **Procedural:** `Skill → Step` with a `success_rate` that every check answer updates, and the Tutor picks the best-rated skill. Partial because the procedures themselves don't change: the 8 skills and their steps are authored (`data/curated/skills.json`). Unlearn learns *which* skill works, never new steps. | `RECORD_ATTEMPT`, `START_SESSION`, `LOG_EVENT`; `UPDATE_SHOWED`, `MARK_MASTERED`; `PICK_SKILL`, `UPDATE_SKILL` |
+| persistent conversation history | Partial | What happened in each session persists in the graph across restarts: answers, explanations, the diagnosis and the remediation result. Session 2 opens from it. Partial because the wording isn't kept: the agents' messages aren't stored, so there is no transcript, and the teacher chat answers each message without the earlier turns. | `STUDENT_SESSIONS`, `RECALL`, `SESSION_ATTEMPTS`; `agents/teacher_chat.py` (one turn per call) |
+| shared state and handoffs between agents | Yes | Diagnoser, Tutor and Teacher coordinate only through graph state. A `Task` is claimed atomically, completed, and handed off (`HANDED_OFF_FROM`). The Teacher's `Proposal` waits for a human. Each HTTP step reads its state back from the graph; the agents keep none in Python. | `CREATE_TASK`, `CLAIM`, `CLAIM_TASK`, `HANDOFF`, `CHAIN`, `PROPOSE`, `DECIDE`; `tests/test_claim_race.py` |
+| high-concurrency reads and writes | Partial | 30 simulated students in each of two class graphs at once: p50 2.1 ms, p95 18 ms per query. Heavy writes on one class barely move another class's p50 (0.33 → 0.57 ms). Partial because it was measured at that small scale, on one laptop. Writes within one class graph queue behind each other (p50 294 ms under heavy writes on the same class), and the server's shared threads raise another class's p95 (0.38 → 28 ms). | `eval/concurrency.py`, [`eval/results/concurrency.json`](eval/results/concurrency.json), `CONC_PROBE_WRITE`, `CONC_HEAVY_WRITE` |
+| separate memory per user or tenant | Yes | Each classroom (tenant) is its own graph, copied from `class_template` with `GRAPH.COPY`. Each student's memory is their own `SHOWED`, `MASTERED`, `ATTEMPTED` and `Session` edges inside it. There are no logins, so separation is by graph, not by access control. | `db.recreate_graph` (`GRAPH.COPY`), `scripts/05_new_class.py`, `tools.graph_name` |
+
+**Track 01: Agents That Act on Connected Data (secondary)**
+
+| Key focus | Met? | What Unlearn does | Proof |
+| --- | --- | --- | --- |
+| multi-hop reasoning | Yes | `root_cause` walks up to 4 `REQUIRES` hops below the target and weighs misconception evidence on each prerequisite. The chain shown on screen is the shortest path to the winner. The Diagnoser descends the prerequisites level by level. | `ROOT_CAUSE`, `ROOT_CAUSE_CHAIN`, `PROBE_FRONTIER`, `LEARNING_PATH`, `LEARNING_PATH_SP` (`algo.SPpaths`) |
+| graph queries and algorithms as agent tools | Yes | 16 fixed tools in `api/unlearn/tools.py`. The agents call them and nothing else. The Teacher uses WCC (cohorts), PageRank (keystones) and betweenness (bridges). The Tutor uses shortest paths. `diagnose_text` uses the vector index. | `COHORTS_WCC` (`algo.WCC`), `KEYSTONES` (`algo.pageRank`), `BRIDGES` (`algo.betweenness`), `LEARNING_PATH_SP`, `DIAGNOSE_TEXT` (`db.idx.vector.queryNodes`) |
+| tool selection through MCP | Partial | `api/unlearn/unlearn_mcp.py` exposes 7 of the tools (no approve, no Cypher) to MCP clients. Checked over stdio and listed in MCP Inspector. Inside the app, the teacher chat lets an LLM choose among the same 7 tools by function calling, not MCP. Partial because no LLM client has yet been tested choosing tools over MCP (Claude Desktop wasn't tested). The Diagnoser and Tutor call tools in fixed code, not by LLM choice. | `api/unlearn/unlearn_mcp.py`, `tests/test_mcp.py`, [`docs/mcp.md`](docs/mcp.md); `agents/teacher_chat.py` |
+| actions based on what the graph shows | Yes | The Diagnoser picks each next question from what the graph has ruled out. The Tutor picks the skill with the best `success_rate`. The Teacher proposes a regroup from a cohort, or practice on a student's root cause; the teacher chat can also propose a skip-ahead. An approved proposal is applied from the graph's own edges and logged as an `Event`. | `NEXT_QUESTION`, `PICK_SKILL`, `PROPOSE`, `DECIDE`, `EXEC_REGROUP`, `EXEC_SKIP_AHEAD`, `EXEC_ASSIGN_PRACTICE`, `LOG_PROPOSAL_EVENT` |
+| explainable results | Yes | Every tool call returns a receipt: the query name, its parameters and the rows. The UI shows the Cypher behind each claim. An LLM reply that names anything not in that turn's rows is rejected, retried once, and then replaced by a template built from the rows. | `tools._Receipt`, `llm.check_reply`; the Receipts panel in the web UI |
+
 ## Why I built this
 
 <!-- PARTH: rewrite in your own words -->
