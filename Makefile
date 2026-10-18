@@ -1,7 +1,7 @@
 PY ?= .venv/bin/python
 export PYTHONPATH := api:.
 
-.PHONY: up dev prod down seed test topics latency demo serve
+.PHONY: up dev prod down seed test topics latency demo serve real-eval
 
 # FalkorDB only, on 127.0.0.1:6379, for running the scripts, tests and API on the host.
 up:
@@ -42,3 +42,10 @@ latency:
 demo:
 	$(PY) scripts/demo_session.py --class demo --student $(or $(STUDENT),s01)
 	$(PY) scripts/demo_session.py --class demo --student $(or $(STUDENT),s01) --session 2
+
+# Real-data eval on Eedi NeurIPS 2020 (eval/real; data in data/external/, see eval/real/DATA.md).
+# The pre-registered test run: aggregates to eval/results/real/, tables into eval/real/RESULTS.md.
+real-eval:
+	$(PY) -m eval.real.data
+	$(PY) -m eval.real.run
+	$(PY) -m eval.real.report

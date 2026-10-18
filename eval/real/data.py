@@ -68,7 +68,7 @@ def build() -> tuple[pd.DataFrame, dict]:
     first = first.sort_values(["UserId", "quiz_ts", "QuizId"])
     first["quiz_rank"] = first.groupby("UserId").cumcount().astype("int32")
     a = a.merge(first[["UserId", "QuizId", "quiz_rank"]], on=["UserId", "QuizId"])
-    a = a.sort_values(["UserId", "ts", "QuizId", "AnswerId"]).reset_index(drop=True)
+    a = a.sort_values(["UserId", "ts", "AnswerId"]).reset_index(drop=True)
     test = split(a.UserId.unique())
     a["test"] = a.UserId.isin(test)
     info = {"questions_one_subtopic": qcounts["one"], "questions_several_subtopics_dropped": qcounts["several"],
