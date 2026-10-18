@@ -143,7 +143,7 @@ class TeacherChat(Agent):
                              if rec else f"{who} has no confident misconceptions yet.")
         if "cohort" in m or "group" in m or not (named or any(k in m for k in ("keystone", "bridge", "proposal", "pending"))):
             groups = self.run_tool(task_id, "cohorts", {})
-            parts.append(f"{len(groups)} cohort(s): " + "; ".join(", ".join(g["students"]) for g in groups[:4]) + "."
+            parts.append(f"{len(groups)} cohort{'' if len(groups) == 1 else 's'}: " + "; ".join(", ".join(g["students"]) for g in groups[:4]) + "."
                          if groups else "No cohorts: no two students share a confident misconception yet.")
         if "keystone" in m or "foundation" in m or "important" in m:
             ks = self.run_tool(task_id, "keystones", {})

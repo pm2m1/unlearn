@@ -15,6 +15,7 @@ const el = (tag, attrs = {}, ...kids) => {
   return n;
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const count = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const PLUMBING = new Set(["task_context", "set_pending", "session_state", "log_event", "complete_task", "set_tutor_plan", "name_vocabulary"]);
 
 async function api(path, opts = {}) {
@@ -106,7 +107,7 @@ async function loadClass() {
   const groups = {};
   for (const x of t.targets) (groups[x.subtopic] ||= []).push(x);
   $("#target-select").replaceChildren(...Object.entries(groups).map(([sub, xs]) =>
-    el("optgroup", { label: sub }, xs.map((x) => el("option", { value: x.id, text: `${x.name} (${x.depth} levels)` })))));
+    el("optgroup", { label: sub }, xs.map((x) => el("option", { value: x.id, text: `${x.name} (${count(x.depth, "level")})` })))));
   syncTarget();
   renderScoreboard();
   $("#class-name").textContent = state.classId;
@@ -114,7 +115,7 @@ async function loadClass() {
 }
 
 function showSummary(students) {
-  $("#class-summary").textContent = `${students.length} simulated students · ${students.reduce((a, x) => a + x.sessions, 0)} sessions so far`;
+  $("#class-summary").textContent = `${students.length} simulated students · ${count(students.reduce((a, x) => a + x.sessions, 0), "session")} so far`;
 }
 
 function syncTarget() {
@@ -238,11 +239,12 @@ function markPicked(box, key, correct) {
 
 function showFeedback(sel, a, heard) {
   const f = $(sel);
-  f.replaceChildren(
+  // replaceChildren(null) would print "null", so only real nodes go in.
+  f.replaceChildren(...[
     el("div", {}, el("span", { class: `tag ${a.correct ? "right" : "wrong"}`, text: a.correct ? "correct" : "misconception" }),
-      a.correct ? (a.mastered ? `Mastered construct ${a.mastered}.` : "Right answer.") : a.misconception),
+      a.correct ? (a.mastered ? `Mastered construct ${a.mastered}.` : "Right answer.") : (a.misconception || "A wrong answer with no mapped misconception.")),
     heard && heard.length ? el("div", { class: "heard", text: `Your explanation sounds closest to: “${heard[0].name}” (distance ${heard[0].score.toFixed(2)})` }) : null,
-  );
+  ].filter(Boolean));
 }
 
 function renderDiagnosis(out) {
@@ -258,7 +260,7 @@ function renderDiagnosis(out) {
     return;
   }
   $("#dx-root").replaceChildren(document.createTextNode(out.root.name),
-    el("span", { class: "ev", text: `evidence ${out.root.evidence.toFixed(2)} · ${out.root.depth} level${out.root.depth > 1 ? "s" : ""} down · ${out.asked} questions` }));
+    el("span", { class: "ev", text: `evidence ${out.root.evidence.toFixed(2)} · ${count(out.root.depth, "level")} down · ${count(out.asked, "question")}` }));
   $("#dx-chain").replaceChildren(...out.root.chain.map((n) => el("li", { text: n })));
   $("#dx-message").textContent = out.message;
   $("#tutor-btn").hidden = !out.next_task;
@@ -670,7 +672,7 @@ async function loadEval() {
   const { results } = await api("/eval/results");
   box.replaceChildren();
   if (!Object.keys(results).length) { box.append(el("p", { class: "empty", text: "No results yet." })); return; }
-  const order = ["eval", "random_baseline", "concurrency", "latency", "crosscheck"];
+  const order = ["eval", "random_baseline", "design_checks", "concurrency", "latency", "crosscheck"];
   const names = Object.keys(results).sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99);
   for (const name of names) {
     const r = results[name];
@@ -683,6 +685,7 @@ async function loadEval() {
       box.append(foot);
     }
     else if (name === "random_baseline" && r.per_seed) box.append(...randomView(r));
+    else if (name === "design_checks" && r.recall) box.append(...designChecksView(r));
     else if (name === "concurrency" && r.isolation) box.append(...concurrencyView(r));
     else if (r.tools) box.append(...latencyTable(r));
     else box.append(el("h2", { text: name }), el("pre", { text: JSON.stringify(r, null, 2).slice(0, 4000) }));
@@ -705,6 +708,34 @@ function latencyOf(r, c, key, seeds) {
 function latencyCell(r, c, key, seeds, fmt) {
   const x = latencyOf(r, c, key, seeds);
   return x ? el("td", {}, el("strong", { text: fmt(x.v, "") }), el("span", { class: "muted", text: ` n=${x.n}` })) : el("td", { text: "–" });
+}
+
+// eval/design_checks.py: the recall-rule comparison and the stop-threshold check, as two small tables.
+function designChecksView(r) {
+  const pct = (x) => `${Math.round(100 * x)}%`;
+  const rules = [["spec", "Seen twice, newest first (build spec)"], ["strongest", "Seen once or more, strongest first"],
+    ["root_first", "Seen once or more, last diagnosed root first (current)"]];
+  const head = (...hs) => el("thead", {}, el("tr", {}, hs.map((h) => el("th", { text: h }))));
+  const out = [el("h2", { text: "Design checks" }),
+    el("p", { class: "muted", text: "eval/design_checks.py, template wording, no LLM calls. The current rules were kept; see the README's design decisions." })];
+  out.push(el("h3", { text: "Recall rule: what session 2 opens with" }),
+    el("table", { class: "eval" }, head("Rule", "Opening names a planted misconception", "Named misconceptions that were planted", "Nothing to recall"),
+      el("tbody", {}, rules.filter(([k]) => r.recall[k]).map(([k, label]) => {
+        const v = r.recall[k];
+        return el("tr", {}, el("td", { text: label }), el("td", {}, el("strong", { text: pct(v.recall) })),
+          el("td", { text: pct(v.precision) }), el("td", { text: `${v.empty} of ${v.n}` }));
+      }))));
+  if (r.thresholds) {
+    const seeds = Object.keys(Object.values(r.thresholds)[0] || {});
+    out.push(el("h3", { text: "Stop thresholds: planted root named top-1" }),
+      el("table", { class: "eval" }, head("Evidence / lead", ...seeds.map((s) => `Seed ${s}`), "Total"),
+        el("tbody", {}, Object.entries(r.thresholds).map(([label, per]) => {
+          const hit = seeds.reduce((a, s) => a + per[s].top1, 0), all = seeds.reduce((a, s) => a + per[s].pairs, 0);
+          return el("tr", {}, el("td", { text: `${label}${label === "1.5/0.5" ? " (current)" : ""}` }),
+            seeds.map((s) => el("td", { text: `${per[s].top1} of ${per[s].pairs}` })), el("td", {}, el("strong", { text: `${hit} of ${all}` })));
+        }))));
+  }
+  return out;
 }
 
 function evalTable(r, title) {

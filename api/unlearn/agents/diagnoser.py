@@ -110,7 +110,7 @@ class Diagnoser(Agent):
             return {"kind": "diagnosis", "task_id": task_id, "root": None, "candidates": [], "message": message,
                     "asked": asked, "next_task": None}
         self.call(task_id, tools.log_event, c, sess, f"{task_id}-dx", "diagnosis",
-                  f"Root cause {top['name']} (evidence {top['evidence']:.2f}) after {asked} questions",
+                  f"Root cause {top['name']} (evidence {top['evidence']:.2f}) after {asked} question{'' if asked == 1 else 's'}",
                   construct_id=top["id"])
         nxt = self.call(task_id, tools.handoff, c, task_id, sid, "Tutor", "remediate", f"{sess}-remediate")
         return {"kind": "diagnosis", "task_id": task_id, "root": top, "candidates": rc_rows, "message": message,

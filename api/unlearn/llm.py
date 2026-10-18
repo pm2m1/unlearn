@@ -165,6 +165,10 @@ def unmark(text: str) -> str:
 
 # --- Templates (built only from tool rows) ------------------------------------
 
+def _count(n: int, word: str) -> str:
+    return f"{n} {word}{'' if n == 1 else 's'}"
+
+
 def _join(xs: list[str]) -> str:
     xs = [x for x in xs if x]
     return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " and " + xs[-1] if xs else ""
@@ -177,14 +181,14 @@ def template(kind: str, facts: dict) -> str:
             return "Welcome back. Nothing from last time stood out strongly, so I'll start with a few questions."
         if not items:
             return "Welcome! This is our first session, so I'll start with a few questions."
-        parts = [f"{r['misconception']} ({r['times']} times)" for r in items[:2]]
+        parts = [f"{r['misconception']} ({_count(r['times'], 'time')})" for r in items[:2]]
         return f"Welcome back. Last time you showed: {_join(parts)}. Let's check whether that has changed."
     if kind == "diagnosis":
         root = facts.get("root")
         if not root:
             return "I didn't find a broken prerequisite in these answers."
         chain = " → ".join(root.get("chain") or [])
-        return (f"Your answers point back to a prerequisite: {root['name']}, {root['depth']} step(s) below the topic "
+        return (f"Your answers point back to a prerequisite: {root['name']}, {_count(root['depth'], 'step')} below the topic "
                 f"(evidence {root['evidence']:.2f}). Path: {chain}.")
     if kind == "explain":
         steps = facts.get("steps") or []

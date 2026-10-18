@@ -167,6 +167,12 @@ def test_larger_regroup_supersedes_pending_regroups_it_contains(fixture_class):
             and p["id"] in mine | {"p-abc2"}] == ["p-cd", "p-abc2"]
 
 
+def test_tool_rows_trim_stray_spaces_in_names():
+    # Some Eedi names end in a space, which printed as "number ,"; newlines in text are kept.
+    assert T._tidy([{"name": "Identify multiples of the same number ", "chain": [" a  b", "c"], "n": 2, "t": "x\n  1. y"}]) \
+        == [{"name": "Identify multiples of the same number", "chain": ["a b", "c"], "n": 2, "t": "x\n 1. y"}]
+
+
 # --- diagnose_text: is `score` a distance (lower = closer) or a similarity? ---
 
 @pytest.mark.parametrize("cid, explanation, expected", [

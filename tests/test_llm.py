@@ -86,6 +86,13 @@ def test_daily_cap_stops_uncached_calls(monkeypatch, tmp_path):
     assert not llm.daily_cap_reached()
 
 
+def test_counts_read_as_words():
+    root = {"name": "Find the lowest common multiple", "depth": 1, "evidence": 1.5, "chain": ["a", "b"]}
+    assert "1 step below" in llm.template("diagnosis", {"root": root})
+    assert "2 steps below" in llm.template("diagnosis", {"root": {**root, "depth": 2}})
+    assert "(1 time)" in llm.template("recall", {"recall": [{"misconception": "m", "times": 1}]})
+
+
 def test_cache_key_is_stable_and_model_specific(monkeypatch, tmp_path):
     monkeypatch.setattr(llm, "CACHE_DIR", tmp_path)
     a, b = llm.PROVIDERS[0], llm.PROVIDERS[1]

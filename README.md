@@ -498,6 +498,7 @@ Both containers bind to `127.0.0.1` in the `dev` profile. `docker compose --prof
 
 [`render.yaml`](render.yaml) deploys [`deploy/Dockerfile.render`](deploy/Dockerfile.render): one container running FalkorDB v4.20.7 and the API. FalkorDB listens only on a unix socket inside the container, with no TCP port. The free tier has 512 MB of RAM, no disk, and sleeps after 15 minutes idle.
 - **Baked graphs.** `curriculum`, `class_template`, `class_demo` and `class_demo_video` are built at image build time and saved as `dump.rdb`, so a cold start loads them in seconds. Nothing is ever saved, so demo state resets on every restart.
+- **A pre-filled Teacher tab.** At build time `scripts/simulate_class.py` runs 2 sessions for each of `class_demo`'s 30 students with template wording, so the live Teacher tab opens with cohorts and pending proposals. `class_demo_video` stays fresh for the video's two students.
 - **Measured locally under the free tier's limits** (`docker run --memory=512m --memory-swap=512m --cpus=0.1`):
   - Healthy 19 s after start.
   - `demo_scenario.py --verify 10` correct 10/10.

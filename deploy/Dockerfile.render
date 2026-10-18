@@ -46,7 +46,8 @@ COPY --chown=unlearn eval ./eval
 COPY --chown=unlearn data/curated ./data/curated
 
 # Bake the pinned Eedi CSVs (CC BY 4.0), then build every graph into dump.rdb with a throwaway FalkorDB
-# (no password: it only listens on loopback inside this build step).
+# (no password: it only listens on loopback inside this build step). class_demo is simulated (2 sessions per
+# student, template wording) so the Teacher tab opens with cohorts and proposals; class_demo_video stays fresh.
 RUN python scripts/01_download.py \
  && redis-server --bind 127.0.0.1 --port 6379 --dir /app/falkordb-data --save "" --appendonly no \
       --daemonize yes --loadmodule /opt/falkordb/falkordb.so \
@@ -55,6 +56,7 @@ RUN python scripts/01_download.py \
  && python scripts/03_derive.py \
  && python scripts/04_build_template.py \
  && python scripts/05_new_class.py --id demo --students 30 \
+ && python scripts/simulate_class.py --id demo --sessions 2 \
  && python scripts/demo_scenario.py \
  && redis-cli SAVE \
  && (redis-cli SHUTDOWN NOSAVE || true) \

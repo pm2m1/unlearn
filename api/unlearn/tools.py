@@ -9,6 +9,7 @@ Every class tool takes class_id and runs against graph class_<class_id>.
 """
 
 import json
+import re
 import time
 
 from unlearn import queries as Q
@@ -28,6 +29,18 @@ def graph_name(class_id: str) -> str:
     return f"class_{class_id}"
 
 
+def _tidy(value):
+    """Some Eedi names carry stray spaces ("... the same number "), which print as "number ,". Tool rows trim
+    them and collapse runs of spaces; newlines are kept. The graph keeps the source text unchanged."""
+    if isinstance(value, str):
+        return re.sub(r"[ \t]{2,}", " ", value).strip()
+    if isinstance(value, list):
+        return [_tidy(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _tidy(v) for k, v in value.items()}
+    return value
+
+
 class _Receipt:
     """Collects every query a tool runs so the receipt shows all of them."""
 
@@ -38,7 +51,7 @@ class _Receipt:
         rows, receipt = run(self.graph, query, params)
         self.cypher.append(query.strip())
         self.params.append(receipt["params"])
-        return rows
+        return _tidy(rows)
 
     def done(self, rows: list[dict], node_ids: list[dict]) -> dict:
         seen, unique = set(), []
