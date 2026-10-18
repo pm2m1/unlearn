@@ -205,7 +205,7 @@ Eedi does not endorse this project. There are no real students, logins or person
 
 ## Limitations and next steps
 
-The misconception graph is real (Eedi, 8,117 misconceptions); the students are simulated, so treat the eval numbers as an upper bound. Next step: validate on real student responses, e.g. Eedi's NeurIPS 2020 Education Challenge data, and extend beyond fractions.
+The misconception graph is real (Eedi, 8,117 misconceptions); the students are simulated, so treat the eval numbers as an upper bound. Real-data check done at SubTopic level (see Real-data results). Next: test the misconception reasoning itself on real students, which needs option-level answers to misconception-tagged questions — a small pilot on the live site.
 
 ## AI assistance
 
