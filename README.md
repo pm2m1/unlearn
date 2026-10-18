@@ -1,12 +1,25 @@
 # Unlearn
 
+**Graph Hacks 2026 (WeMakeDevs × FalkorDB) · Track 02: Agent Memory and Coordination (primary) · Track 01: Agents That Act on Connected Data**
+
 Unlearn finds the earlier skill behind a student's wrong answers by walking a FalkorDB prerequisite graph, remembers it next session, and shows the Cypher behind every claim.
 
-**Live demo: [unlearn-ejdh.onrender.com](https://unlearn-ejdh.onrender.com)** (free tier: the first load can take about a minute) · **Video:** <link> · **Code: [github.com/pm2m1/unlearn](https://github.com/pm2m1/unlearn)** · **Blog: [I gave an AI tutor a map of 8,117 ways students get maths wrong](https://dev.to/pm2m1/i-gave-an-ai-tutor-a-map-of-8117-ways-students-get-maths-wrong-240i)**
+**Live demo: [unlearn-ejdh.onrender.com](https://unlearn-ejdh.onrender.com)** (free tier: the first load can take about a minute) · **Video:** <link> · **Code: [github.com/pm2m1/unlearn](https://github.com/pm2m1/unlearn)** · **Blog: [Same score, different problem](https://medium.com/@parthsonumishra/same-score-different-problem-6d575fe719ff)**
 
 ![Asha answers a few questions and Unlearn walks the prerequisite graph down to the skill that broke](docs/img/hero.gif)
 
 *Asha answers five questions; Unlearn walks her `REQUIRES` chain and lights up the root cause in amber: lowest common multiple, two levels below the topic she got wrong.*
+
+## What you can ask
+
+| Ask | What happens |
+| --- | --- |
+| **Diagnose Asha**, then **Ben** (Student tab, `?class=demo_video`) | Asha: lowest common multiple (345) in 5 questions, 2 levels below the topic. Ben, same 40%: equivalent fractions (409). `root_cause` over `REQUIRES*1..4` and each student's `SHOWED` edges. |
+| **Start Asha's second session** | A "Last time you…" banner: `recall` reads her `SHOWED` edges back, last diagnosed root cause first. |
+| Teacher chat: **"Which cohorts do I have?"** | `cohorts`: `algo.WCC` over `SHARES_GAP` (students sharing a confident misconception). Names in the reply are checked against its rows. |
+| Teacher chat: **"Which skill should I teach first?"** | `keystones`: `algo.pageRank` over `REQUIRES`. |
+| Teacher view: **Approve** or **Reject** a proposal | `DECIDE`. Approve applies it from graph edges (`EXEC_REGROUP`, `EXEC_ASSIGN_PRACTICE`) and logs an `Event`; Reject changes nothing. |
+| **Click any claim** | Its receipt: query, parameters, rows and Cypher. |
 
 > **Remove-FalkorDB test:** without the graph there is no misconception-to-concept grounding, no prerequisite root-cause traversal, no per-class memory, no agent handoffs and no cohort grouping. It collapses into generic chat.
 
@@ -52,7 +65,7 @@ The graph decides; the LLM only phrases. Every agent claim carries a receipt (qu
 
 The full schema is in [docs/DESIGN.md](docs/DESIGN.md#graph-data-model-full-schema), and every query (115, all parameterised, in [`api/unlearn/queries.py`](api/unlearn/queries.py)) is listed in [docs/QUERIES.md](docs/QUERIES.md). Algorithms used as agent tools: `algo.WCC`, `algo.pageRank`, `algo.betweenness`, `algo.SPpaths` and the vector index.
 
-## The hero query: `root_cause`
+### The hero query: `root_cause`
 
 ```
 MATCH (s:Student {id:$sid}), (c:Construct {id:$cid})
@@ -67,6 +80,38 @@ ORDER BY evidence DESC, depth DESC LIMIT 3
 ```
 
 It walks up to four prerequisite hops back from the skill the student is working on. It ranks every unmastered prerequisite by misconception evidence, weighted by how specific each misconception is to that skill (`SEEN_IN.w`). Ties go to the deeper prerequisite, because the deepest broken skill is the real cause.
+
+Memory, `recall` (opens session 2):
+
+```
+MATCH (s:Student {id:$sid})
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(dx:Event {type:'diagnosis'})-[:ABOUT]->(root:Construct)
+WITH s, root, dx.ts AS dx_ts ORDER BY dx_ts DESC LIMIT 1
+MATCH (s)-[e:SHOWED]->(m:Misconception)
+WHERE e.count >= 1
+OPTIONAL MATCH (m)-[si:SEEN_IN]->(root)
+WITH s, m, e, coalesce(si.w, 0.0) AS on_root
+OPTIONAL MATCH (s)-[:HAD_SESSION]->(:Session)-[:HAD_EVENT]->(ev:Event)-[:ABOUT]->(m)
+WITH m, e, on_root, ev ORDER BY ev.ts DESC
+WITH m, e, on_root, collect(ev.summary) AS events
+RETURN m.name AS misconception, e.count AS times, e.confidence AS confidence, e.last_ts AS last_seen,
+       on_root, events[0..3] AS recent
+ORDER BY on_root DESC, confidence DESC, last_seen DESC LIMIT 5
+```
+
+Cohorts, `algo.WCC` over `SHARES_GAP` (Teacher agent):
+
+```
+CALL algo.WCC({nodeLabels: ['Student'], relationshipTypes: ['SHARES_GAP']}) YIELD node, componentId
+WITH componentId, collect(node) AS members
+WHERE size(members) > 1
+UNWIND members AS a
+OPTIONAL MATCH (a)-[g:SHARES_GAP]->(:Student)
+WITH componentId, members, collect(g.miscs) AS links
+RETURN componentId, [m IN members | m.alias] AS students, [m IN members | m.id] AS ids,
+       reduce(acc = [], l IN links | acc + l) AS shared
+ORDER BY size(students) DESC
+```
 
 ## Results
 
@@ -84,19 +129,25 @@ Same simulated students for every condition: 90 per condition (30 × seeds 0–2
 
 ## Tracks
 
-Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory and Coordination** (primary) and **01 Agents That Act on Connected Data** (secondary).
+**Track 02: Agent Memory and Coordination (primary)**
 
-| Requirement | Where in Unlearn |
+| Key focus | Where Unlearn does it |
 | --- | --- |
-| Episodic, semantic, procedural memory | `Session`/`Event`/`ATTEMPTED`; `SHOWED`/`MASTERED`; `Skill → Step` with `success_rate` (partial: authored skills) |
-| Persistent history | Sessions and events in the graph; `recall` opens session 2 (partial: no transcript) |
-| Shared state and handoffs | `Task` claim and `HANDOFF`; `Proposal` awaits a human |
-| High-concurrency reads and writes | One graph per class; 10 classes × 30 students at once (partial: one laptop) |
-| Memory per user or tenant | `class_<id>` per classroom; per-student edges |
-| Multi-hop reasoning | `ROOT_CAUSE`: `REQUIRES*1..4` |
-| Graph algorithms as tools | WCC, PageRank, betweenness, shortest paths, vector search |
-| Tool selection through MCP | 7 MCP tools (partial: no LLM client tested over MCP) |
-| Actions and explainability | Approved proposals applied from graph edges; receipts on every claim |
+| Episodic, semantic, and procedural memory | **Partial.** Episodic: `ATTEMPTED`, `Session` → `Event`. Semantic: `SHOWED {count, confidence}`, `MASTERED`. Procedural: `Skill → Step` with `success_rate` (`UPDATE_SKILL`). Partial: the 8 skills' steps are authored; Unlearn learns which skill works, not new steps. |
+| Persistent conversation history | **Partial.** Answers, diagnosis and remediation persist as `Session`/`Event` nodes; session 2 opens from them (`RECALL`). Partial: no transcript of agent messages, and the teacher chat is one turn at a time. |
+| Shared state and handoffs between agents | Agents coordinate only through the graph: `Task` claimed atomically (`CLAIM`), handed off (`HANDOFF`); the Teacher's `Proposal` waits for a human (`DECIDE`). `tests/test_claim_race.py`. |
+| High-concurrency reads and writes | **Partial.** 10 class graphs × 30 students at once: 11,892 queries/s, p50 about 25 ms, 0 errors (`eval/concurrency.py`). Partial: one laptop, and writes within one class graph queue (p50 294 ms under heavy writes). |
+| Separate memory per user or tenant | `class_<id>` per classroom (`GRAPH.COPY` of `class_template`); per-student `SHOWED`, `MASTERED`, `ATTEMPTED`, `Session` edges. No logins: separation is by graph, not access control. |
+
+**Track 01: Agents That Act on Connected Data**
+
+| Key focus | Where Unlearn does it |
+| --- | --- |
+| Multi-hop reasoning | `ROOT_CAUSE` walks `REQUIRES*1..4`; Asha's root is 2 hops down (`ROOT_CAUSE_CHAIN`). |
+| Graph queries and algorithms as agent tools | 16 fixed tools (`api/unlearn/tools.py`): `algo.WCC`, `algo.pageRank`, `algo.betweenness`, `algo.SPpaths`, vector index. |
+| Tool selection through MCP | **Partial.** `unlearn_mcp.py`: 7 tools over stdio, no approve (`tests/test_mcp.py`). The in-app chat picks among the same 7 by function calling: 30/30 dev, 10/10 held-out (`eval/tool_routing.py`). Partial: no LLM client tested choosing tools over MCP. |
+| Actions based on what the graph shows | Next question from what's ruled out (`NEXT_QUESTION`); best-rated skill (`PICK_SKILL`); proposals from cohorts and root causes (`PROPOSE`), applied from graph edges once approved (`EXEC_REGROUP`, `EXEC_ASSIGN_PRACTICE`, `EXEC_SKIP_AHEAD`). |
+| Explainable results | Every tool call returns a receipt (`tools._Receipt`), shown with its Cypher. A reply naming anything not in its rows is rejected (`llm.check_reply`), retried once, then templated. |
 
 Full mapping with evidence: [docs/DESIGN.md](docs/DESIGN.md#how-unlearn-maps-to-the-tracks).
 
