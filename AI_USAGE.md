@@ -1,6 +1,5 @@
 # AI assistant usage
 
-Graph Hacks requires disclosure of AI assistance. One line per session: date | tool | what was generated | what Parth reviewed.
 ## Summary
    - Idea, research and build spec (SPEC.md): developed with Claude (claude.ai); I chose the idea, topic and design decisions.
    - Code: written by Claude Code under my direction, phase by phase, from SPEC.md.
