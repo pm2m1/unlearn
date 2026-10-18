@@ -179,8 +179,12 @@ class BKT:
         return [st["pL"][x] if st["pL"][x] is not None else self.params[x][0] for x in range(K)]
 
 
+MAX_GUESS = MAX_SLIP = 0.5  # identifiability (PREREGISTRATION.md deviation 7): never "learned" meaning worse
+
+
 def fit_bkt(seqs: list[np.ndarray], init=(0.4, 0.1, 0.1, 0.2), max_iter: int = 200, tol: float = 1e-6) -> dict:
-    """EM (Baum-Welch) for one skill's 2-state HMM, vectorised over left-aligned padded sequences."""
+    """EM (Baum-Welch) for one skill's 2-state HMM, vectorised over left-aligned padded sequences.
+    The M-step caps guess and slip at 0.5."""
     n, T = len(seqs), max(len(s) for s in seqs)
     obs, mask = np.zeros((n, T)), np.zeros((n, T), bool)
     for i, s in enumerate(seqs):
@@ -210,8 +214,8 @@ def fit_bkt(seqs: list[np.ndarray], init=(0.4, 0.1, 0.1, 0.2), max_iter: int = 2
         mt = mask[:, 1:]
         L0 = float(g[:, 0, 1].mean())
         Tr = float((xi01 * mt).sum() / (g[:, :-1, 0] * mt).sum())
-        G = float((g[..., 0] * obs * mask).sum() / (g[..., 0] * mask).sum())
-        S = float((g[..., 1] * (1 - obs) * mask).sum() / (g[..., 1] * mask).sum())
+        G = min(float((g[..., 0] * obs * mask).sum() / (g[..., 0] * mask).sum()), MAX_GUESS)
+        S = min(float((g[..., 1] * (1 - obs) * mask).sum() / (g[..., 1] * mask).sum()), MAX_SLIP)
         if prev_ll is not None and abs(ll - prev_ll) < tol:
             break
         prev_ll = ll

@@ -64,7 +64,12 @@ def task_b(b: dict) -> list[str]:
 def tables(a: dict, b: dict) -> str:
     meta = a["meta"]
     head = [f"Run {meta['run_at']} on {meta['split']}, commit `{meta['commit'][:7]}`"
-            f"{' (with uncommitted changes)' if meta['uncommitted_changes'] else ''}.", "", "### Task A: next-answer prediction", ""]
+            f"{' (with uncommitted changes)' if meta['uncommitted_changes'] else ''}.", ""]
+    for label, s in (("Primary", "all"), ("Key secondary (cold start)", "first 2 quizzes")):
+        d = a[s]["differences"]["M2 - M2-nograph"]
+        head.append(f"- **{label}:** M2 − M2-nograph AUC on {s} = {d['auc_diff']:+.4f} "
+                    f"[95% CI {d['ci'][0]:+.4f}, {d['ci'][1]:+.4f}]: **{d['verdict']}**.")
+    head += ["", "### Task A: next-answer prediction", ""]
     return "\n".join(head + task_a(a) + ["### Task B: is the diagnosed root real?", ""] + task_b(b))
 
 

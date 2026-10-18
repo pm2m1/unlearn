@@ -1,5 +1,9 @@
 # Pre-registration: Unlearn on real student data (Eedi NeurIPS 2020)
 
+> **Primary hypothesis (single, Deviation 5).** Task A, **M2 vs M2-nograph**, AUC, 9-edge graph, all test students: do the prerequisite edges improve next-answer prediction?
+> **Key secondary:** the same comparison on each student's first 2 quizzes (cold start).
+> **Everything else is secondary or exploratory:** the M0, M0b, M1 and M3 comparisons, the 12-edge sensitivity graph, and all of Task B.
+
 Written and committed before any model is run on the test students. After the test run, nothing below changes. Anything that has to change is added under **Deviations**, dated, with the reason, and both versions are reported.
 
 - Drafted by Claude Code. Decisions marked *(Parth)* are Parth's, from Phase 0 and the edge review on 2026-10-18. The other design details (M2's features, BKT's EM start, M3's β grid, the Task B D/N rules) are Claude's proposals, shown to Parth before the test run.
@@ -53,7 +57,7 @@ Each model outputs P(correct) for every test answer. Every parameter is fitted o
 | --- | --- |
 | **M0** question difficulty | (train correct + 1) / (train answers + 2) for the question; questions unseen in train get the train correct rate. |
 | **M0b** running accuracy | (student's earlier right on X + 2·p_X) / (earlier answers on X + 2), where p_X is the train correct rate on SubTopic X, so a student with no history on X gets p_X. |
-| **M1** BKT per SubTopic | Plain 4-parameter BKT (P(L0), P(T), P(S), P(G)) per SubTopic, no forgetting, fitted by EM (Baum–Welch) on the train students' sequences on X. EM starts at (0.4, 0.1, 0.1, 0.2), with no parameter bounds, and stops at 200 iterations or a log-likelihood change < 1e-6. Prediction: P(L)(1−S) + (1−P(L))G, with P(L) after the student's earlier blocks on X. Implemented here, see Deviation 1. |
+| **M1** BKT per SubTopic | Plain 4-parameter BKT (P(L0), P(T), P(S), P(G)) per SubTopic, no forgetting, fitted by EM (Baum–Welch) on the train students' sequences on X. EM starts at (0.4, 0.1, 0.1, 0.2), with guess and slip capped at 0.5 (Deviation 7), and stops at 200 iterations or a log-likelihood change < 1e-6. Prediction: P(L)(1−S) + (1−P(L))G, with P(L) after the student's earlier blocks on X. Implemented here, see Deviation 1. |
 | **M2** graph-structure prior, correctness-only | Logistic regression (scikit-learn, L2, C = 1.0, lbfgs) fitted on the train students. Features at prediction time: logit(M0), evidence at X, mastered X (0/1), and **prerequisite suspicion** = the top evidence of root_cause(X) (0 if none). |
 | **M2-nograph** (ablation) | M2 without prerequisite suspicion: logit(M0), evidence at X, mastered X. M2 vs M2-nograph is the cleanest test of the graph edges, since it is the only difference between them. |
 | **M3** BKT + graph prior | M1, except that the student's P(L0) for X at their first block on X is P(L0)_X · exp(−β · prerequisite suspicion at that time). β is chosen from {0, 0.1, 0.2, 0.3, 0.5, 0.75, 1, 1.5, 2} by train-student predictive log-likelihood. |
@@ -69,7 +73,7 @@ Each model outputs P(correct) for every test answer. Every parameter is fitted o
 - 95% percentile intervals from 1,000 resamples of the test students with replacement (seed 0). AUC is recomputed on all answers of the resampled students.
 - Differences between models are paired: the same resamples are used for both models.
 
-**Pre-registered comparisons** (all reported whatever they show):
+**Pre-registered comparisons** (all reported whatever they show; A2 on all test students is the single primary hypothesis and A2 on the first 2 quizzes the key secondary, the rest secondary, Deviation 5):
 - **A1:** M2 − M1 AUC (does it beat BKT).
 - **A2:** M2 − M2-nograph AUC (do the graph edges add anything).
 - **A3:** A2 on the first 2 quizzes vs on later quizzes (the graph should help most at cold start).
@@ -82,7 +86,7 @@ Each model outputs P(correct) for every test answer. Every parameter is fitted o
 - **"Negligible":** the interval excludes 0 but the point estimate is < 0.005.
 - If BKT (or anything else) beats M2, that is reported as the result.
 
-## 6. Task B: is the diagnosed root real?
+## 6. Task B: is the diagnosed root real? (exploratory, Deviation 6)
 
 For each test student and k ∈ {5, 10}:
 
@@ -100,7 +104,7 @@ For each test student and k ∈ {5, 10}:
 5. **Lift:** a student is evaluable if they have ≥ 1 later answer in D and ≥ 1 in N. For each evaluable student, lift = error rate on later answers in D − error rate on later answers in N. The reported number is the mean over evaluable students, with a student-bootstrap interval (1,000, seed 0).
 
 **Comparison roots**, computed for the same students with the same D/N rule:
-- **random:** uniform over the root candidates, i.e. the SubTopics that have dependents. That is {204, 219, 220, 226} in the primary graph and {204, 219, 220, 226, 227} in the sensitivity graph. One draw per student, `default_rng(0)`, in sorted UserId order.
+- **random:** uniform over the roots Unlearn can be evaluated on: the SubTopics that have dependents, minus 204 (N is empty for 204). That is {219, 220, 226} in the primary graph and {219, 220, 226, 227} in the sensitivity graph (Deviation 8). One draw per student, `default_rng(0)`, in sorted UserId order.
 - **BKT lowest mastery:** among the root candidates, the lowest M1 P(L) after the window (P(L0) where unobserved); ties go to the lowest id.
 
 **Reporting:**
@@ -114,7 +118,7 @@ For each test student and k ∈ {5, 10}:
 
 **Power:** if fewer than **500** test students are evaluable for a given k and graph, Task B is reported as **underpowered** for that cell, and no claim is made from it.
 
-**Success criterion:** the root is "real" if Unlearn − random lift has a 95% interval above 0. Unlearn − BKT is reported alongside.
+**Success criterion:** the root is "real" if Unlearn − random lift has a 95% interval above 0. Unlearn − BKT is reported alongside. Task B is exploratory (Deviation 6): it supports no headline claim.
 
 ## 7. Task C: dropped (*Parth*)
 
@@ -139,3 +143,7 @@ Predicting which wrong option a student picks next needs wrong options linked to
 2. **2026-10-18, before any test run: correctness-only evidence** (section 4), instead of misconception evidence, because the data has no misconception labels (Parth's decision).
 3. **2026-10-18, before any test run: SubTopic granularity** (section 3), instead of our 40 constructs, because questions are tagged only to SubTopic and their text is only in images that can't be used (Parth's decision).
 4. **2026-10-18, before any test run: the cold-start split** is the first 2 quizzes rather than the first 5 answers (Parth's decision). Most quizzes are answered within one minute, so answer counts within a quiz carry no time order.
+5. **2026-10-18, before any test data is touched: a single primary hypothesis** (Parth's decision). Task A, M2 vs M2-nograph, AUC, 9-edge graph, all test students. Key secondary: the same comparison on each student's first 2 quizzes. All other comparisons (M0, M0b, M1, M3, the 12-edge graph) and Task B are secondary or exploratory. Previously A1–A4 were listed without a primary.
+6. **2026-10-18, before any test data is touched: Task B is exploratory** (Parth's decision). It keeps exactly the design in section 6. Cells under 500 evaluable students are reported as underpowered, with no threshold or graph changes to gain power. **What the dev run showed:** the dev run (train students only, 8,040 held-out train students, `--dev`) computed and printed full tables for both tasks: Task A AUCs, including M2 vs M2-nograph, and Task B lift values. Claude saw them, including a check of the report script on the dev output. The message to Parth reported only Task B counts (diagnosed and evaluable students per cell) and the BKT fit ranges, no Task A or Task B metric values. Deviations 5–8 were decided by Parth after that message.
+7. **2026-10-18, before any test data is touched: BKT guess and slip capped at 0.5** (Parth's decision), the standard identifiability constraint, so that "learned" never means worse. Applied in the EM M-step (`models.fit_bkt`). The dev fits already satisfied it: guess 0.386–0.485, slip 0.107–0.166 across the 7 SubTopics.
+8. **2026-10-18, before any test data is touched: Task B's random root comes from Unlearn's evaluable roots** (Parth's decision): the SubTopics with dependents minus 204, so the comparison is like-for-like. BKT's lowest-mastery root is unchanged (all root candidates, 204 included).

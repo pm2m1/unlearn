@@ -60,11 +60,14 @@ def run(test, graph, bkt, k: int) -> dict:
     """One (k, graph) cell: Unlearn's root vs a random candidate vs BKT's lowest mastery."""
     rng = np.random.default_rng(SEED)
     cands = graph.root_candidates
+    # Deviation 8: the random root is drawn from the roots that can be evaluated (N non-empty), so not 204,
+    # which every other SubTopic depends on.
+    eligible = [c for c in cands if len(graph.dependents[c] | {c}) < len(graph.prereqs)]
     res = {m: {} for m in ("unlearn", "random", "bkt")}
     confident_ids, roots, n_diagnosed, n_students = set(), Counter(), 0, 0
     for uid, g in test.groupby("UserId", sort=True):
         n_students += 1
-        draw = int(rng.choice(cands))  # one draw per test student, in sorted UserId order
+        draw = int(rng.choice(eligible))  # one draw per test student, in sorted UserId order
         rows = {"subtopic": g.subtopic.to_numpy(), "ts": g.ts.to_numpy(), "quiz_rank": g.quiz_rank.to_numpy(),
                 "correct": g.IsCorrect.to_numpy().astype(float), "pq": g.pq.to_numpy()}
         win, later = split_window(rows, k)

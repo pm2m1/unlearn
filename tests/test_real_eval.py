@@ -178,3 +178,18 @@ def test_root_cause_matches_the_production_cypher():
         assert checked > 20  # enough non-empty diagnoses to mean something
     finally:
         delete_graph(name)
+
+
+def test_bkt_em_caps_guess_and_slip_at_half():
+    """Answers mostly right regardless of state (G 0.8) would push the unconstrained guess above 0.5."""
+    rng = np.random.default_rng(1)
+    seqs = [(rng.random(12) < 0.8).astype(int) for _ in range(2000)]
+    L0, T, S, G = fit_bkt(seqs, max_iter=50)["params"]
+    assert G <= 0.5 and S <= 0.5
+
+
+def test_random_root_is_drawn_only_from_evaluable_roots():
+    for variant in ("primary", "sensitivity"):
+        g = Graph(variant)
+        eligible = [c for c in g.root_candidates if len(g.dependents[c] | {c}) < len(g.prereqs)]
+        assert 204 not in eligible and eligible == [c for c in g.root_candidates if c != 204]
