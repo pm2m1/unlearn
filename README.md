@@ -614,6 +614,10 @@ Claude Desktop config (`claude_desktop_config.json`), with your clone's absolute
 
 More in [docs/mcp.md](docs/mcp.md).
 
+## Limitations and next steps
+
+The misconception graph is real (Eedi, 8,117 misconceptions); the students are simulated, so treat the eval numbers as an upper bound. Next step: validate on real student responses, e.g. Eedi's NeurIPS 2020 Education Challenge data, and extend beyond fractions.
+
 ## AI assistance
 
 AI assistant use is disclosed in [AI_USAGE.md](AI_USAGE.md).

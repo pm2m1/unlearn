@@ -5,6 +5,7 @@ Graph Hacks requires disclosure of AI assistance. One line per session: date | t
    - Idea, research and build spec (SPEC.md): developed with Claude (claude.ai); I chose the idea, topic and design decisions.
    - Code: written by Claude Code under my direction, phase by phase, from SPEC.md.
    - My review: I reviewed the curated data (REQUIRES edges, distractors, spot checks) item by item, with Claude presenting each item and arguing both sides; the final decisions and reasons in REVIEW.md section 0 are mine. 11 issues were fixed and the full eval was re-run. I also made the key calls (topic, evidence weighting, recall rule, thresholds, eval design).
+   - README pitch and 'Why I built this' paragraphs and the dev.to blog post were drafted with Claude (claude.ai) and edited by Parth.
 
 - 2026-10-17 | Claude Code (Claude Opus 5.5) | Phase 1: repo skeleton, docker-compose, Makefile, db.py, queries.py, scripts 01–03 and topics.py, tests/test_curriculum.py (all following SPEC.md) | Reviewed: ran and tested by Parth; curated data reviewed item by item (see REVIEW.md section 0); code not line-by-line reviewed.
 - 2026-10-17 | Claude Code (Claude Opus 5.5) | Phase 2 (partial, DRAFT): canonical source links, requires.csv (59 edges), author_questions.py + questions.json (120 MCQs), skills.json (8 skills), curation.py validators | Reviewed: ran and tested by Parth; curated data reviewed item by item (see REVIEW.md section 0); code not line-by-line reviewed.
