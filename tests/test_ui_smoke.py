@@ -141,3 +141,23 @@ def test_a_server_restart_is_announced_and_clears_the_view(server):
         assert page.evaluate("state.session") is None
         browser.close()
         assert errors == []
+
+
+def test_theme_toggle_restyles_the_graph_and_the_guide_stays_dismissed(server):
+    with playwright.sync_playwright() as p:
+        browser, page, errors = _page(p, server, f"/?class={CLASS_ID}&student=s18")
+        assert page.is_visible("#guide")
+        page.click("#start-btn")
+        page.wait_for_function("state.cy && state.cy.nodes('.construct').length > 0")
+        session = page.evaluate("state.session.id")
+        node_bg = "state.cy.nodes('.construct').first().style('background-color')"
+        before, theme = page.evaluate(node_bg), page.evaluate("document.documentElement.dataset.theme")
+        page.click("#theme-toggle")
+        assert page.evaluate("document.documentElement.dataset.theme") != theme
+        assert page.evaluate(node_bg) != before and page.evaluate("state.session.id") == session  # restyled in place
+        page.click("#guide-dismiss")
+        page.reload()
+        page.wait_for_selector("#student-select option", state="attached")
+        assert page.is_hidden("#guide") and page.evaluate("document.documentElement.dataset.theme") != theme  # both remembered
+        browser.close()
+        assert errors == []

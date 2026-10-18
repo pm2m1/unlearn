@@ -508,36 +508,43 @@ function drawGraph(g) {
   if (!first) cy.nodes().filter((n) => fresh.has(n.id())).style("opacity", 0).animate({ style: { opacity: 1 } }, { duration: 450 });
 }
 
+// Graph colours come from the CSS variables, so switching theme restyles the graph without redrawing it.
+function cyStyle() {
+  const css = getComputedStyle(document.documentElement);
+  const v = (name) => css.getPropertyValue(name).trim();
+  return [
+    { selector: "node", style: { "font-family": "ui-sans-serif, -apple-system, Segoe UI, Roboto, sans-serif" } },
+    { selector: ".construct", style: {
+      shape: "round-rectangle", width: "data(w)", height: "data(h)", "background-color": v("--cy-node-bg"),
+      "border-width": 1.5, "border-color": v("--cy-node-line"), label: "data(label)", "text-wrap": "wrap", "text-max-width": CW - 26,
+      "font-size": C_FS, color: v("--cy-node-ink"), "text-valign": "center", "text-halign": "center", "line-height": 1.25 } },
+    { selector: ".construct.target", style: { "border-color": v("--cy-target"), "border-width": 2.5, color: v("--cy-target"), "font-weight": 600 } },
+    { selector: ".construct.attempted", style: { "border-color": v("--cy-attempted") } },
+    { selector: ".construct.mastered", style: { "background-color": v("--cy-mastered-bg"), "border-color": v("--ok"), color: v("--cy-mastered-ink") } },
+    { selector: ".construct.chain", style: { "border-color": v("--root"), "border-width": 2.5 } },
+    { selector: ".construct.root", style: { "background-color": v("--cy-root-bg"), "border-color": v("--root"), "border-width": 6, color: v("--cy-root-ink"), "font-weight": 600 } },
+    { selector: ".construct.asked", style: { "underlay-color": v("--accent"), "underlay-padding": 7, "underlay-opacity": 0.16, "underlay-shape": "round-rectangle", "border-color": v("--accent"), "border-width": 2.5 } },
+    { selector: ".mis", style: {
+      shape: "round-rectangle", height: "data(h)", width: "data(w)", "background-color": v("--cy-mis-bg"), "border-width": 1.5, "border-color": v("--mis"),
+      label: "data(label)", "font-size": M_FS, "font-weight": 500, color: v("--cy-mis-ink"), "text-valign": "center", "text-halign": "center" } },
+    { selector: ".mis.strong", style: { "background-color": v("--mis"), color: v("--cy-mis-strong-ink") } },
+    { selector: ".more", style: { shape: "round-rectangle", height: "data(h)", width: "data(w)", "background-color": v("--cy-more-bg"), "border-width": 1, "border-color": v("--mis"), "border-style": "dashed", label: "data(label)", "font-size": 12, "font-weight": 500, color: v("--cy-mis-ink") } },
+    { selector: "edge.requires", style: { width: 1.5, "line-color": v("--cy-node-line"), "target-arrow-color": v("--cy-node-line"), "target-arrow-shape": "triangle", "arrow-scale": 0.9, "curve-style": "bezier" } },
+    { selector: "edge.requires.chain", style: { width: 4.5, "line-color": v("--root"), "target-arrow-color": v("--root"), "z-index": 5 } },
+    { selector: "edge.seen", style: { width: 1, "line-color": v("--cy-seen"), "line-style": "dashed", "curve-style": "bezier", opacity: 0.8 } },
+  ];
+}
+
 function makeCy() {
   const cy = cytoscape({
     container: $("#cy"),
     layout: { name: "preset" },
     minZoom: 0.25, maxZoom: 2.5,
     autoungrabify: true,
-    style: [
-      { selector: "node", style: { "font-family": "ui-sans-serif, -apple-system, Segoe UI, Roboto, sans-serif" } },
-      { selector: ".construct", style: {
-        shape: "round-rectangle", width: "data(w)", height: "data(h)", "background-color": "#f1f1ee",
-        "border-width": 1.5, "border-color": "#c9cbd1", label: "data(label)", "text-wrap": "wrap", "text-max-width": CW - 26,
-        "font-size": C_FS, color: "#3c4049", "text-valign": "center", "text-halign": "center", "line-height": 1.25 } },
-      { selector: ".construct.target", style: { "border-color": "#1b1d22", "border-width": 2.5, color: "#1b1d22", "font-weight": 600 } },
-      { selector: ".construct.attempted", style: { "border-color": "#9aa0ab" } },
-      { selector: ".construct.mastered", style: { "background-color": "#e3f3ea", "border-color": "#2e9b62", color: "#17603b" } },
-      { selector: ".construct.chain", style: { "border-color": "#e3a33b", "border-width": 2.5 } },
-      { selector: ".construct.root", style: { "background-color": "#fdf0d8", "border-color": "#e3a33b", "border-width": 6, color: "#6b4405", "font-weight": 600 } },
-      { selector: ".construct.asked", style: { "underlay-color": "#2f3ab8", "underlay-padding": 7, "underlay-opacity": 0.16, "underlay-shape": "round-rectangle", "border-color": "#2f3ab8", "border-width": 2.5 } },
-      { selector: ".mis", style: {
-        shape: "round-rectangle", height: "data(h)", width: "data(w)", "background-color": "#fbeceb", "border-width": 1.5, "border-color": "#d2453f",
-        label: "data(label)", "font-size": M_FS, "font-weight": 500, color: "#9a2d28", "text-valign": "center", "text-halign": "center" } },
-      { selector: ".mis.strong", style: { "background-color": "#d2453f", color: "#ffffff" } },
-      { selector: ".more", style: { shape: "round-rectangle", height: "data(h)", width: "data(w)", "background-color": "#ffffff", "border-width": 1, "border-color": "#d2453f", "border-style": "dashed", label: "data(label)", "font-size": 12, "font-weight": 500, color: "#9a2d28" } },
-      { selector: "edge.requires", style: { width: 1.5, "line-color": "#c9cbd1", "target-arrow-color": "#c9cbd1", "target-arrow-shape": "triangle", "arrow-scale": 0.9, "curve-style": "bezier" } },
-      { selector: "edge.requires.chain", style: { width: 4.5, "line-color": "#e3a33b", "target-arrow-color": "#e3a33b", "z-index": 5 } },
-      { selector: "edge.seen", style: { width: 1, "line-color": "#e8a4a1", "line-style": "dashed", "curve-style": "bezier", opacity: 0.8 } },
-    ],
+    style: cyStyle(),
   });
   const tip = el("div", { class: "cy-tip" });
-  Object.assign(tip.style, { position: "absolute", pointerEvents: "none", background: "#1b1d22", color: "#fff", padding: "6px 10px", borderRadius: "8px", fontSize: "12.5px", maxWidth: "340px", zIndex: 5, display: "none", whiteSpace: "pre-line" });
+  Object.assign(tip.style, { position: "absolute", pointerEvents: "none", background: "var(--tip-bg)", color: "var(--tip-ink)", padding: "6px 10px", borderRadius: "8px", fontSize: "12.5px", maxWidth: "340px", zIndex: 5, display: "none", whiteSpace: "pre-line" });
   $(".graph-card").append(tip);
   cy.on("mouseover tap", "node", (ev) => {
     const p = ev.renderedPosition, box = $("#cy").getBoundingClientRect(), card = $(".graph-card").getBoundingClientRect();
@@ -889,7 +896,7 @@ function toast(msg) {
   let t = $("#toast");
   if (!t) {
     t = el("div", { id: "toast", role: "status" });
-    Object.assign(t.style, { position: "fixed", left: "50%", bottom: "24px", transform: "translateX(-50%)", background: "#1b1d22", color: "#fff",
+    Object.assign(t.style, { position: "fixed", left: "50%", bottom: "24px", transform: "translateX(-50%)", background: "var(--tip-bg)", color: "var(--tip-ink)",
       padding: "10px 16px", borderRadius: "10px", fontSize: "14px", zIndex: 50, maxWidth: "min(720px, calc(100vw - 32px))", boxShadow: "0 8px 30px rgba(0,0,0,.2)" });
     document.body.append(t);
   }
@@ -901,7 +908,35 @@ function toast(msg) {
 
 /* ------------------------------------------------------------------ wire up */
 
+/* ------------------------------------------------------------------ theme and first-visit guide */
+// Storage can be blocked (private windows, strict settings): every read and write is optional.
+const stored = (key) => { try { return localStorage.getItem(key); } catch (e) { return null; } };
+const store = (key, value) => { try { localStorage.setItem(key, value); } catch (e) { /* the page works without it */ } };
+
+function setTheme(theme, save) {
+  document.documentElement.setAttribute("data-theme", theme);
+  const next = theme === "dark" ? "light" : "dark";
+  const b = $("#theme-toggle");
+  if (b) { b.setAttribute("aria-label", `Switch to ${next} mode`); b.title = `Switch to ${next} mode`; }
+  if (state.cy) state.cy.style(cyStyle());
+  if (save) store("unlearn-theme", theme);
+}
+
+function initThemeAndGuide() {
+  setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light", false);
+  $("#theme-toggle").addEventListener("click", () =>
+    setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark", true));
+  const os = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+  if (os && os.addEventListener) os.addEventListener("change", (e) => { if (!stored("unlearn-theme")) setTheme(e.matches ? "dark" : "light", false); });
+  $("#guide").hidden = stored("unlearn-guide-dismissed") === "1";
+  $("#guide-dismiss").addEventListener("click", () => { $("#guide").hidden = true; store("unlearn-guide-dismissed", "1"); });
+  const help = $("#legend-help"), text = $("#legend-help-text");
+  help.addEventListener("click", () => { text.hidden = !text.hidden; help.setAttribute("aria-expanded", String(!text.hidden)); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !text.hidden) { text.hidden = true; help.setAttribute("aria-expanded", "false"); } });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  initThemeAndGuide();
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => showView(t.dataset.view)));
   $("#start-btn").addEventListener("click", startSession);
   $("#student-select").addEventListener("change", switchStudent);

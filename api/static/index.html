@@ -6,6 +6,15 @@
   <title>Unlearn</title>
   <meta name="description" content="A tutor that traces a student's misconception back to the prerequisite that broke, with the graph query that proves it.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='9' r='5' fill='%23e3a33b'/%3E%3Ccircle cx='8' cy='23' r='5' fill='%23c9cbd1'/%3E%3Ccircle cx='24' cy='23' r='5' fill='%23d2453f'/%3E%3C/svg%3E">
+  <script>
+    /* Theme before first paint: the saved choice, else the OS setting. Storage may be blocked; that's fine. */
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("unlearn-theme"); } catch (e) {}
+      if (t !== "dark" && t !== "light") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
   <link rel="stylesheet" href="/static/app.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.34.3/cytoscape.min.js"
           integrity="sha512-SQebVa91Tn1DeP45Wo74monK/I9wiQg59uKc7P8vp3T7KQ9l5e8IMjZ1GJTgZehUVQt7eS61DTqldQUb1EHfnw=="
@@ -28,12 +37,31 @@
       <span>Class</span>
       <select id="class-select" aria-label="Class"></select>
     </label>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
     <div class="status" id="health" title="FalkorDB status"><span class="dot"></span><span class="label">connecting…</span></div>
   </header>
 
   <main>
     <!-- ================= Student ================= -->
     <section class="view" id="view-student" data-view="student">
+      <div class="card guide" id="guide" hidden>
+        <div>
+          <h2>How to read this demo</h2>
+          <p class="lede">Unlearn asks a few adaptive questions, then walks a FalkorDB graph of prerequisites back to the earlier skill that actually broke, and remembers it next session. Every claim it makes links to the Cypher query behind it, under Receipts.</p>
+        </div>
+        <div class="guide-actions">
+          <a class="btn" id="guide-open" href="/?class=demo_video&amp;student=asha">Open demo_video</a>
+          <button class="btn primary" id="guide-dismiss" type="button">Got it</button>
+        </div>
+        <ol>
+          <li>Pick class <code>demo_video</code>, choose <strong>Asha</strong> and click <strong>Start session</strong>. Answer, or let the simulated student answer, and watch the <strong>root cause</strong> light up amber in the graph.</li>
+          <li>Start a <strong>second session</strong> for Asha. The <strong>"Last time you…"</strong> banner is her memory, read back from the graph.</li>
+          <li>Open <strong>Teacher</strong> for cohorts (<code>algo.WCC</code> over shared misconceptions) and approve a proposal. Then <strong>Eval</strong>: graph against vector RAG against no memory.</li>
+        </ol>
+      </div>
       <div class="student-grid">
         <div class="col-left">
           <div class="card scoreboard" id="scoreboard" hidden>
@@ -110,7 +138,13 @@
                 <li><i class="sw root"></i>root cause</li>
                 <li><i class="sw asked"></i>asked now</li>
                 <li><i class="sw grey"></i>other</li>
+                <li><button class="legend-help" id="legend-help" type="button" aria-expanded="false" aria-controls="legend-help-text" aria-label="What the colours mean">?</button></li>
               </ul>
+              <div class="legend-help-text" id="legend-help-text" role="note" hidden>
+                <p><strong>Boxes are skills</strong> (constructs). <strong>Solid arrows are <code>REQUIRES</code> edges</strong>, from a skill to the prerequisite it needs; the amber path is the chain from the topic down to the root cause.</p>
+                <p><strong>Red pills are misconceptions this student showed</strong> (<code>SHOWED</code> edges in the graph), beside the skill where they weigh most; filled red means confidence above 0.6. Dashed red lines link a misconception to other skills it also appears in (<code>SEEN_IN</code>).</p>
+                <p>Green is mastered, amber with a thick border is the diagnosed root cause, the blue ring is the skill being asked about now, and grey is everything else in the slice.</p>
+              </div>
             </div>
             <div id="cy" class="cy" aria-label="Prerequisite graph"></div>
             <div class="graph-empty" id="graph-empty">The REQUIRES chain from the topic down to its prerequisites appears here.</div>
@@ -138,18 +172,22 @@
       <div class="teacher-grid">
         <div class="card t-proposals">
           <div class="card-kicker"><span>Pending proposals</span><span class="muted">nothing changes until you approve</span></div>
+          <p class="card-caption">What the Teacher agent suggests after a Tutor escalates a stuck student. Each one is a <code>Proposal</code> node in the graph; approving applies it from the graph's own edges and logs an event.</p>
           <div id="proposals" class="list"></div>
         </div>
         <div class="card t-cohorts">
           <div class="card-kicker"><span>Cohorts</span><span class="muted">algo.WCC over shared misconceptions</span><button class="receipt-link" data-receipt-for="cohorts">receipt</button></div>
+          <p class="card-caption">Students who hold the same confident misconception: links built from their <code>SHOWED</code> edges, grouped into connected components. A score alone can't show who is wrong in the same way.</p>
           <div id="cohorts" class="list"></div>
         </div>
         <div class="card t-keystones">
           <div class="card-kicker"><span>Keystones</span><span class="muted">algo.pageRank over REQUIRES</span><button class="receipt-link" data-receipt-for="keystones">receipt</button></div>
+          <p class="card-caption">The skills most of the topic depends on, ranked by PageRank over the prerequisite edges. A gap in one of these affects the most later skills.</p>
           <ol id="keystones" class="ranked"></ol>
         </div>
         <div class="card t-bridges">
           <div class="card-kicker"><span>Bridges</span><span class="muted">algo.betweenness, curriculum graph</span><button class="receipt-link" data-receipt-for="bridges">receipt</button></div>
+          <p class="card-caption">Skills where misconceptions cross from one topic to another, by betweenness over the whole Eedi curriculum graph. A path question, so it needs the graph.</p>
           <ol id="bridges" class="ranked"></ol>
         </div>
         <div class="card t-chat">
@@ -166,6 +204,7 @@
     <!-- ================= Eval ================= -->
     <section class="view" id="view-eval" data-view="eval" hidden>
       <h1 class="view-title">Evaluation</h1>
+      <p class="eval-caption">The same simulated students in every column: Unlearn traversing the graph (C) against no memory (A), vector RAG (B) and the whole graph pasted into the prompt (B+), all three on the same local model. Root-cause accuracy is the headline: finding the earlier skill that broke takes walking the prerequisites, not retrieving similar text.</p>
       <p class="muted">Read live from <code>eval/results/*.json</code>: <code>eval/run_eval.py</code>, <code>eval/concurrency.py</code> and <code>eval/latency.py</code> write them.</p>
       <div id="eval-results"></div>
     </section>
