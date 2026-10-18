@@ -3,10 +3,19 @@
 The model may only call the tools below (no decide, no Cypher). Every tool row it receives in the turn goes
 into the receipt check for its final reply. If no provider is configured, or a provider fails, or the reply
 fails the check twice, a template answers from the same tools, chosen by keywords in the message.
+
+Recorded answers (the live demo only, when UNLEARN_RECORDED_CHAT names a file of them): the example questions'
+LLM replies, recorded against the demo's baked class. One is served only if re-running its tool calls now gives
+the same rows (timestamps and ids aside) and the text passes the receipt check against them; otherwise the
+question is answered live as usual.
 """
 
+import hashlib
 import json
+import os
 import re
+from functools import lru_cache
+from pathlib import Path
 
 from unlearn import llm, tools
 from unlearn.agents.base import Agent
@@ -53,8 +62,20 @@ class TeacherChat(Agent):
 
     # --- tools the model can call ---
 
+    def student_id(self, value) -> str:
+        """Models often pass a student's name ("Rosa") where the tool needs the id ("s18"): map it."""
+        v = str(value).strip()
+        rows = tools.class_students(self.class_id)["rows"]
+        if any(r["id"] == v for r in rows):
+            return v
+        return next((r["id"] for r in rows if (r["alias"] or "").lower() == v.lower()), v)
+
     def run_tool(self, task_id: str, name: str, args: dict) -> list:
         c = self.class_id
+        if name in ("recall", "root_cause") and "student_id" in args:
+            args = {**args, "student_id": self.student_id(args["student_id"])}
+        if name == "propose" and args.get("student_ids"):
+            args = {**args, "student_ids": [self.student_id(x) for x in args["student_ids"]]}
         if name == "cohorts":
             out = self.call(task_id, tools.cohorts, c)
         elif name == "keystones":
@@ -80,6 +101,9 @@ class TeacherChat(Agent):
 
     def reply(self, message: str) -> dict:
         task_id = f"chat-{tools.now_ms()}"
+        recorded = self._recorded(task_id, message)
+        if recorded:
+            return recorded
         attempts = []
         for provider in llm.available():
             try:
@@ -96,6 +120,25 @@ class TeacherChat(Agent):
         attempts.append({"provider": "template", "ok": True, "problems": []})
         self._log_llm(task_id, text, "template", attempts)
         return {"text": text, "source": "template", "attempts": attempts}
+
+    def _recorded(self, task_id: str, message: str) -> dict | None:
+        rec = recorded_answers().get((self.class_id, normalise(message)))
+        if not rec:
+            return None
+        self.turn_rows = []
+        rows = [self.run_tool(task_id, name, args) for name, args in rec["tools"]]
+        if fingerprint(rec["tools"], rows) != rec["fingerprint"]:
+            self.note(task_id, "recorded answer skipped: the class has changed since it was recorded")
+            return None
+        problems = llm.check_reply(rec["text"], self.turn_rows, self.vocabulary()) + llm.malformed(rec["text"])
+        if problems:
+            self.note(task_id, f"recorded answer skipped: {problems}")
+            return None
+        text = llm.unmark(rec["text"])
+        attempts = [{"provider": "recorded", "model": rec["model"], "ok": True, "problems": []}]
+        self._log_llm(task_id, text, "recorded", attempts)
+        return {"text": text, "source": "recorded", "recorded": {"model": rec["model"], "on": rec["recorded_on"]},
+                "attempts": attempts}
 
     def _log_llm(self, task_id, text, source, attempts):
         from unlearn.agents.base import Step
@@ -157,6 +200,38 @@ class TeacherChat(Agent):
                          + "; ".join(f"{p['kind']} for {', '.join(p['students'])}" for p in ps[:4]) + "."
                          if ps else "No pending proposals.")
         return " ".join(parts)
+
+
+# --- recorded answers ---------------------------------------------------------------
+
+VOLATILE = {"last_seen", "recent", "created_ts", "first_ts", "last_ts", "ts"}
+
+
+def normalise(message: str) -> str:
+    return " ".join(re.sub(r"[^a-z0-9 ]", " ", message.lower()).split())
+
+
+def fingerprint(calls: list, rows: list) -> str:
+    """The facts a reply rests on: every tool's rows, without timestamps or ids that differ between builds."""
+    def clean(v, tool):
+        if isinstance(v, dict):
+            drop = VOLATILE | ({"id", "payload"} if tool == "pending_proposals" else set())
+            return {k: clean(x, tool) for k, x in sorted(v.items()) if k not in drop}
+        if isinstance(v, list):
+            return [clean(x, tool) for x in v]
+        return round(v, 6) if isinstance(v, float) else v
+    body = json.dumps([[name, args, clean(r, name)] for (name, args), r in zip(calls, rows)], sort_keys=True, default=str)
+    return hashlib.sha256(body.encode()).hexdigest()
+
+
+@lru_cache(maxsize=1)
+def recorded_answers() -> dict:
+    path = os.getenv("UNLEARN_RECORDED_CHAT")
+    if not path or not Path(path).exists():
+        return {}
+    data = json.loads(Path(path).read_text())
+    return {(a["class_id"], normalise(a["question"])): {**a, "model": data["model"], "recorded_on": data["recorded_on"]}
+            for a in data["answers"]}
 
 
 def chat(class_id: str, message: str, on_step=None) -> dict:

@@ -1,0 +1,554 @@
+{
+  "model": "qwen3.5:27b-q4_K_M (local, Ollama)",
+  "method": "OLLAMA_BASE_URL=http://localhost:11434/v1 GEMINI_API_KEY= python eval/tool_routing.py   # tool_routing.json",
+  "dev": {
+    "n": 30,
+    "exact": 30,
+    "covers": 30,
+    "exact_rate": 1.0,
+    "covers_rate": 1.0,
+    "rows": [
+      {
+        "q": "Which students are struggling with the same misconception?",
+        "expected": [
+          "cohorts"
+        ],
+        "called": [
+          "cohorts"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 28.0
+      },
+      {
+        "q": "Group my class by shared mistakes.",
+        "expected": [
+          "cohorts"
+        ],
+        "called": [
+          "cohorts"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 19.1
+      },
+      {
+        "q": "Are there any clusters of students I could teach together?",
+        "expected": [
+          "cohorts"
+        ],
+        "called": [
+          "cohorts"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 18.7
+      },
+      {
+        "q": "Show me the cohorts in this class.",
+        "expected": [
+          "cohorts"
+        ],
+        "called": [
+          "cohorts"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 24.1
+      },
+      {
+        "q": "Which skills does most of the fractions topic depend on?",
+        "expected": [
+          "keystones"
+        ],
+        "called": [
+          "keystones"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 15.7
+      },
+      {
+        "q": "What are the foundational skills I should make sure everyone has?",
+        "expected": [
+          "keystones"
+        ],
+        "called": [
+          "keystones"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 18.3
+      },
+      {
+        "q": "Rank the most important prerequisite skills.",
+        "expected": [
+          "keystones"
+        ],
+        "called": [
+          "keystones"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 18.9
+      },
+      {
+        "q": "Which skill should I teach first?",
+        "expected": [
+          "keystones"
+        ],
+        "called": [
+          "keystones"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 13.8
+      },
+      {
+        "q": "Which skills connect misconceptions across different topics?",
+        "expected": [
+          "bridges"
+        ],
+        "called": [
+          "bridges"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 30.6
+      },
+      {
+        "q": "Where do misconceptions cross from one topic into another?",
+        "expected": [
+          "bridges"
+        ],
+        "called": [
+          "bridges"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 35.6
+      },
+      {
+        "q": "Show me the bridge skills in the curriculum.",
+        "expected": [
+          "bridges"
+        ],
+        "called": [
+          "bridges"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 34.1
+      },
+      {
+        "q": "What do you remember about Rosa?",
+        "expected": [
+          "recall"
+        ],
+        "called": [
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 29.6
+      },
+      {
+        "q": "What misconceptions has Asha shown so far?",
+        "expected": [
+          "recall"
+        ],
+        "called": [
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 19.2
+      },
+      {
+        "q": "Tell me what Kofi keeps getting wrong.",
+        "expected": [
+          "recall"
+        ],
+        "called": [
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 22.3
+      },
+      {
+        "q": "What does the tutor remember about Priya from last session?",
+        "expected": [
+          "recall"
+        ],
+        "called": [
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 22.2
+      },
+      {
+        "q": "Has Omar shown any misconceptions?",
+        "expected": [
+          "recall"
+        ],
+        "called": [
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 20.4
+      },
+      {
+        "q": "What is the root cause for Asha on construct 429?",
+        "expected": [
+          "root_cause"
+        ],
+        "called": [
+          "root_cause"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 26.3
+      },
+      {
+        "q": "Find the deepest broken prerequisite for Ben on construct 410.",
+        "expected": [
+          "root_cause"
+        ],
+        "called": [
+          "root_cause"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 15.8
+      },
+      {
+        "q": "Why is Dara stuck on construct 410? Trace it back to the prerequisite.",
+        "expected": [
+          "root_cause"
+        ],
+        "called": [
+          "root_cause"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 16.1
+      },
+      {
+        "q": "What is waiting for my approval?",
+        "expected": [
+          "pending_proposals"
+        ],
+        "called": [
+          "pending_proposals"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 72.6
+      },
+      {
+        "q": "Show me the pending proposals.",
+        "expected": [
+          "pending_proposals"
+        ],
+        "called": [
+          "pending_proposals"
+        ],
+        "source": "template",
+        "exact": true,
+        "covers": true,
+        "seconds": 66.7
+      },
+      {
+        "q": "Has the Teacher agent suggested anything I need to approve?",
+        "expected": [
+          "pending_proposals"
+        ],
+        "called": [
+          "pending_proposals"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 65.2
+      },
+      {
+        "q": "Propose regrouping Asha and Ben together.",
+        "expected": [
+          "propose"
+        ],
+        "called": [
+          "propose"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 13.5
+      },
+      {
+        "q": "Suggest assigning Dara practice on construct 345.",
+        "expected": [
+          "propose"
+        ],
+        "called": [
+          "propose"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 15.2
+      },
+      {
+        "q": "Create a proposal to let Eli skip ahead past construct 342.",
+        "expected": [
+          "propose"
+        ],
+        "called": [
+          "propose"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 15.6
+      },
+      {
+        "q": "Which cohorts are there, and is anything pending approval?",
+        "expected": [
+          "cohorts",
+          "pending_proposals"
+        ],
+        "called": [
+          "cohorts",
+          "pending_proposals"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 73.4
+      },
+      {
+        "q": "What are the keystone skills and the bridge skills?",
+        "expected": [
+          "bridges",
+          "keystones"
+        ],
+        "called": [
+          "bridges",
+          "keystones"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 39.0
+      },
+      {
+        "q": "What do you remember about Asha and about Ben?",
+        "expected": [
+          "recall"
+        ],
+        "called": [
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 32.8
+      },
+      {
+        "q": "Show the cohorts, then propose regrouping the largest one.",
+        "expected": [
+          "cohorts",
+          "propose"
+        ],
+        "called": [
+          "cohorts",
+          "propose"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 40.0
+      },
+      {
+        "q": "What does Rosa struggle with, and what is the root cause for her on construct 429?",
+        "expected": [
+          "recall",
+          "root_cause"
+        ],
+        "called": [
+          "recall",
+          "root_cause"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 30.6
+      }
+    ]
+  },
+  "held_out": {
+    "n": 10,
+    "exact": 10,
+    "covers": 10,
+    "exact_rate": 1.0,
+    "covers_rate": 1.0,
+    "rows": [
+      {
+        "q": "Who in my class makes the same mistakes?",
+        "expected": [
+          "cohorts"
+        ],
+        "called": [
+          "cohorts"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 31.4
+      },
+      {
+        "q": "Which concepts are the biggest building blocks for this topic?",
+        "expected": [
+          "keystones"
+        ],
+        "called": [
+          "keystones"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 25.0
+      },
+      {
+        "q": "Which ideas link fractions problems to other areas of maths?",
+        "expected": [
+          "bridges"
+        ],
+        "called": [
+          "bridges"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 28.3
+      },
+      {
+        "q": "Remind me what Hana has been getting wrong.",
+        "expected": [
+          "recall"
+        ],
+        "called": [
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 25.9
+      },
+      {
+        "q": "Trace Tara's difficulty on construct 429 back to its source.",
+        "expected": [
+          "root_cause"
+        ],
+        "called": [
+          "root_cause"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 15.5
+      },
+      {
+        "q": "Anything in my approval queue?",
+        "expected": [
+          "pending_proposals"
+        ],
+        "called": [
+          "pending_proposals"
+        ],
+        "source": "template",
+        "exact": true,
+        "covers": true,
+        "seconds": 69.9
+      },
+      {
+        "q": "Put Nia and Ivo in a group together, please propose it.",
+        "expected": [
+          "propose"
+        ],
+        "called": [
+          "propose"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 13.7
+      },
+      {
+        "q": "List the cohorts and the keystone skills.",
+        "expected": [
+          "cohorts",
+          "keystones"
+        ],
+        "called": [
+          "cohorts",
+          "keystones"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 42.3
+      },
+      {
+        "q": "What has Quinn shown, and are there pending proposals for anyone?",
+        "expected": [
+          "pending_proposals",
+          "recall"
+        ],
+        "called": [
+          "pending_proposals",
+          "recall"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 54.8
+      },
+      {
+        "q": "Propose extra practice for Sami on construct 345.",
+        "expected": [
+          "propose"
+        ],
+        "called": [
+          "propose"
+        ],
+        "source": "ollama",
+        "exact": true,
+        "covers": true,
+        "seconds": 15.1
+      }
+    ]
+  }
+}

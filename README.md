@@ -44,7 +44,7 @@ Each row is a track's official key-focus item. "Partial" means some of it is met
 | --- | --- | --- | --- |
 | multi-hop reasoning | Yes | `root_cause` walks up to 4 `REQUIRES` hops below the target and weighs misconception evidence on each prerequisite. The chain shown on screen is the shortest path to the winner. The Diagnoser descends the prerequisites level by level. | `ROOT_CAUSE`, `ROOT_CAUSE_CHAIN`, `PROBE_FRONTIER`, `LEARNING_PATH`, `LEARNING_PATH_SP` (`algo.SPpaths`) |
 | graph queries and algorithms as agent tools | Yes | 16 fixed tools in `api/unlearn/tools.py`. The agents call them and nothing else. The Teacher uses WCC (cohorts), PageRank (keystones) and betweenness (bridges). The Tutor uses shortest paths. `diagnose_text` uses the vector index. | `COHORTS_WCC` (`algo.WCC`), `KEYSTONES` (`algo.pageRank`), `BRIDGES` (`algo.betweenness`), `LEARNING_PATH_SP`, `DIAGNOSE_TEXT` (`db.idx.vector.queryNodes`) |
-| tool selection through MCP | Partial | `api/unlearn/unlearn_mcp.py` exposes 7 of the tools (no approve, no Cypher) to MCP clients. Checked over stdio and listed in MCP Inspector. Inside the app, the teacher chat lets an LLM choose among the same 7 tools by function calling, not MCP. Partial because no LLM client has yet been tested choosing tools over MCP (Claude Desktop wasn't tested). The Diagnoser and Tutor call tools in fixed code, not by LLM choice. | `api/unlearn/unlearn_mcp.py`, `tests/test_mcp.py`, [`docs/mcp.md`](docs/mcp.md); `agents/teacher_chat.py` |
+| tool selection through MCP | Partial | `api/unlearn/unlearn_mcp.py` exposes 7 of the tools (no approve, no Cypher) to MCP clients. Checked over stdio and listed in MCP Inspector. Inside the app, the teacher chat lets an LLM choose among the same 7 tools by function calling, not MCP. Measured in-app: on 30 dev and 10 held-out teacher questions, the local model called exactly the expected tools for 30/30 and 10/10 (`eval/tool_routing.py`). Partial because no LLM client has yet been tested choosing tools over MCP (Claude Desktop wasn't tested); the benchmark uses function calling inside the app. The Diagnoser and Tutor call tools in fixed code, not by LLM choice. | `api/unlearn/unlearn_mcp.py`, `tests/test_mcp.py`, [`docs/mcp.md`](docs/mcp.md); `agents/teacher_chat.py` |
 | actions based on what the graph shows | Yes | The Diagnoser picks each next question from what the graph has ruled out. The Tutor picks the skill with the best `success_rate`. The Teacher proposes a regroup from a cohort, or practice on a student's root cause; the teacher chat can also propose a skip-ahead. An approved proposal is applied from the graph's own edges and logged as an `Event`. | `NEXT_QUESTION`, `PICK_SKILL`, `PROPOSE`, `DECIDE`, `EXEC_REGROUP`, `EXEC_SKIP_AHEAD`, `EXEC_ASSIGN_PRACTICE`, `LOG_PROPOSAL_EVENT` |
 | explainable results | Yes | Every tool call returns a receipt: the query name, its parameters and the rows. The UI shows the Cypher behind each claim. An LLM reply that names anything not in that turn's rows is rejected, retried once, and then replaced by a template built from the rows. | `tools._Receipt`, `llm.check_reply`; the Receipts panel in the web UI |
 
@@ -441,6 +441,23 @@ Brackets are 95% bootstrap intervals over students.
 - **p = 0 reproduces the main table's top-1, top-3 and root cause exactly.** Its recall is 59% against the table's 57%: the session-2 opening's wording changed after the eval ran ("1 time", trimmed names), and that moves one student under the embedding judge.
 - **A stronger model may narrow the gap** on naming misconceptions. The baselines here run on a 27B local model.
 
+### Teacher chat tool routing (`eval/tool_routing.py`, [`eval/results/tool_routing.json`](eval/results/tool_routing.json))
+
+Does the chat's model pick the right graph tools for a teacher's question?
+- **Method.** [`eval/tool_routing_questions.json`](eval/tool_routing_questions.json) has 30 dev and 10 held-out natural-language questions, each with the exact set of tools that should answer it. They cover all seven chat tools, plus some two-tool questions. Each went through the real chat with `qwen3.5:27b-q4_K_M` (local, Ollama) on a copy of `class_demo`. Only the tools the model chose count.
+
+| Set | Exact tool match | Expected tools all called |
+| --- | --- | --- |
+| Dev | 30 of 30 (100%) | 30 of 30 (100%) |
+| Held-out | 10 of 10 (100%) | 10 of 10 (100%) |
+
+**Read it with care:**
+- **The test is easy.** We wrote the questions, they are fairly direct, and the seven tools have clearly distinct descriptions.
+- **It was one run.**
+- **It scores tool names, not arguments:** a right tool with the wrong student or construct would still count.
+- **Nothing was tuned on the dev set**, so both sets are plain test sets.
+- **Two replies fell back to the template.** In 2 of the 40 questions the model's final reply failed the receipt check twice and the template answered. Its tool choice still counts, because the model made it before the fallback.
+
 ### Concurrency (`eval/concurrency.py`, [`eval/results/concurrency.json`](eval/results/concurrency.json))
 
 **Both classes at once.** 30 simulated students in each of two class graphs ran at the same time through the async client. Per graph, p50 was 2.1 ms and p95 18 ms across 360 answers' worth of queries.
@@ -539,6 +556,10 @@ Both containers bind to `127.0.0.1` in the `dev` profile. `docker compose --prof
 [`render.yaml`](render.yaml) deploys [`deploy/Dockerfile.render`](deploy/Dockerfile.render): one container running FalkorDB v4.20.7 and the API. FalkorDB listens only on a unix socket inside the container, with no TCP port. The free tier has 512 MB of RAM, no disk, and sleeps after 15 minutes idle.
 - **Baked graphs.** `curriculum`, `class_template`, `class_demo` and `class_demo_video` are built at image build time and saved as `dump.rdb`, so a cold start loads them in seconds. Nothing is ever saved, so demo state resets on every restart.
 - **Restarts reset the demo.** The free tier sleeps after 15 minutes idle and may restart at any time, and each restart loads the baked graphs again. The page notices (`server_started_at` changes), clears what it showed and says so, instead of mixing old numbers with the reset state.
+- **Recorded chat answers.** The four example questions under the Teacher chat were answered once by the local model against these baked graphs (`deploy/record_chat.py`), and the answers ship in the image.
+  - **Instant answers:** the live site can answer them with model wording even when the free Gemini quota is used up. Each is labelled "recorded answer".
+  - **Never stale:** one is served only while re-running its tool calls gives the same rows (timestamps aside) and its text passes the receipt check again. After a visitor changes the class, the question is answered live.
+  - **Other questions** are always answered live.
 - **A pre-filled Teacher tab.** At build time `scripts/simulate_class.py` runs 2 sessions for each of `class_demo`'s 30 students with template wording, so the live Teacher tab opens with cohorts and pending proposals. `class_demo_video` stays fresh for the video's two students.
 - **Measured locally under the free tier's limits** (`docker run --memory=512m --memory-swap=512m --cpus=0.1`):
   - Healthy 19 s after start.

@@ -711,7 +711,9 @@ async function sendChat(ev) {
     const out = await api(`/classes/${state.classId}/teacher/chat`, { method: "POST", body: { message: msg } });
     pending.className = "msg bot";
     pending.replaceChildren(el("div", { text: out.text }),
-      el("div", { class: "meta" }, el("span", { class: "muted", style: "font-size:11px", text: `written by ${out.source}` }),
+      el("div", { class: "meta" }, el("span", { class: "muted", style: "font-size:11px", text: out.source === "recorded"
+        ? `recorded answer · written by ${out.recorded.model} on ${out.recorded.on}, re-checked against this class's rows just now`
+        : `written by ${out.source}` }),
         out.receipts.filter((r) => !r.tool.startsWith("llm:")).map((r) => el("button", { onclick: () => openReceipt(r.id), text: r.tool }))));
   } catch (e) {
     pending.textContent = e.message;
@@ -726,7 +728,7 @@ async function loadEval() {
   const { results } = await api("/eval/results");
   box.replaceChildren();
   if (!Object.keys(results).length) { box.append(el("p", { class: "empty", text: "No results yet." })); return; }
-  const order = ["eval", "random_baseline", "design_checks", "concurrency", "latency", "crosscheck"];
+  const order = ["eval", "random_baseline", "design_checks", "tool_routing", "concurrency", "latency", "crosscheck"];
   const names = Object.keys(results).sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99);
   for (const name of names) {
     const r = results[name];
@@ -740,6 +742,7 @@ async function loadEval() {
     }
     else if (name === "random_baseline" && r.per_seed) box.append(...randomView(r));
     else if (name === "design_checks" && r.recall) box.append(...designChecksView(r));
+    else if (name === "tool_routing" && r.dev) box.append(...routingView(r));
     else if (name === "concurrency" && r.isolation) box.append(...concurrencyView(r));
     else if (r.tools) box.append(...latencyTable(r));
     else box.append(el("h2", { text: name }), el("pre", { text: JSON.stringify(r, null, 2).slice(0, 4000) }));
@@ -799,6 +802,22 @@ function designChecksView(r) {
         }))));
   }
   return out;
+}
+
+// eval/tool_routing.py: does the Teacher chat's model pick the right tools? Exact match per question set.
+function routingView(r) {
+  const pct = (x) => `${Math.round(100 * x)}%`;
+  const sets = [["dev", "Dev set"], ["held_out", "Held-out set"]];
+  const misses = sets.flatMap(([k]) => r[k].rows.filter((x) => !x.exact).map((x) => ({ ...x, set: k })));
+  return [el("h2", { text: "Teacher chat tool routing" }),
+    el("p", { class: "muted", text: `Natural-language teacher questions, each with the exact set of tools that should answer it, through the real chat with ${r.model}. Only the tools the model chose count. Nothing was tuned on the dev set.` }),
+    el("table", { class: "eval" }, el("thead", {}, el("tr", {}, ["Set", "Questions", "Exact tool match", "Expected tools all called"].map((h) => el("th", { text: h })))),
+      el("tbody", {}, sets.map(([k, label]) => el("tr", {}, el("td", { text: label }), el("td", { text: String(r[k].n) }),
+        el("td", {}, el("strong", { text: `${r[k].exact} of ${r[k].n} (${pct(r[k].exact_rate)})` })),
+        el("td", { text: `${r[k].covers} of ${r[k].n} (${pct(r[k].covers_rate)})` }))))),
+    misses.length ? el("details", { class: "footnote" }, el("summary", { text: `The ${misses.length} misses` }),
+      el("ul", {}, misses.map((x) => el("li", { text: `${x.set === "dev" ? "Dev" : "Held-out"}: “${x.q}” expected ${x.expected.join(" + ")}, called ${x.called.join(" + ") || "nothing"}` })))) : null]
+    .filter(Boolean);  // append(null) would print "null"
 }
 
 function evalTable(r, title) {
@@ -961,6 +980,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#refresh-btn").addEventListener("click", loadTeacher);
   $("#simulate-all-btn").addEventListener("click", simulateAll);
   $("#chat-form").addEventListener("submit", sendChat);
+  document.querySelectorAll(".chat-example").forEach((b) => b.addEventListener("click", () => {
+    $("#chat-input").value = b.textContent;
+    $("#chat-form").requestSubmit();
+  }));
   document.querySelectorAll("[data-receipt-for]").forEach((b) => b.addEventListener("click", () => {
     const rid = state.teacherReceipts[b.dataset.receiptFor];
     if (rid) openReceipt(rid);

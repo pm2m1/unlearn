@@ -69,5 +69,9 @@ ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
     FALKORDB_ARGS="THREAD_COUNT 2 MAX_QUEUED_QUERIES 256 TIMEOUT 30000 RESULTSET_SIZE 10000"
 
 COPY --chown=unlearn deploy/render-entrypoint.sh /app/deploy/render-entrypoint.sh
+# The Teacher chat's example answers, recorded with a local model against these baked graphs (deploy/record_chat.py).
+# One is served only while the class still gives the same rows; otherwise the question is answered live.
+COPY --chown=unlearn deploy/recorded_chat.json /app/deploy/recorded_chat.json
+ENV UNLEARN_RECORDED_CHAT=/app/deploy/recorded_chat.json
 EXPOSE 10000
 CMD ["bash", "/app/deploy/render-entrypoint.sh"]

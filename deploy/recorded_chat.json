@@ -1,0 +1,58 @@
+{
+  "model": "qwen3.5:27b-q4_K_M (local, Ollama)",
+  "recorded_on": "2026-10-18",
+  "answers": [
+    {
+      "class_id": "demo",
+      "question": "Which cohorts do I have?",
+      "tools": [
+        [
+          "cohorts",
+          {}
+        ]
+      ],
+      "fingerprint": "c1f710a603b9acb362084346707f0adc22a1c7971ddd709f0023e8c9c9ac433e",
+      "text": "You have four cohorts:\n\n1. **Cohort 1064**: Zara, Uma, Priya, Nia, Ivo  \n   Shared misconceptions include:  \n   - When asked for a fraction on a number line, assumes it is a unit fraction with the number of dashes up to the required fraction as a denominator  \n   - When finding the difference between two marks on a scale, counts lines instead of gaps  \n   - Believes the first mark on a number line is always 1\n\n2. **Cohort 1068**: Vik, Tara, Sami, Mateo, Kofi  \n   Shared misconceptions include:  \n   - Believes the last number of an unordered list must be the largest  \n   - Mixes up smallest and largest when ordering fractions  \n   - Believes smaller numerator means smaller fraction, regardless of denominator\n\n3. **Cohort 1066**: Xia, Eli  \n   Shared misconception:  \n   - Thinks the division sign means to subtract\n\n4. **Cohort 1061**: Cyrus, Gus  \n   Shared misconception:  \n   - Finds a common multiple but not the lowest common multiple"
+    },
+    {
+      "class_id": "demo",
+      "question": "What do you remember about Rosa?",
+      "tools": [
+        [
+          "recall",
+          {
+            "student_id": "Rosa"
+          }
+        ]
+      ],
+      "fingerprint": "947d85a265247cce94d1a55eb67280e005095b4466b9b282f5de7f2289f100d9",
+      "text": "Rosa has several misconceptions about fractions:\n\n*   She thinks dimensions are needed to compare fractions.\n*   When shading fractions of shapes, she believes the denominator always means the number of sections that are not shaded.\n*   She believes the number of shaded parts determines fraction equivalence regardless of total parts.\n*   She thinks that fractions with the same numerator are equivalent.\n*   She believes equivalent fractions are formed with addition not multiplication.\n\nThese misconceptions have been observed multiple times recently, particularly in questions related to fraction walls and shading shapes."
+    },
+    {
+      "class_id": "demo",
+      "question": "Which skill should I teach first?",
+      "tools": [
+        [
+          "keystones",
+          {}
+        ]
+      ],
+      "fingerprint": "0e44d80c42eab6099aa04c27e29ac415b041678fdfdfa722d5ff57ebfdab9673",
+      "text": "Based on the curriculum's foundational constructs, you should teach Read fractions first. It has the highest priority score (0.010) among the key skills required for this topic. Following that, Know times tables up to 12 x 12 is the next most critical skill to address."
+    },
+    {
+      "class_id": "demo",
+      "question": "Why is Ben struggling?",
+      "tools": [
+        [
+          "recall",
+          {
+            "student_id": "Ben"
+          }
+        ]
+      ],
+      "fingerprint": "10c94b99d1d92235b3e58d1971c9ed72ee14b268432eb079a1b7c443c2e936ad",
+      "text": "Ben is struggling primarily due to a confident misconception: When adding mixed numbers believes they only need to add the integers. He has demonstrated this error three times with high confidence (0.875). Additionally, he holds another misconception: Believes you add the whole to the numerators, ignoring denominators, when adding a mixed number to a proper fraction with the same denominator, which he has shown twice. These errors indicate a fundamental misunderstanding of how to combine whole numbers and fractional parts correctly during addition."
+    }
+  ]
+}
