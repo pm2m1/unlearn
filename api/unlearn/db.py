@@ -13,10 +13,12 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 @lru_cache(maxsize=1)
 def client() -> FalkorDB:
+    # FALKOR_SOCKET (a unix socket path) wins over host and port; the single-container image sets it.
     return FalkorDB(
         host=os.getenv("FALKOR_HOST", "localhost"),
         port=int(os.getenv("FALKOR_PORT", "6379")),
         password=os.getenv("FALKOR_PASSWORD") or None,
+        unix_socket_path=os.getenv("FALKOR_SOCKET") or None,
     )
 
 

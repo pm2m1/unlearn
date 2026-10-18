@@ -1,4 +1,5 @@
-# One container for a free Render web service (512 MB, no disk): FalkorDB and the API side by side.
+# One container for a free Render web service (512 MB, no disk): FalkorDB and the API side by side. At run time
+# FalkorDB listens on a unix socket only (FALKOR_SOCKET), with no TCP port.
 #   docker build -f deploy/Dockerfile.render -t unlearn-render .
 #   docker run --rm -p 8000:10000 -e PORT=10000 unlearn-render
 # FalkorDB's redis-server and module are copied from the pinned image (both images are Debian trixie). The
@@ -62,6 +63,7 @@ RUN python scripts/01_download.py \
 # TIMEOUT is 30 s here, not compose's 1 s: on the free tier's 0.1 CPU, betweenness over the curriculum graph
 # (bridges) takes about 7 s. Two query threads keep FalkorDB's memory down.
 ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+    FALKOR_SOCKET=/tmp/falkordb.sock \
     FALKORDB_ARGS="THREAD_COUNT 2 MAX_QUEUED_QUERIES 256 TIMEOUT 30000 RESULTSET_SIZE 10000"
 
 COPY --chown=unlearn deploy/render-entrypoint.sh /app/deploy/render-entrypoint.sh
