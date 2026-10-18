@@ -6,23 +6,23 @@ Oct 17, 2026 · Parth
 
 Unlearn is a tutor agent that works out *which* misconception a student holds, traces it back to the prerequisite that actually broke, and remembers it next session. Each classroom gets its own FalkorDB graph, and three agents (Diagnoser, Tutor, Teacher) hand work to each other through it.
 
-- **Pitch:** two students both score 40% on fractions and need opposite fixes. A chat tutor can't tell them apart. Unlearn can, and shows the graph path that proves it.
+- **Summary:** two students both score 40% on fractions and need opposite fixes. A chat tutor can't tell them apart. Unlearn can, and shows the graph path that proves it.
 - **Tracks:** 02 Agent Memory and Coordination (primary), 01 Agents That Act on Connected Data (secondary).
-- **Deadline:** submit by Oct 18, 22:00 IST (2-hour buffer before the 23:59 close).
-- **Remove-FalkorDB test:** without the graph there is no misconception-to-concept grounding, no prerequisite root-cause traversal, no per-class memory, no agent handoffs and no cohort grouping. It collapses into generic chat. Put this line at the top of the README.
-- **Prior art to beat:** Atrium won FalkorDB's own "Memory Meets Motion" hackathon by grouping students by misconception. Unlearn adds root-cause traversal, cross-session memory, multi-agent handoff, an MCP server and a measured eval. Name Atrium in the README.
+- **Submission window:** the hackathon closed at 23:59 IST on Oct 18; the planned submission time was 22:00 IST, a 2-hour buffer.
+- **Remove-FalkorDB test:** without the graph there is no misconception-to-concept grounding, no prerequisite root-cause traversal, no per-class memory, no agent handoffs and no cohort grouping. It collapses into generic chat. This line opens the README.
+- **Prior art:** Atrium won FalkorDB's own "Memory Meets Motion" hackathon by grouping students by misconception. Unlearn adds root-cause traversal, cross-session memory, multi-agent handoff, an MCP server and a measured eval. The README names Atrium.
 
 ## Scope and non-goals
 
 One subject (Maths), one topic cluster (Fractions, about 30–40 constructs), one classroom demo with 30 simulated students. Everything else is a non-goal.
 
-**Topic options.** Pick one; Fractions is the default. Building more than one in 40 hours would cost you the eval. Confirm the topic names with `TopicName.value_counts()` before committing.
+**Topic options.** One topic is in scope; Fractions is the default. Building more than one in the 40-hour window would have left no time for the eval. Topic names are confirmed with `TopicName.value_counts()` before one is chosen.
 
 | Topic | Prerequisite chain | Verdict |
 | --- | --- | --- |
 | Fractions (default) | place value, division, multiples/LCM → equivalent fractions → adding and subtracting → simplifying | Safe choice. Deep chains, text-only questions |
 | Solving linear equations | negative numbers → order of operations → collecting like terms → expanding brackets → solving | Best alternative. Very relatable, text-only questions, and the root cause often sits in a different topic (negative numbers) |
-| Algebraic fractions | number fractions → factorising → expanding → algebraic fractions | Best demo moment: a student fails algebra because of Year 6 fractions, 3–4 hops back. About twice the authoring, since you build the fractions layer too |
+| Algebraic fractions | number fractions → factorising → expanding → algebraic fractions | Best demo moment: a student fails algebra because of Year 6 fractions, 3–4 hops back. About twice the authoring, since the fractions layer has to be built too |
 | Percentages | fractions/decimals → percentages → percentage change → reverse percentages | Good. Relatable through discounts and marks, but shorter chains |
 
 **In scope**
@@ -82,13 +82,13 @@ Requests flow down from the UIs or an MCP client to the agents, which reason thr
 
 One real dataset (Eedi, CC BY 4.0) supplies the misconception graph. Everything else is authored or synthetic, and the README must say so.
 
-| Source | What you get | Status | Licence |
+| Source | Contents | Status | Licence |
 | --- | --- | --- | --- |
 | [Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph) `data/construct-map.csv` | 2,258 constructs with Subject → Topic → SubTopic hierarchy | Real | CC BY 4.0 |
 | Same dataset, `data/misconception-map.csv` | 19,294 weighted misconception↔construct edges, 8,117 misconceptions | Real | CC BY 4.0 |
-| `REQUIRES` prerequisite edges | Construct → prerequisite construct, chosen topic only | Authored by you (LLM draft + manual review) | Yours |
-| Questions and options | 3–5 MCQs per construct, each wrong option → one misconception | Generated + reviewed | Yours |
-| Students and attempts | 30 simulated students with planted misconceptions | Synthetic | Yours |
+| `REQUIRES` prerequisite edges | Construct → prerequisite construct, chosen topic only | Authored for this project (LLM draft + manual review) | This repo (MIT) |
+| Questions and options | 3–5 MCQs per construct, each wrong option → one misconception | Generated + reviewed | This repo (MIT) |
+| Students and attempts | 30 simulated students with planted misconceptions | Synthetic | This repo (MIT) |
 
 **Exact columns** (from the dataset's data dictionary):
 
@@ -99,8 +99,8 @@ One real dataset (Eedi, CC BY 4.0) supplies the misconception graph. Everything 
 
 **Facts that shape the design**
 
-- The release has no questions, no distractors and no student data. You must generate questions yourself.
-- There are no construct-to-construct prerequisite edges. `REQUIRES` is your own work, so label it `source:'curated'`.
+- The release has no questions, no distractors and no student data. Questions have to be generated for this project.
+- There are no construct-to-construct prerequisite edges. `REQUIRES` is authored for this project, so it is labelled `source:'curated'`.
 - Download from the canonical `Eedi/Eedi-Misconceptions-Graph` repo (public), pinned to commit `2ae0839debf73c0ce7dd6578d8ea8b99e7be8631`. The duplicate `wangwangduishuidajiao/Eedi-Misconceptions-Graph` is only a fallback.
 - Do not commit the Kaggle "Mining Misconceptions" CSVs. Their redistribution terms are unverified.
 
@@ -224,7 +224,7 @@ MERGE (m)-[e:SEEN_IN]->(c) ON CREATE SET e.pct = r.pct
 **Curated prerequisites** live in `data/curated/requires.csv` with columns `construct_id,prereq_id,note`.
 
 1. Ask an LLM to draft edges from the construct names only.
-2. Review every row by hand (about 45 minutes for 40–60 rows). Delete anything you can't justify in one sentence.
+2. Review every row by hand (about 45 minutes for 40–60 rows). Delete any edge that can't be justified in one sentence.
 3. Check it is acyclic with `networkx.is_directed_acyclic_graph` before loading. Fail the script if not.
 4. Set `weight: 1` on every `REQUIRES` edge (needed by `algo.SPpaths`).
 
@@ -559,7 +559,7 @@ if __name__ == "__main__":
     mcp.run()
 ```
 
-Record 20 seconds of Claude Desktop calling `cohorts` then `propose` on the demo class for the video.
+The MCP demo is about 20 seconds of Claude Desktop calling `cohorts` then `propose` on the demo class.
 
 ## API and UI
 
@@ -587,7 +587,7 @@ FastAPI serves the API and the UI. The UI is static HTML, CSS and JS in `api/sta
 2. **Tutor (same page, after diagnosis):** a "Last time you…" banner from `recall`, the explanation, the skill used, one check question.
 3. **Teacher dashboard:** cohort groups, keystone constructs, pending proposals with Approve and Reject, and a chat box.
 4. **Receipt drawer:** opens on every answer and shows the Cypher, params and rows behind it.
-5. **Eval tab:** the results table from your eval run.
+5. **Eval tab:** the results table from the eval run.
 
 Colour misconception nodes red, mastered constructs green, the root cause amber with a thick border. Keep everything else grey so the path stands out.
 
@@ -660,11 +660,11 @@ volumes:
   falkor-data:
 ```
 
-- **Pin the image.** Pull once, test your exact queries, then pin that tag. Participants hit crashes on some 6.0.x builds.
+- **Pin the image.** Pull once, test the exact queries, then pin that tag. Other participants reported crashes on some 6.0.x builds.
 - **Self-heal on boot.** On API startup, call `GRAPH.LIST` and seed only what is missing: no `curriculum` means a full seed, no `class_template` means 04 then 05, and no `class_demo` means 05. A wiped instance then recovers on its own. The Eedi CSVs are baked into the image, so seeding needs no network.
 - **Keep FalkorDB private.** In prod, publish only the API port (8000), which also serves the UI. Don't publish 6379 or the FalkorDB Browser port.
 - **Bake the embedding model into the API image** at build time, so cold starts don't download it.
-- **Wake before judging.** Hit `/health` after submitting and again during judging if your host sleeps idle services.
+- **Wake on demand.** If the host sleeps idle services, a request to `/health` wakes the demo; it is requested after submission and during the judging period.
 - **Local fallback.** The README's setup is `cp .env.example .env` (set `FALKOR_PASSWORD`), then `docker compose --profile dev up -d --build`. Self-heal seeds on first boot.
 
 ## Repo structure
@@ -681,7 +681,7 @@ unlearn/
 ├── data/
 │   ├── raw/                    # Eedi CSVs (gitignored, downloaded)
 │   └── curated/
-│       ├── requires.csv        # your prerequisite edges
+│       ├── requires.csv        # curated prerequisite edges
 │       ├── questions.json
 │       └── skills.json
 ├── scripts/                    # 01_download … 05_new_class
@@ -702,11 +702,11 @@ unlearn/
 
 Keep every Cypher string in `queries.py`. The rules require the README to list the queries the product depends on, and one file makes that a copy-paste job. Commit small and often from Oct 17 onward, so the history shows the work started after Oct 15.
 
-## Build plan
+## Planned build order
 
-About 28 hours of work and two sleeps between now and a 22:00 IST submit on Oct 18. Each block has a "done when" test. If a block runs over by an hour, take its cut-line and move on.
+The plan covered about 28 hours of work and two sleeps, ending with submission at 22:00 IST on Oct 18. Each block had a "done when" test and a fallback scope, used if the block ran more than an hour over.
 
-| Window (IST) | Deliverable | Done when | Cut-line if behind |
+| Window (IST) | Deliverable | Done when | Fallback scope |
 | --- | --- | --- | --- |
 | Oct 17, 03:30–06:00 | Repo, Compose, download, load `curriculum`, derive edges | `MATCH (m:Misconception) RETURN count(m)` returns 8117 | Skip `SHARES_MISCONCEPTION` and drop `bridges` |
 | 06:00–12:00 | Sleep | — | — |
@@ -716,19 +716,19 @@ About 28 hours of work and two sleeps between now and a 22:00 IST submit on Oct 
 | 21:00–Oct 18, 01:00 | Agents, handoff, approval gate, LLM chain, receipt check | CLI runs one full session end to end | Teacher agent only proposes `regroup` |
 | 01:00–02:00 | MCP wrapper | Claude Desktop calls `root_cause` | Expose 3 tools only |
 | 02:00–07:30 | Sleep | — | — |
-| 07:30–11:30 | API, static web UI, deploy | Live URL works on your phone | Static graph render, no animation |
+| 07:30–11:30 | API, static web UI, deploy | Live URL works on a phone | Static graph render, no animation |
 | 11:30–14:30 | Eval run, concurrency numbers | Results table filled | 15 students, 1 seed, conditions B and C only |
 | 14:30–17:30 | README, `AI_USAGE.md`, demo video | Video under 3 minutes, uploaded | One take, no editing |
 | 17:30–20:00 | dev.to blog, bug fixes | Blog published | Shorter blog |
 | 20:00–22:00 | Submit, check every link in a private window | Submission confirmed | — |
 
-**Never cut:** `root_cause`, cross-session `recall`, the approval gate, the README queries list, and at least a two-condition eval. Those are the submission's argument.
+**Core scope, with no fallback:** `root_cause`, cross-session `recall`, the approval gate, the README queries list, and at least a two-condition eval. Those carry the submission's argument.
 
 ## Demo, README, blog and submission
 
-**Demo video (2:30)**
+**Planned demo video (2:30)**
 
-| Time | On screen | Say |
+| Time | On screen | Narration |
 | --- | --- | --- |
 | 0:00–0:20 | Two synthetic students, both 40% on fractions | "Same score, opposite problems. A chat tutor can't tell them apart." |
 | 0:20–1:00 | Diagnoser asks 4 questions; misconception nodes light up; root cause traced 2 hops back; receipt drawer opens | "Every claim comes with the Cypher that proves it." |
@@ -747,12 +747,12 @@ About 28 hours of work and two sleeps between now and a 22:00 IST submit on Oct 
 6. Eval method and results table
 7. How it differs from Atrium
 8. Data sources, licences, Eedi attribution, what is synthetic
-9. Known FalkorDB issues you hit and the workarounds
+9. Known FalkorDB issues hit during the build, and the workarounds
 10. One-command setup
 11. AI assistant disclosure (link `AI_USAGE.md`)
 12. Tracks entered: 02 primary, 01 secondary
 
-**Blog (dev.to, for the AirPods prize).** Title idea: "I gave an AI tutor a map of 8,117 ways students get maths wrong." Cover the 40%/40% example, the `root_cause` query, the eval table, and an honest "what broke" section. Add the line "Built for Graph Hacks (WeMakeDevs × FalkorDB)", as other entrants do.
+**Blog (dev.to; the hackathon offered a separate blog prize, AirPods).** Planned title: "I gave an AI tutor a map of 8,117 ways students get maths wrong." It covers the 40%/40% example, the `root_cause` query, the eval table, and an honest "what broke" section, and carries the line "Built for Graph Hacks (WeMakeDevs × FalkorDB)", as other entrants' posts do.
 
 **Submission checklist**
 
@@ -769,12 +769,12 @@ About 28 hours of work and two sleeps between now and a 22:00 IST submit on Oct 
 
 ## Risks and FalkorDB gotchas
 
-The biggest risk is time, not FalkorDB. Hand-curating prerequisites and questions eats the afternoon if you let it. Timebox it to 3.5 hours.
+The biggest planned risk was time, not FalkorDB: hand-curating prerequisites and questions could take the whole afternoon, so it was limited to 3.5 hours.
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Curating `REQUIRES` and questions overruns | Everything downstream slips | Hard stop at 15:30 Oct 17; take the 20-construct cut-line |
-| Judges call the prerequisite graph "made up" | Credibility | Label it curated, keep it small, show the Eedi data is real |
+| Curating `REQUIRES` and questions overruns | Everything downstream slips | Stop curating at 15:30 Oct 17 and fall back to 20 constructs |
+| The prerequisite graph is hand-curated, so it can read as made up | Credibility | Label it curated, keep it small, show the Eedi data is real |
 | Simulator favours Unlearn | Eval looks rigged | Add noise, state the bias, include vector RAG with full history |
 | LLM free-tier limits hit mid-eval | Eval stalls | Cache by prompt hash; graph-only template fallback |
 | Host wipes or sleeps the DB | Dead demo link | Self-heal seed on boot; `/health` wake |
@@ -789,8 +789,8 @@ The biggest risk is time, not FalkorDB. Hand-curating prerequisites and question
 - **No aggregates inside pattern comprehensions.** Aggregate in a `WITH` first.
 - **Vector indexes need both `dimension` and `similarityFunction`,** and every vector must match the dimension. Insert with `vecf32()`.
 - **Vector queries can't filter.** Over-fetch and filter with a `MATCH` after.
-- **Betweenness samples randomly** unless you set `samplingSeed`.
-- **Bugs reported on 6.0.x:** returning a never-stored property next to a count crashed the server, and `WHERE id(n) > -1` returned nothing. Test your exact queries on your pinned image.
+- **Betweenness samples randomly** unless `samplingSeed` is set.
+- **Bugs reported on 6.0.x:** returning a never-stored property next to a count crashed the server, and `WHERE id(n) > -1` returned nothing. Test the exact queries on the pinned image.
 - **Writes serialise per graph.** Good for safe claims and per-class isolation. Batch writes rather than issuing many tiny ones.
 
 **Sources**

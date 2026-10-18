@@ -14,7 +14,7 @@ Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory an
 
 ## Try it
 
-- **Live demo:** [unlearn-ejdh.onrender.com](https://unlearn-ejdh.onrender.com) (free tier: first load can take about 1 minute; demo state resets on restart). The video's two students are at [`?class=demo_video`](https://unlearn-ejdh.onrender.com/?class=demo_video).
+- **Live demo:** [unlearn-ejdh.onrender.com](https://unlearn-ejdh.onrender.com) (free tier: first load can take about 1 minute; demo state resets on restart). The two-student demo (Asha and Ben) is at [`?class=demo_video`](https://unlearn-ejdh.onrender.com/?class=demo_video).
 - **Demo video:** <link>
 - **Run it locally.** With Docker installed, one command starts it once `.env` exists. Without `.env`, FalkorDB exits on startup because its password is empty. Full steps, including setting a real password, are in [Local setup](#local-setup):
 
@@ -23,7 +23,7 @@ Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory an
   docker compose --profile dev up -d --build --wait
   ```
 
-  Then open **http://localhost:8000**. For the video's two students, run `docker compose exec api python scripts/demo_scenario.py` and open `http://localhost:8000/?class=demo_video`.
+  Then open **http://localhost:8000**. For the two-student demo (Asha and Ben), run `docker compose exec api python scripts/demo_scenario.py` and open `http://localhost:8000/?class=demo_video`.
 - **No API keys needed.** Without them every reply is a template built from the graph's rows. The diagnosis, memory and receipts are the same either way.
 - **One-page explainer:** [docs/EXPLAIN.md](docs/EXPLAIN.md) covers the graph model, the root-cause query, the search, the evidence weighting, the recall rule and the known weaknesses.
 
@@ -99,7 +99,7 @@ flowchart TB
 - **Stop thresholds.** The Diagnoser stops when the top root-cause evidence is ≥ 1.5 and leads the runner-up by ≥ 0.5. These are the SPEC's original values, and they follow from the evidence scale: the median prerequisite distractor has weight 1.0, so two hits score 1.5. Looser thresholds (1.0 / 0.33) named the planted root slightly more often on the simulator: 104/115/119 against 102/110/113 of the 139 (root, target) pairs on seeds 0–2 (`eval/design_checks.py`, [`design_checks.json`](eval/results/design_checks.json)). They were not adopted, so the thresholds aren't tuned to the simulator the eval scores against. An earlier version of this note gave 109/126/126 against 103/121/121 of 151; those came from earlier code on the pre-review data.
 - **Recall.** `recall` returns every misconception the student has shown. It ranks those on the root cause the student was diagnosed with last session first, then the strongest, then the most recent.
   - **Why it changed:** the build spec kept only misconceptions seen at least twice. That left 58 of 90 simulated students with nothing to recall in session 2.
-  - **Chosen after seeing the eval results, stated plainly:** I measured three rules on the same session-1 histories and picked "last diagnosed root first" afterwards. The tutor should open with what it diagnosed last session, and that rule does exactly that.
+  - **Chosen after seeing the eval results:** three rules were measured on the same session-1 histories, and "last diagnosed root first" was picked afterwards. The tutor should open with what it diagnosed last session, and that rule does exactly that.
   - **The cost:** fewer of the named misconceptions are right than under the original rule, because one-off slips get named too.
 
   Measured by `eval/design_checks.py` on the eval's 90 students ([`design_checks.json`](eval/results/design_checks.json)):
@@ -558,7 +558,7 @@ Then open **http://localhost:8000**.
 - **First run.** `--build` takes a few minutes and bakes the embedding model and the pinned Eedi CSVs into the image. On first boot the API seeds every graph before it reports healthy (under a minute), and `--wait` returns once it has. Later starts take seconds.
 - **Check it.** `curl -s localhost:8000/health` lists the graphs (`curriculum`, `class_template`, `class_demo`), their node counts and the FalkorDB version.
 - **Fill the teacher view.** Open the Teacher tab and click "Simulate the class", or run `curl -X POST localhost:8000/classes/demo/simulate-all`.
-- **The demo video's scenario.** Run `docker compose exec api python scripts/demo_scenario.py`, then open `http://localhost:8000/?class=demo_video`. Asha and Ben both score 40% and have different root causes; `--verify 10` replays both students 10 times.
+- **The two-student demo scenario.** Run `docker compose exec api python scripts/demo_scenario.py`, then open `http://localhost:8000/?class=demo_video`. Asha and Ben both score 40% and have different root causes; `--verify 10` replays both students 10 times.
 - **Stop it.** `docker compose --profile dev down`. The graphs stay in the `falkor-data` volume. Add `-v` to wipe them; the next start re-seeds itself.
 - **Optional LLMs.** Put any of `GROQ_API_KEY`, `GEMINI_API_KEY` or `OPENROUTER_API_KEY` in `.env` before starting. Without them, every reply is a template built from the graph's rows.
 - **A local model instead (dev profile only).** With [Ollama](https://ollama.com) running on the host, set `OLLAMA_BASE_URL=http://host.docker.internal:11434/v1` (and optionally `OLLAMA_MODEL`) in `.env` and run the `up` command again. The app then tries the local model first. The `prod` profile never passes it.

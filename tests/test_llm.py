@@ -117,7 +117,7 @@ def test_app_chain_order(monkeypatch):
     assert [(p.name, p.model) for p in llm.available()] == [
         ("gemini", "gemini-3.8-flash"), ("gemini", "gemini-3.6-flash"), ("gemini", "gemini-3.5-flash-lite")]
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-    assert llm.available()[0].name == "ollama"  # local recording: Ollama first, only when set
+    assert llm.available()[0].name == "ollama"  # local runs: Ollama first, only when set
 
 
 def test_daily_quota_cools_a_model_down(monkeypatch):

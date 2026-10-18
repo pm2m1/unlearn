@@ -1,4 +1,4 @@
-# Review for Parth — Phase 2 drafts
+# Curated data review — Phase 2 drafts
 
 Everything in `data/curated/` is a **DRAFT** written by Claude Code. **Parth reviewed sections 1–3 on Oct 18, 2026.** His decisions and reasons are in section 0. They were **applied on Oct 18**: `scripts/author_questions.py` and `requires.csv` were edited, the graphs rebuilt, and the eval re-run on the new data.
 Suggested order: REQUIRES edges (they drive `root_cause`), then the stretch distractors, then the 10-question spot check.
@@ -76,7 +76,7 @@ make seed && make test
 
 ## 1. REQUIRES edges to check (12 of 59 are not "high")
 
-Direction is (needs)-[:REQUIRES]->(prerequisite). If you delete an edge, also check `max depth` stays ≥ 3 (`tests/test_curated.py` checks it).
+Direction is (needs)-[:REQUIRES]->(prerequisite). After deleting an edge, check that `max depth` stays ≥ 3 (`tests/test_curated.py` checks it).
 
 | Confidence | Construct (needs) | Prerequisite | Note |
 | --- | --- | --- | --- |
@@ -93,7 +93,7 @@ Direction is (needs)-[:REQUIRES]->(prerequisite). If you delete an edge, also ch
 | medium | 3328 Subtract with fractions and integers where the answer is less than 0 | 432 Subtract proper fractions with the same denominator | Subtracting an integer from a fraction is done by writing the integer over the same denominator and subtracting. |
 | medium | 3632 Estimate the value of a fraction addition or subtraction using benchmark fractions | 415 Order fractions whose denominators are not multiples of the same number | Rounding to 0, 1/2 or 1 means comparing each fraction against those benchmarks. |
 
-**Prerequisites chosen from outside Fractions (7):** 3378 times tables, 342 multiples, 345 LCM, 331 factors, 338 HCF, 164 mental division, 3193 division as a fraction. **Place value was left out on purpose:** I could not justify a REQUIRES edge from any of the four kept subtopics to a place-value construct in one sentence.
+**Prerequisites chosen from outside Fractions (7):** 3378 times tables, 342 multiples, 345 LCM, 331 factors, 338 HCF, 164 mental division, 3193 division as a fraction. **Place value was left out on purpose:** no REQUIRES edge could be justified from any of the four kept subtopics to a place-value construct in one sentence.
 
 ## 2. Distractors that are a stretch (14 options)
 
@@ -120,7 +120,7 @@ Other things to look at in the same pass:
 - **Construct 3839** (which two whole numbers a fraction lies between) has only 2 misconceptions in Eedi. All three "17 and 18"-style distractors are stretches; consider dropping that distractor and leaving 2-option questions.
 - **Construct 3587** (comparing fractions needs the same whole) has only 1 misconception in Eedi, so its 3 questions have 2 options: q-3587-1, q-3587-2, q-3587-3.
 - **31 questions have 3 options**, because the construct had too few misconceptions that map to a specific wrong answer: q-413-2, q-3320-1, q-3320-2, q-418-1, q-418-2, q-418-3, q-419-1, q-419-2, q-419-3, q-414-2, q-415-2, q-415-3, q-3839-1, q-3839-2, q-3839-3, q-420-2, q-430-1, q-430-2, q-430-3, q-426-1, q-426-2, q-426-3, q-3241-1, q-3241-2, q-3241-3, q-434-1, q-434-2, q-437-3, q-3378-1, q-3378-2, q-331-3.
-- **Eedi data is noisy.** Some constructs list misconceptions from other topics (e.g. 437 lists "Believes number sequences always increase", 426 lists a probability misconception). I skipped those rather than force a distractor.
+- **Eedi data is noisy.** Some constructs list misconceptions from other topics (e.g. 437 lists "Believes number sequences always increase", 426 lists a probability misconception). Those were skipped rather than forcing a distractor.
 
 ## 3. Ten random questions to spot-check (seed 12)
 
@@ -217,7 +217,7 @@ A number line from 0 to 1 is split into 10 equal gaps. An arrow points to the 7t
 
 **Data and loader choices**
 9. **Extra columns and fields:**
-   - `requires.csv` has a `confidence` column (as you asked). REQUIRES edges also store `note` and `confidence` alongside `source:'curated'` and `weight:1`.
+   - `requires.csv` has a `confidence` column, as requested. REQUIRES edges also store `note` and `confidence` alongside `source:'curated'` and `weight:1`.
    - `questions.json` options carry extra fields: `check` (the maths spec used to verify the question), `why` and `stretch`. The graph stores only the SPEC fields.
 10. **Questions have 2–4 options**, not always 4 (see section 2).
 11. **8 skills**, two of them not in the SPEC's list: "Same-size pieces comparison" and "Factor and multiple ladders". Skills also store a `description`.
@@ -285,7 +285,7 @@ Results, top-1 (top-3) over 30 students:
 This is an informal check, not the eval harness. The SPEC deepest-first policy was only measured on seed 0.
 
 ### `pct` weighting makes roots with generic misconceptions hard to find (decision needed)
-Step 0's evidence formula weights each hit by `SEEN_IN.pct / 100`. It does what you asked: in `tests/test_root_cause_weighting.py`, a specific misconception beats a generic one spread over 4 prerequisites.
+Step 0's evidence formula weights each hit by `SEEN_IN.pct / 100`. It does what was specified: in `tests/test_root_cause_weighting.py`, a specific misconception beats a generic one spread over 4 prerequisites.
 
 But some prerequisites only have generic Eedi misconceptions:
 - 3342 (fraction notation): its distractors' `pct` values are 25, 21, 20, 10, 5.9 and 1.5.
@@ -303,7 +303,7 @@ Options, none applied yet:
 - (b) Normalise per construct (divide by the construct's highest distractor `pct`).
 - (c) Keep the formula and rank by depth among candidates above an evidence floor.
 
-I'd try (a) first: it keeps your "generic spread counts less" property, and it stops penalising constructs whose misconceptions also appear outside the slice.
+Option (a) is the one to try first: it keeps the "generic spread counts less" property, and it stops penalising constructs whose misconceptions also appear outside the slice.
 
 ### Other Phase 3 deviations and choices
 15. **Task carries `construct_id` and `session`.** The SPEC's Task has neither, but every agent needs both.

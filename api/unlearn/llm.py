@@ -17,7 +17,7 @@ The Gemini model names are the API's own (models.list, 2026-10-17); override the
 Ollama: ollama_provider() talks to OLLAMA_BASE_URL with OLLAMA_MODEL (default qwen3.5:27b-q4_K_M) and turns
 Qwen's thinking off with reasoning_effort="none" (Ollama ignores think=false on its OpenAI-compatible
 endpoint). The eval always uses it (default http://localhost:11434/v1). The app uses it first only when
-OLLAMA_BASE_URL is set in .env, for recording locally; compose never passes it, so the deployed app doesn't.
+OLLAMA_BASE_URL is set in .env, for local runs; only the dev compose profile passes it, so the deployed app doesn't.
 From inside Docker the address would be http://host.docker.internal:11434/v1.
 
 Replies are cached on disk by a hash of (provider, model, messages), so reruns cost nothing.
@@ -88,7 +88,7 @@ def ollama_provider(model: str | None = None) -> Provider:
 
 
 def app_providers() -> list[Provider]:
-    """The app's chain, in order. Ollama leads only when OLLAMA_BASE_URL is set (local recording)."""
+    """The app's chain, in order. Ollama leads only when OLLAMA_BASE_URL is set (local runs)."""
     return ([ollama_provider()] if os.getenv("OLLAMA_BASE_URL") else []) + hosted_providers()
 
 

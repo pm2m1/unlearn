@@ -1,4 +1,4 @@
-"""The demo video's scenario: two students, the same 40% on fractions, opposite root causes.
+"""The two-student demo scenario: two students, the same 40% on fractions, opposite root causes.
 
     python scripts/demo_scenario.py              # (re)build class_demo_video: students + their fractions check
     python scripts/demo_scenario.py --verify 10  # rebuild and play sessions 1 and 2 for both, 10 times over

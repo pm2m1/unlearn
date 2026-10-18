@@ -58,8 +58,8 @@ services:
   api:
     <<: *api
     profiles: ["dev"]
-    # Dev only: a local Ollama model first in the chain when OLLAMA_BASE_URL is set in .env (for recording the
-    # demo). Use http://host.docker.internal:11434/v1 from inside the container. Prod never passes it.
+    # Dev only: a local Ollama model first in the chain when OLLAMA_BASE_URL is set in .env (for running the
+    # demo on a local model). Use http://host.docker.internal:11434/v1 from inside the container. Prod never passes it.
     environment:
       <<: *api-env
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}

@@ -1,4 +1,4 @@
-"""The demo video's scenario replays exactly: same 40% check, different correct roots, recall in session 2."""
+"""The two-student demo scenario replays exactly: same 40% check, different correct roots, recall in session 2."""
 
 import importlib.util
 from pathlib import Path
