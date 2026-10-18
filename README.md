@@ -10,9 +10,10 @@ Built for **Graph Hacks (WeMakeDevs × FalkorDB)**. Tracks: **02 Agent Memory an
 ## Try it
 
 - **Demo video:** <link>
-- **No hosted deployment.** There was no budget for one, so Unlearn runs locally. With Docker installed, one command starts it after cloning (full steps in [Local setup](#local-setup)):
+- **No hosted deployment.** There was no budget for one, so Unlearn runs locally. With Docker installed, one command starts it once `.env` exists. Without `.env`, FalkorDB exits on startup because its password is empty. Full steps, including setting a real password, are in [Local setup](#local-setup):
 
   ```
+  cp .env.example .env
   docker compose --profile dev up -d --build --wait
   ```
 
@@ -399,7 +400,7 @@ Tool latency for all 16 tools, 50 calls each, is in [`eval/results/latency.json`
 
 ## How Unlearn differs from Atrium
 
-Atrium won FalkorDB's own "Memory Meets Motion" hackathon by grouping students by misconception. Unlearn keeps that grouping (`cohorts`, WCC over shared misconceptions) and adds what a grouping can't tell a teacher:
+Atrium won FalkorDB's own "Memory Meets Motion" hackathon ([FalkorDB's recap](https://www.falkordb.com/blog/memory-meets-motion-the-falkordb-standouts/)) by grouping students by misconception. Unlearn keeps that grouping (`cohorts`, WCC over shared misconceptions) and adds what a grouping can't tell a teacher:
 - **Why.** `root_cause` traverses prerequisites to the skill that broke, often in another topic.
 - **Memory across sessions.** Session 2 opens with what session 1 found.
 - **Multi-agent handoff through the graph.** Tasks are claimed, handed off and approved, all as graph state.
@@ -411,7 +412,7 @@ Atrium won FalkorDB's own "Memory Meets Motion" hackathon by grouping students b
 
 | Source | What | Status | Licence |
 | --- | --- | --- | --- |
-| [Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph), pinned to commit `2ae0839debf73c0ce7dd6578d8ea8b99e7be8631` | 2,258 constructs (Subject → Topic → SubTopic hierarchy), 8,117 misconceptions, 19,294 weighted misconception↔construct edges | Real | CC BY 4.0 |
+| [Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph), pinned to commit `2ae0839debf73c0ce7dd6578d8ea8b99e7be8631` | 2,258 constructs (Subject → Topic → SubTopic hierarchy), 8,117 misconceptions, 19,294 weighted misconception↔construct edges | Real | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `data/curated/requires.csv` | 57 prerequisite edges between 40 constructs (10 of 57 marked medium or low confidence) | Authored (AI draft, human review: 2 edges deleted, see [REVIEW.md](REVIEW.md)) | MIT (this repo) |
 | `data/curated/questions.json` | 120 multiple-choice questions, each wrong option tied to an Eedi misconception, maths checked with `fractions.Fraction` | Authored (AI draft, human review: 9 options removed, see [REVIEW.md](REVIEW.md)) | MIT |
 | `data/curated/skills.json` | 8 remediation skills | Authored (AI draft, human review) | MIT |
@@ -419,7 +420,7 @@ Atrium won FalkorDB's own "Memory Meets Motion" hackathon by grouping students b
 
 **Attribution** (required by the licence):
 
-> "Eedi Misconceptions Graph v1.0" by Eedi, licensed under CC BY 4.0. Adapted: filtered to Number/Fractions for the class graphs, with curated prerequisite edges and generated questions added.
+> "[Eedi Misconceptions Graph v1.0](https://huggingface.co/datasets/Eedi/Eedi-Misconceptions-Graph)" by Eedi, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Adapted: filtered to Number/Fractions for the class graphs, with curated prerequisite edges and generated questions added.
 
 Eedi does not endorse this project. There are no real students, logins or personal data anywhere.
 
