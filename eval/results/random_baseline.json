@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "commit": "cdf3bb76ed6217257e7ba3cfba4324e1480b4363",
-    "uncommitted_changes": false,
+    "commit": "3f3856f421ae2f2670051f64134da1fbda430773",
+    "uncommitted_changes": true,
     "seeds": [
       0,
       1,
@@ -9,18 +9,31 @@
     ],
     "graph": {
       "name": "class_template",
-      "sha256": "bc268f15eaaf77236355575e97e76dd4460f31989ed0a1d3b08e965597745499",
+      "sha256": "8f1c23674a4220cd767d1352efd785e5660b9837255d099b53ef9ba80416016f",
       "nodes": 1060,
-      "edges": 1826
+      "edges": 1826,
+      "indexes": 8,
+      "vector_index_options": [
+        {
+          "id": {},
+          "embedding": {
+            "dimension": 384,
+            "similarityFunction": "cosine",
+            "M": 16,
+            "efConstruction": 200,
+            "efRuntime": 1000
+          }
+        }
+      ]
     },
-    "run_at": "2026-10-19T13:10:19Z"
+    "run_at": "2026-10-19T17:26:56Z"
   },
   "method": "    python eval/random_baseline.py [--seeds 0,1,2] [--students 30]",
   "per_seed": {
     "0": {
       "A": {
-        "top1_misconception": 0.027,
-        "top3_misconception": 0.08,
+        "top1_misconception": 0.03,
+        "top3_misconception": 0.09,
         "root_cause_accuracy": 0.206
       },
       "B": {
@@ -41,7 +54,7 @@
         "Bplus_constructs": 40
       },
       "planted_misconception_on_list": {
-        "A": 0.267,
+        "A": 0.3,
         "B": 0.333,
         "B+": 1
       },
@@ -49,8 +62,8 @@
     },
     "1": {
       "A": {
-        "top1_misconception": 0.03,
-        "top3_misconception": 0.088,
+        "top1_misconception": 0.027,
+        "top3_misconception": 0.078,
         "root_cause_accuracy": 0.239
       },
       "B": {
@@ -71,7 +84,7 @@
         "Bplus_constructs": 40
       },
       "planted_misconception_on_list": {
-        "A": 0.267,
+        "A": 0.233,
         "B": 0.167,
         "B+": 1
       },

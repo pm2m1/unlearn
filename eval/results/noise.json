@@ -1,7 +1,7 @@
 {
   "provenance": {
-    "commit": "cdf3bb76ed6217257e7ba3cfba4324e1480b4363",
-    "uncommitted_changes": false,
+    "commit": "3f3856f421ae2f2670051f64134da1fbda430773",
+    "uncommitted_changes": true,
     "seeds": [
       0,
       1,
@@ -9,11 +9,24 @@
     ],
     "graph": {
       "name": "class_template",
-      "sha256": "bc268f15eaaf77236355575e97e76dd4460f31989ed0a1d3b08e965597745499",
+      "sha256": "8f1c23674a4220cd767d1352efd785e5660b9837255d099b53ef9ba80416016f",
       "nodes": 1060,
-      "edges": 1826
+      "edges": 1826,
+      "indexes": 8,
+      "vector_index_options": [
+        {
+          "id": {},
+          "embedding": {
+            "dimension": 384,
+            "similarityFunction": "cosine",
+            "M": 16,
+            "efConstruction": 200,
+            "efRuntime": 1000
+          }
+        }
+      ]
     },
-    "run_at": "2026-10-19T13:11:04Z"
+    "run_at": "2026-10-19T17:27:43Z"
   },
   "method": "The simulator picks wrong answers through the same option-to-misconception map Unlearn reads. noise=p adds\nanswers that map can't explain (eval/simulator.py): a uniformly random wrong option outside the student's\nplanted misconceptions with probability p, and a correct answer slipping to a random wrong option with\nprobability p/2. Only C is re-run (template wording, no LLM calls). A, B and B+ are their saved clean-simulator\nscores from eval/results/eval.json; B+ ran on seed 0 only, so it is compared with C's seed 0 at the same p.",
   "seeds": [
@@ -23,28 +36,28 @@
   ],
   "clean_baselines": {
     "A": {
-      "top1_misconception": 0.067,
-      "top3_misconception": 0.067,
-      "root_cause_accuracy": 0.322,
+      "top1_misconception": 0.089,
+      "top3_misconception": 0.1,
+      "root_cause_accuracy": 0.3,
       "session2_recall": 0
     },
     "B": {
       "top1_misconception": 0.066,
       "top3_misconception": 0.134,
-      "root_cause_accuracy": 0.367,
+      "root_cause_accuracy": 0.378,
       "session2_recall": 0.089
     },
     "B+": {
       "top1_misconception": 0.233,
-      "top3_misconception": 0.467,
+      "top3_misconception": 0.4,
       "root_cause_accuracy": 0.4,
       "session2_recall": 0.067
     }
   },
   "clean_baselines_from": {
     "file": "eval/results/eval.json",
-    "commit": "cdf3bb76ed6217257e7ba3cfba4324e1480b4363",
-    "graph_sha256": "bc268f15eaaf77236355575e97e76dd4460f31989ed0a1d3b08e965597745499"
+    "commit": "3f3856f421ae2f2670051f64134da1fbda430773",
+    "graph_sha256": "8f1c23674a4220cd767d1352efd785e5660b9837255d099b53ef9ba80416016f"
   },
   "levels": {
     "0.0": {
@@ -53,7 +66,7 @@
         "top3_misconception": 0.789,
         "root_cause_accuracy": 0.722,
         "questions_to_diagnosis": 5.189,
-        "session2_recall": 0.578
+        "session2_recall": 0.6
       },
       "C_ci95": {
         "top1_misconception": [
@@ -73,8 +86,8 @@
           5.4222
         ],
         "session2_recall": [
-          0.4778,
-          0.6667
+          0.5,
+          0.7
         ]
       },
       "C_seed0": {
@@ -113,7 +126,7 @@
         "top3_misconception": 0.578,
         "root_cause_accuracy": 0.522,
         "questions_to_diagnosis": 5.389,
-        "session2_recall": 0.367
+        "session2_recall": 0.378
       },
       "C_ci95": {
         "top1_misconception": [
@@ -133,15 +146,15 @@
           5.5889
         ],
         "session2_recall": [
-          0.2667,
-          0.4667
+          0.2778,
+          0.4778
         ]
       },
       "C_seed0": {
         "top1_misconception": 0.367,
         "top3_misconception": 0.667,
         "root_cause_accuracy": 0.667,
-        "session2_recall": 0.5
+        "session2_recall": 0.533
       },
       "n": 90,
       "beats_clean": {
@@ -173,7 +186,7 @@
         "top3_misconception": 0.278,
         "root_cause_accuracy": 0.333,
         "questions_to_diagnosis": 5.544,
-        "session2_recall": 0.167
+        "session2_recall": 0.178
       },
       "C_ci95": {
         "top1_misconception": [
@@ -194,14 +207,14 @@
         ],
         "session2_recall": [
           0.1,
-          0.2556
+          0.2667
         ]
       },
       "C_seed0": {
         "top1_misconception": 0.267,
         "top3_misconception": 0.367,
         "root_cause_accuracy": 0.467,
-        "session2_recall": 0.267
+        "session2_recall": 0.3
       },
       "n": 90,
       "beats_clean": {

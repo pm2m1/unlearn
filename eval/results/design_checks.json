@@ -51,8 +51,8 @@
   },
   "method": "    python eval/design_checks.py                 # both, seeds 0-2; writes eval/results/design_checks.json\n    python eval/design_checks.py --only recall   # or --only thresholds",
   "provenance": {
-    "commit": "cdf3bb76ed6217257e7ba3cfba4324e1480b4363",
-    "uncommitted_changes": false,
+    "commit": "3f3856f421ae2f2670051f64134da1fbda430773",
+    "uncommitted_changes": true,
     "seeds": [
       0,
       1,
@@ -60,10 +60,23 @@
     ],
     "graph": {
       "name": "class_template",
-      "sha256": "bc268f15eaaf77236355575e97e76dd4460f31989ed0a1d3b08e965597745499",
+      "sha256": "8f1c23674a4220cd767d1352efd785e5660b9837255d099b53ef9ba80416016f",
       "nodes": 1060,
-      "edges": 1826
+      "edges": 1826,
+      "indexes": 8,
+      "vector_index_options": [
+        {
+          "id": {},
+          "embedding": {
+            "dimension": 384,
+            "similarityFunction": "cosine",
+            "M": 16,
+            "efConstruction": 200,
+            "efRuntime": 1000
+          }
+        }
+      ]
     },
-    "run_at": "2026-10-19T13:11:05Z"
+    "run_at": "2026-10-19T17:27:43Z"
   }
 }
