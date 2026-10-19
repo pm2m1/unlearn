@@ -2,7 +2,8 @@
 # Scan the full git history for secrets. Prints counts only, never a matched value.
 #   scripts/secret_scan.sh        exit 0 if clean, 1 if anything is found
 # Patterns: provider keys (Groq gsk_, Gemini AIza and AQ., OpenRouter sk-or-, OpenAI-style sk-), GitHub,
-# Hugging Face, Slack and AWS tokens, private keys; plus every non-empty value in the local .env.
+# Hugging Face, Slack and AWS tokens, private keys, database URLs with a password; plus every non-empty
+# secret-like value in the local .env.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
@@ -32,13 +33,14 @@ check "huggingface hf_"      'hf_[A-Za-z0-9]{20,}'
 check "slack xox"            'xox[baprs]-[A-Za-z0-9-]{10,}'
 check "aws AKIA"             'AKIA[0-9A-Z]{16}'
 check "private key"          'BEGIN [A-Z ]*PRIVATE KEY'
+check "postgres url+password" 'postgres(ql)?://[^:/ ]+:[^@/ ]+@'
 
-# Every secret-like value set in the local .env (names with KEY, TOKEN, SECRET or PASSWORD) must not appear
+# Every secret-like value set in the local .env (names with KEY, TOKEN, SECRET, PASSWORD or DATABASE_URL) must not appear
 # anywhere in history. "|| [ -n "$key" ]" keeps a last line that has no trailing newline.
 if [ -f .env ]; then
   while IFS='=' read -r key value || [ -n "$key" ]; do
     [[ -z "$key" || "$key" == \#* ]] && continue
-    [[ "$key" =~ (KEY|TOKEN|SECRET|PASSWORD) ]] || continue
+    [[ "$key" =~ (KEY|TOKEN|SECRET|PASSWORD|DATABASE_URL) ]] || continue
     value="${value%$'\r'}"; value="${value#\"}"; value="${value%\"}"; value="${value#\'}"; value="${value%\'}"
     [[ ${#value} -lt 8 ]] && continue  # empty or placeholder-short
     n=$(grep -cF -- "$value" "$LOG" || true)

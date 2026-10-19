@@ -10,3 +10,5 @@ data/raw
 docs
 tests
 *.md
+# ...except the pilot's item review file: the pilot reads its APPROVED decisions at run time.
+!docs/pilot/ITEM_REVIEW.md

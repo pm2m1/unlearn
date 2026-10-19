@@ -30,6 +30,9 @@ COPY --chown=unlearn api ./api
 COPY --chown=unlearn scripts ./scripts
 COPY --chown=unlearn eval ./eval
 COPY --chown=unlearn data/curated ./data/curated
+# Pilot mode: the question set and the review file that approves it (only APPROVED items are used).
+COPY --chown=unlearn data/pilot ./data/pilot
+COPY --chown=unlearn docs/pilot/ITEM_REVIEW.md ./docs/pilot/ITEM_REVIEW.md
 
 # Bake the pinned Eedi CSVs (CC BY 4.0) so self-heal can seed without reaching Hugging Face.
 RUN python scripts/01_download.py

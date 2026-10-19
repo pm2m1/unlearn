@@ -38,6 +38,9 @@ x-api: &api
     GEMINI_MODELS: ${GEMINI_MODELS:-}
     OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}
     UNLEARN_LLM: ${UNLEARN_LLM:-auto}
+    # Pilot mode (off when unset): the event log (Neon) and the key that creates pilot classes.
+    PILOT_DATABASE_URL: ${PILOT_DATABASE_URL:-}
+    PILOT_ADMIN_KEY: ${PILOT_ADMIN_KEY:-}
   restart: unless-stopped
 
 services:
