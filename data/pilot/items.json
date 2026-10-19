@@ -1,0 +1,1571 @@
+{
+ "constructs": {
+  "164": "Carry out mental divisions when the answer is an integer",
+  "331": "Identify factors of a number",
+  "338": "Identify the Highest Common Factor of two numbers",
+  "342": "Identify multiples of a number",
+  "345": "Identify the Lowest Common Multiple of two numbers",
+  "408": "Identify equivalent fractions when presented as shapes or objects",
+  "409": "Identify equivalent fractions when presented as numbers",
+  "424": "Add proper fractions with the same denominator",
+  "432": "Subtract proper fractions with the same denominator",
+  "3342": "Read fractions",
+  "3378": "Know times tables up to 12 x 12"
+ },
+ "items": [
+  {
+   "id": "q-425-2",
+   "role": "S1",
+   "construct_id": 425,
+   "text": "2/3 + 1/6 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(2,3)+F(1,6)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "5/6",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "3/6",
+     "misconception_id": 26985,
+     "why": "Adds the numerators and uses the larger denominator."
+    },
+    {
+     "key": "C",
+     "text": "3/3",
+     "misconception_id": 26161,
+     "why": "Adds the numerators and uses the smaller denominator."
+    },
+    {
+     "key": "D",
+     "text": "3/9",
+     "misconception_id": 15521,
+     "why": "Adds the denominators to get a common denominator."
+    }
+   ]
+  },
+  {
+   "id": "q-427-1",
+   "role": "S1",
+   "construct_id": 427,
+   "text": "1/3 + 1/4 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(1,3)+F(1,4)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1/12",
+     "misconception_id": 26157,
+     "why": "Multiplies numerators and denominators, treating + as x."
+    },
+    {
+     "key": "B",
+     "text": "2/7",
+     "misconception_id": 19849,
+     "why": "Adds numerators and adds denominators."
+    },
+    {
+     "key": "C",
+     "text": "7/12",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "7/24",
+     "misconception_id": 13807,
+     "why": "Converts to 4/12 + 3/12 correctly, then adds the denominators too."
+    }
+   ]
+  },
+  {
+   "id": "q-433-1",
+   "role": "S1",
+   "construct_id": 433,
+   "text": "3/4 - 1/2 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(3,4)-F(1,2)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "2/2",
+     "misconception_id": 24501,
+     "why": "Subtracts numerators and denominators: (3-1)/(4-2)."
+    },
+    {
+     "key": "B",
+     "text": "4/6",
+     "misconception_id": 18369,
+     "why": "Adds numerators and adds denominators."
+    },
+    {
+     "key": "C",
+     "text": "1/4",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "2/4",
+     "misconception_id": 14107,
+     "why": "Subtracts the numerators and keeps the largest denominator."
+    }
+   ]
+  },
+  {
+   "id": "q-435-1",
+   "role": "S1",
+   "construct_id": 435,
+   "text": "2/3 - 1/5 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(2,3)-F(1,5)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1/15",
+     "misconception_id": 22639,
+     "why": "Changes the denominators to 15 but not the numerators."
+    },
+    {
+     "key": "B",
+     "text": "1/8",
+     "misconception_id": 15521,
+     "why": "Adds the denominators to get a common denominator, keeps the numerators."
+    },
+    {
+     "key": "C",
+     "text": "7/15",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "13/15",
+     "misconception_id": 26054,
+     "why": "Adds instead of subtracting: 2/3 + 1/5 = 13/15."
+    }
+   ]
+  },
+  {
+   "id": "q-410-1",
+   "role": "S1",
+   "construct_id": 410,
+   "text": "Simplify 4/12 fully.",
+   "check": {
+    "kind": "simplest",
+    "expr": "F(4,12)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "4/12",
+     "misconception_id": 15267,
+     "why": "Does not see that 4/12 can be simplified."
+    },
+    {
+     "key": "B",
+     "text": "1/3",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "1/4",
+     "misconception_id": 15522,
+     "why": "Divides the numerator by 4 but the denominator by 3."
+    },
+    {
+     "key": "D",
+     "text": "2/6",
+     "misconception_id": 14537,
+     "why": "Divides by 2 once and stops."
+    }
+   ]
+  },
+  {
+   "id": "q-425-3",
+   "role": "S2",
+   "construct_id": 425,
+   "text": "3/10 + 2/5 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(3,10)+F(2,5)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "5/10",
+     "misconception_id": 26985,
+     "why": "Adds the numerators and uses the larger denominator."
+    },
+    {
+     "key": "B",
+     "text": "6/50",
+     "misconception_id": 26157,
+     "why": "Multiplies numerators and denominators, treating + as x."
+    },
+    {
+     "key": "C",
+     "text": "5/50",
+     "misconception_id": 18669,
+     "why": "Adds the numerators and multiplies the denominators."
+    },
+    {
+     "key": "D",
+     "text": "7/10",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-427-3",
+   "role": "S2",
+   "construct_id": 427,
+   "text": "3/4 + 1/5 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(3,4)+F(1,5)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "19/20",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "19/40",
+     "misconception_id": 13807,
+     "why": "Converts to 15/20 + 4/20 correctly, then adds the denominators too."
+    },
+    {
+     "key": "C",
+     "text": "4/20",
+     "misconception_id": 22639,
+     "why": "Changes the denominators to 20 but not the numerators."
+    },
+    {
+     "key": "D",
+     "text": "4/9",
+     "misconception_id": 21651,
+     "why": "Adds numerators and adds denominators."
+    }
+   ]
+  },
+  {
+   "id": "q-433-2",
+   "role": "S2",
+   "construct_id": 433,
+   "text": "5/6 - 1/3 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(5,6)-F(1,3)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1/2",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "7/6",
+     "misconception_id": 26054,
+     "why": "Treats the - sign as +."
+    },
+    {
+     "key": "C",
+     "text": "4/3",
+     "misconception_id": 24501,
+     "why": "Subtracts numerators and denominators: (5-1)/(6-3)."
+    },
+    {
+     "key": "D",
+     "text": "4/6",
+     "misconception_id": 14107,
+     "why": "Subtracts the numerators and keeps the largest denominator."
+    }
+   ]
+  },
+  {
+   "id": "q-435-3",
+   "role": "S2",
+   "construct_id": 435,
+   "text": "1/2 - 1/3 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(1,2)-F(1,3)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1",
+     "misconception_id": 17587,
+     "why": "With the same numerators, subtracts the denominators: 1/(3-2)."
+    },
+    {
+     "key": "B",
+     "text": "0",
+     "misconception_id": 22639,
+     "why": "Changes the denominators to 6 but not the numerators: 1/6 - 1/6."
+    },
+    {
+     "key": "C",
+     "text": "1/6",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "5/6",
+     "misconception_id": 26054,
+     "why": "Treats the - sign as +."
+    }
+   ]
+  },
+  {
+   "id": "q-410-2",
+   "role": "S2",
+   "construct_id": 410,
+   "text": "Simplify 6/24 fully.",
+   "check": {
+    "kind": "simplest",
+    "expr": "F(6,24)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "3/12",
+     "misconception_id": 14537,
+     "why": "Divides by 2 once and stops."
+    },
+    {
+     "key": "B",
+     "text": "0.6/2.4",
+     "misconception_id": 14110,
+     "why": "Divides by 10, leaving decimals in the fraction."
+    },
+    {
+     "key": "C",
+     "text": "1/6",
+     "misconception_id": 15522,
+     "why": "Divides the numerator by 6 but the denominator by 4."
+    },
+    {
+     "key": "D",
+     "text": "1/4",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-425-1",
+   "role": "POOL",
+   "construct_id": 425,
+   "text": "1/2 + 1/4 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(1,2)+F(1,4)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1/8",
+     "misconception_id": 15031,
+     "why": "Multiplies instead of adding."
+    },
+    {
+     "key": "B",
+     "text": "1/6",
+     "misconception_id": 14220,
+     "why": "With identical numerators, keeps the numerator and adds the denominators."
+    },
+    {
+     "key": "C",
+     "text": "2/4",
+     "misconception_id": 26989,
+     "why": "Changes 1/2 to quarters but keeps the numerator 1."
+    },
+    {
+     "key": "D",
+     "text": "3/4",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-427-2",
+   "role": "POOL",
+   "construct_id": 427,
+   "text": "2/5 + 1/3 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(2,5)+F(1,3)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "11/15",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "3/15",
+     "misconception_id": 22639,
+     "why": "Changes the denominators to 15 but not the numerators."
+    },
+    {
+     "key": "C",
+     "text": "2/15",
+     "misconception_id": 16460,
+     "why": "Reads + as x."
+    },
+    {
+     "key": "D",
+     "text": "9/15",
+     "misconception_id": 19088,
+     "why": "Multiplies both numerators by 3 when converting to fifteenths."
+    }
+   ]
+  },
+  {
+   "id": "q-433-3",
+   "role": "POOL",
+   "construct_id": 433,
+   "text": "1/2 - 1/4 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(1,2)-F(1,4)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1/4",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "0/4",
+     "misconception_id": 14107,
+     "why": "Subtracts the numerators and keeps the largest denominator."
+    },
+    {
+     "key": "C",
+     "text": "1/2",
+     "misconception_id": 17587,
+     "why": "With the same numerators, subtracts the denominators: 1/(4-2)."
+    },
+    {
+     "key": "D",
+     "text": "3/4",
+     "misconception_id": 26054,
+     "why": "Treats the - sign as +."
+    }
+   ]
+  },
+  {
+   "id": "q-435-2",
+   "role": "POOL",
+   "construct_id": 435,
+   "text": "How much bigger is 3/4 than 1/3?",
+   "check": {
+    "kind": "value",
+    "expr": "F(3,4)-F(1,3)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "9/4",
+     "misconception_id": 18158,
+     "why": "Divides to find the difference: 3/4 / 1/3."
+    },
+    {
+     "key": "B",
+     "text": "13/12",
+     "misconception_id": 27398,
+     "why": "Reads 'how much bigger' as asking for the total."
+    },
+    {
+     "key": "C",
+     "text": "1/4",
+     "misconception_id": 18159,
+     "why": "Multiplies to find the difference: 3/4 x 1/3."
+    },
+    {
+     "key": "D",
+     "text": "5/12",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-410-3",
+   "role": "POOL",
+   "construct_id": 410,
+   "text": "Simplify 2 4/8 fully.",
+   "check": {
+    "kind": "simplest",
+    "expr": "2+F(4,8)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "2 1/2",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "2 2/4",
+     "misconception_id": 14537,
+     "why": "Divides by 2 once and stops."
+    },
+    {
+     "key": "C",
+     "text": "1 1/2",
+     "misconception_id": 14494,
+     "why": "Halves the whole number as well as the fraction."
+    },
+    {
+     "key": "D",
+     "text": "2 4/8",
+     "misconception_id": 15074,
+     "why": "Believes mixed numbers cannot be simplified."
+    }
+   ]
+  },
+  {
+   "id": "q-409-1",
+   "role": "POOL",
+   "construct_id": 409,
+   "text": "Which fraction is equivalent to 2/3?",
+   "check": {
+    "kind": "value",
+    "expr": "F(2,3)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1/2",
+     "misconception_id": 20776,
+     "why": "Subtracts 1 from numerator and denominator."
+    },
+    {
+     "key": "B",
+     "text": "8/12",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "4/3",
+     "misconception_id": 22626,
+     "why": "Doubles only the numerator."
+    },
+    {
+     "key": "D",
+     "text": "3/2",
+     "misconception_id": 22644,
+     "why": "Thinks a/b is equivalent to b/a."
+    }
+   ]
+  },
+  {
+   "id": "q-409-2",
+   "role": "POOL",
+   "construct_id": 409,
+   "text": "Which pair of fractions is equivalent?",
+   "check": {
+    "kind": "pair",
+    "words": true
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "3/5 and 5/7",
+     "misconception_id": 23144,
+     "why": "Adds 2 to numerator and denominator."
+    },
+    {
+     "key": "B",
+     "text": "1/3 and 2/6",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "2/5 and 2/9",
+     "misconception_id": 17669,
+     "why": "Thinks fractions with the same numerator are equivalent."
+    },
+    {
+     "key": "D",
+     "text": "1/3 and 1/6",
+     "misconception_id": 19786,
+     "why": "Believes all unit fractions are equivalent."
+    }
+   ]
+  },
+  {
+   "id": "q-409-3",
+   "role": "POOL",
+   "construct_id": 409,
+   "text": "Find the missing number: 3/4 = ?/20",
+   "check": {
+    "kind": "value",
+    "expr": "F(3,4)*20"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "5",
+     "misconception_id": 19414,
+     "why": "Thinks the multiplier (x5) is the new numerator."
+    },
+    {
+     "key": "B",
+     "text": "15",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "3",
+     "misconception_id": 22639,
+     "why": "Changes only the denominator."
+    },
+    {
+     "key": "D",
+     "text": "19",
+     "misconception_id": 14007,
+     "why": "Adds 16 to both parts (4 + 16 = 20, so 3 + 16)."
+    }
+   ]
+  },
+  {
+   "id": "q-345-1",
+   "role": "POOL",
+   "construct_id": 345,
+   "text": "What is the lowest common multiple of 4 and 6?",
+   "check": {
+    "kind": "value",
+    "expr": "lcm(4,6)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "2",
+     "misconception_id": 15424,
+     "why": "Gives the HCF instead of the LCM."
+    },
+    {
+     "key": "B",
+     "text": "10",
+     "misconception_id": 15501,
+     "why": "Adds the numbers."
+    },
+    {
+     "key": "C",
+     "text": "12",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "24",
+     "misconception_id": 24069,
+     "why": "Multiplies the numbers together."
+    }
+   ]
+  },
+  {
+   "id": "q-345-2",
+   "role": "POOL",
+   "construct_id": 345,
+   "text": "What is the lowest common multiple of 6 and 9?",
+   "check": {
+    "kind": "value",
+    "expr": "lcm(6,9)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "9",
+     "misconception_id": 15969,
+     "why": "Believes the largest number is the LCM."
+    },
+    {
+     "key": "B",
+     "text": "18",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "36",
+     "misconception_id": 15341,
+     "why": "Finds a common multiple but not the lowest."
+    },
+    {
+     "key": "D",
+     "text": "54",
+     "misconception_id": 15500,
+     "why": "Uses the product of the numbers."
+    }
+   ]
+  },
+  {
+   "id": "q-345-3",
+   "role": "POOL",
+   "construct_id": 345,
+   "text": "What is the lowest common multiple of 8 and 12?",
+   "check": {
+    "kind": "value",
+    "expr": "lcm(8,12)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "24",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "96",
+     "misconception_id": 24069,
+     "why": "Multiplies the numbers together."
+    },
+    {
+     "key": "C",
+     "text": "4",
+     "misconception_id": 15424,
+     "why": "Gives the HCF instead of the LCM."
+    },
+    {
+     "key": "D",
+     "text": "48",
+     "misconception_id": 15341,
+     "why": "Finds a common multiple but not the lowest."
+    }
+   ]
+  },
+  {
+   "id": "q-342-1",
+   "role": "POOL",
+   "construct_id": 342,
+   "text": "Which of these numbers is a multiple of 3?",
+   "check": {
+    "kind": "predicate",
+    "pred": "x % 3 == 0",
+    "words": true
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1",
+     "misconception_id": 13957,
+     "why": "Confuses factors and multiples: 1 is a factor of 3."
+    },
+    {
+     "key": "B",
+     "text": "32",
+     "misconception_id": 22410,
+     "why": "Believes a number containing the digit 3 is a multiple of 3."
+    },
+    {
+     "key": "C",
+     "text": "27",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "13",
+     "misconception_id": 20492,
+     "why": "Believes multiples of 3 end in 3."
+    }
+   ]
+  },
+  {
+   "id": "q-342-2",
+   "role": "POOL",
+   "construct_id": 342,
+   "text": "Which of these numbers is a multiple of 4?",
+   "check": {
+    "kind": "predicate",
+    "pred": "x % 4 == 0",
+    "words": true
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "42",
+     "misconception_id": 22410,
+     "why": "Believes a number containing the digit 4 is a multiple of 4."
+    },
+    {
+     "key": "B",
+     "text": "14",
+     "misconception_id": 18618,
+     "why": "Believes a number is a multiple of its final digit."
+    },
+    {
+     "key": "C",
+     "text": "28",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "2",
+     "misconception_id": 13957,
+     "why": "Confuses factors and multiples: 2 is a factor of 4."
+    }
+   ]
+  },
+  {
+   "id": "q-342-3",
+   "role": "POOL",
+   "construct_id": 342,
+   "text": "What is the first multiple of 6?",
+   "check": {
+    "kind": "value",
+    "expr": "6"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "12",
+     "misconception_id": 15985,
+     "why": "Believes the first multiple of a is 2a."
+    },
+    {
+     "key": "B",
+     "text": "1",
+     "misconception_id": 13957,
+     "why": "Confuses factors and multiples: 1 is a factor of 6."
+    },
+    {
+     "key": "C",
+     "text": "6",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "36",
+     "misconception_id": 22136,
+     "why": "Confuses multiple with power: 6 squared."
+    }
+   ]
+  },
+  {
+   "id": "q-424-1",
+   "role": "POOL",
+   "construct_id": 424,
+   "text": "2/7 + 3/7 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(2,7)+F(3,7)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "5/7",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "5",
+     "misconception_id": 19219,
+     "why": "Adds the numerators and thinks the denominators cancel."
+    },
+    {
+     "key": "C",
+     "text": "6/7",
+     "misconception_id": 21177,
+     "why": "Multiplies the numerators."
+    },
+    {
+     "key": "D",
+     "text": "5/14",
+     "misconception_id": 21651,
+     "why": "Adds numerators and adds denominators."
+    }
+   ]
+  },
+  {
+   "id": "q-424-2",
+   "role": "POOL",
+   "construct_id": 424,
+   "text": "2/9 + 2/9 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(2,9)+F(2,9)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "4/18",
+     "misconception_id": 21651,
+     "why": "Adds numerators and adds denominators."
+    },
+    {
+     "key": "B",
+     "text": "2/18",
+     "misconception_id": 19192,
+     "why": "With the same numerators, adds the denominators and keeps the numerator."
+    },
+    {
+     "key": "C",
+     "text": "4/81",
+     "misconception_id": 15031,
+     "why": "Multiplies instead of adding."
+    },
+    {
+     "key": "D",
+     "text": "4/9",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-424-3",
+   "role": "POOL",
+   "construct_id": 424,
+   "text": "1/5 + 3/5 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(1,5)+F(3,5)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "4/5",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "3/10",
+     "misconception_id": 18355,
+     "why": "Adds the denominators and multiplies the numerators."
+    },
+    {
+     "key": "C",
+     "text": "4/6",
+     "misconception_id": 19251,
+     "why": "Adds the 1 from 1/5 to both parts of 3/5."
+    },
+    {
+     "key": "D",
+     "text": "3/5",
+     "misconception_id": 15032,
+     "why": "Multiplies the numerators: 1 x 3 = 3."
+    }
+   ]
+  },
+  {
+   "id": "q-432-1",
+   "role": "POOL",
+   "construct_id": 432,
+   "text": "5/8 - 3/8 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(5,8)-F(3,8)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1/4",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "15/8",
+     "misconception_id": 18356,
+     "why": "Multiplies the numerators."
+    },
+    {
+     "key": "C",
+     "text": "2/16",
+     "misconception_id": 15931,
+     "why": "Subtracts the numerators and adds the denominators."
+    },
+    {
+     "key": "D",
+     "text": "2",
+     "misconception_id": 19220,
+     "why": "Subtracts the numerators and thinks the denominators cancel."
+    }
+   ]
+  },
+  {
+   "id": "q-432-2",
+   "role": "POOL",
+   "construct_id": 432,
+   "text": "4/9 - 4/9 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(4,9)-F(4,9)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "1",
+     "misconception_id": 19221,
+     "why": "Believes a fraction minus itself is 1."
+    },
+    {
+     "key": "B",
+     "text": "8/9",
+     "misconception_id": 19222,
+     "why": "Adds the numerators instead of subtracting."
+    },
+    {
+     "key": "C",
+     "text": "1/9",
+     "misconception_id": 15932,
+     "why": "Divides the numerators: 4 / 4 = 1."
+    },
+    {
+     "key": "D",
+     "text": "0",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-432-3",
+   "role": "POOL",
+   "construct_id": 432,
+   "text": "7/10 - 2/10 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(7,10)-F(2,10)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "14/10",
+     "misconception_id": 18627,
+     "why": "Multiplies the numerators."
+    },
+    {
+     "key": "B",
+     "text": "5/20",
+     "misconception_id": 15931,
+     "why": "Subtracts the numerators and adds the denominators."
+    },
+    {
+     "key": "C",
+     "text": "9/10",
+     "misconception_id": 19222,
+     "why": "Adds the numerators instead of subtracting."
+    },
+    {
+     "key": "D",
+     "text": "1/2",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-338-1",
+   "role": "POOL",
+   "construct_id": 338,
+   "text": "What is the highest common factor of 12 and 18?",
+   "check": {
+    "kind": "value",
+    "expr": "gcd(12,18)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "6",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "30",
+     "misconception_id": 17605,
+     "why": "Adds the numbers."
+    },
+    {
+     "key": "C",
+     "text": "2",
+     "misconception_id": 21713,
+     "why": "Gives a common factor, not the highest."
+    },
+    {
+     "key": "D",
+     "text": "36",
+     "misconception_id": 15424,
+     "why": "Gives the LCM instead of the HCF."
+    }
+   ]
+  },
+  {
+   "id": "q-338-2",
+   "role": "POOL",
+   "construct_id": 338,
+   "text": "What is the highest common factor of 8 and 15?",
+   "check": {
+    "kind": "value",
+    "expr": "gcd(8,15)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "120",
+     "misconception_id": 15424,
+     "why": "Gives the LCM instead of the HCF."
+    },
+    {
+     "key": "B",
+     "text": "1",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "0",
+     "misconception_id": 17611,
+     "why": "Believes that if there is no common factor other than 1, the answer is 0."
+    },
+    {
+     "key": "D",
+     "text": "15",
+     "misconception_id": 15642,
+     "why": "Believes the largest number is the HCF."
+    }
+   ]
+  },
+  {
+   "id": "q-338-3",
+   "role": "POOL",
+   "construct_id": 338,
+   "text": "What is the highest common factor of 16 and 24?",
+   "check": {
+    "kind": "value",
+    "expr": "gcd(16,24)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "8",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "40",
+     "misconception_id": 17605,
+     "why": "Adds the numbers."
+    },
+    {
+     "key": "C",
+     "text": "4",
+     "misconception_id": 21713,
+     "why": "Gives a common factor, not the highest."
+    },
+    {
+     "key": "D",
+     "text": "16",
+     "misconception_id": 15352,
+     "why": "Believes the smallest number is the HCF."
+    }
+   ]
+  },
+  {
+   "id": "q-331-1",
+   "role": "POOL",
+   "construct_id": 331,
+   "text": "Which of these is a factor of 18?",
+   "check": {
+    "kind": "predicate",
+    "pred": "x.denominator == 1 and 18 % x == 0"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "6",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "1.5",
+     "misconception_id": 18617,
+     "why": "Believes factors do not have to be integers."
+    },
+    {
+     "key": "C",
+     "text": "4",
+     "misconception_id": 16249,
+     "why": "Believes a factor of the final digit (8) is a factor of the number."
+    },
+    {
+     "key": "D",
+     "text": "36",
+     "misconception_id": 13957,
+     "why": "Confuses factors and multiples."
+    }
+   ]
+  },
+  {
+   "id": "q-331-2",
+   "role": "POOL",
+   "construct_id": 331,
+   "text": "How many factors does 16 have?",
+   "check": {
+    "kind": "value",
+    "expr": "ndiv(16)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "5",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "8",
+     "misconception_id": 14338,
+     "why": "Gives an example of a factor instead of counting them."
+    },
+    {
+     "key": "C",
+     "text": "6",
+     "misconception_id": 14892,
+     "why": "Counts 4 twice because 4 x 4 = 16."
+    },
+    {
+     "key": "D",
+     "text": "4",
+     "misconception_id": 21793,
+     "why": "Leaves out 16, believing a number can't divide itself."
+    }
+   ]
+  },
+  {
+   "id": "q-331-3",
+   "role": "POOL",
+   "construct_id": 331,
+   "text": "Which of these is NOT a factor of 24?",
+   "check": {
+    "kind": "predicate",
+    "pred": "24 % x != 0"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "9",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "1",
+     "misconception_id": 15423,
+     "why": "Believes 1 cannot be a factor."
+    },
+    {
+     "key": "C",
+     "text": "24",
+     "misconception_id": 21793,
+     "why": "Believes a number cannot divide itself."
+    }
+   ]
+  },
+  {
+   "id": "q-3342-1",
+   "role": "POOL",
+   "construct_id": 3342,
+   "text": "Which of these shows four sevenths?",
+   "check": {
+    "kind": "value",
+    "expr": "F(4,7)",
+    "words": true
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "4.7",
+     "misconception_id": 15450,
+     "why": "Thinks a/b is written a.b, so four sevenths is 4.7."
+    },
+    {
+     "key": "B",
+     "text": "4/7",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "7/4",
+     "misconception_id": 14092,
+     "why": "Swaps numerator and denominator."
+    },
+    {
+     "key": "D",
+     "text": "47",
+     "misconception_id": 14014,
+     "why": "Writes the two numbers as one integer instead of a fraction."
+    }
+   ]
+  },
+  {
+   "id": "q-3342-2",
+   "role": "POOL",
+   "construct_id": 3342,
+   "text": "Which fraction has a numerator of 2 and a denominator of 9?",
+   "check": {
+    "kind": "value",
+    "expr": "F(2,9)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "2 1/9",
+     "misconception_id": 14121,
+     "why": "Uses the numerator as a whole-number part."
+    },
+    {
+     "key": "B",
+     "text": "9/2",
+     "misconception_id": 16784,
+     "why": "Thinks the denominator goes on top."
+    },
+    {
+     "key": "C",
+     "text": "2/9",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "29",
+     "misconception_id": 14014,
+     "why": "Writes the numbers side by side as an integer."
+    }
+   ]
+  },
+  {
+   "id": "q-3342-3",
+   "role": "POOL",
+   "construct_id": 3342,
+   "text": "Which of these is equal to 7/3?",
+   "check": {
+    "kind": "value",
+    "expr": "F(7,3)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "3/7",
+     "misconception_id": 14092,
+     "why": "Swaps numerator and denominator."
+    },
+    {
+     "key": "B",
+     "text": "2 1/3",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "7.3",
+     "misconception_id": 15450,
+     "why": "Thinks 7/3 is written 7.3."
+    },
+    {
+     "key": "D",
+     "text": "7 1/3",
+     "misconception_id": 21826,
+     "why": "Believes a/b equals the mixed number a 1/b."
+    }
+   ]
+  },
+  {
+   "id": "q-3378-1",
+   "role": "POOL",
+   "construct_id": 3378,
+   "text": "7 × 8 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "7*8"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "56",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "15",
+     "misconception_id": 15515,
+     "why": "Reads x as +."
+    },
+    {
+     "key": "C",
+     "text": "1",
+     "misconception_id": 15627,
+     "why": "Subtracts instead of multiplying."
+    }
+   ]
+  },
+  {
+   "id": "q-3378-2",
+   "role": "POOL",
+   "construct_id": 3378,
+   "text": "? × 6 = 42. What is the missing number?",
+   "check": {
+    "kind": "value",
+    "expr": "F(42,6)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "36",
+     "misconception_id": 14138,
+     "why": "Uses an additive relationship: 42 - 6."
+    },
+    {
+     "key": "B",
+     "text": "252",
+     "misconception_id": 18289,
+     "why": "Multiplies the two numbers given."
+    },
+    {
+     "key": "C",
+     "text": "7",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-3378-3",
+   "role": "POOL",
+   "construct_id": 3378,
+   "text": "48 ÷ 6 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(48,6)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "54",
+     "misconception_id": 22436,
+     "why": "Reads the division sign as add."
+    },
+    {
+     "key": "B",
+     "text": "42",
+     "misconception_id": 15384,
+     "why": "Reads the division sign as subtract."
+    },
+    {
+     "key": "C",
+     "text": "8",
+     "correct": true
+    }
+   ]
+  },
+  {
+   "id": "q-164-1",
+   "role": "POOL",
+   "construct_id": 164,
+   "text": "96 ÷ 8 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(96,8)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "12",
+     "correct": true
+    },
+    {
+     "key": "B",
+     "text": "6",
+     "misconception_id": 16794,
+     "why": "Halves too many times: 96, 48, 24, 12, 6."
+    },
+    {
+     "key": "C",
+     "text": "48",
+     "misconception_id": 18519,
+     "why": "Splits 8 into 2 x 4 but only divides by 2."
+    },
+    {
+     "key": "D",
+     "text": "88",
+     "misconception_id": 15384,
+     "why": "Reads the division sign as subtract."
+    }
+   ]
+  },
+  {
+   "id": "q-164-2",
+   "role": "POOL",
+   "construct_id": 164,
+   "text": "84 ÷ 4 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(84,4)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "80",
+     "misconception_id": 15384,
+     "why": "Reads the division sign as subtract."
+    },
+    {
+     "key": "B",
+     "text": "21",
+     "correct": true
+    },
+    {
+     "key": "C",
+     "text": "81",
+     "misconception_id": 18085,
+     "why": "Divides only the ones digit: keeps the 8, 4 / 4 = 1."
+    },
+    {
+     "key": "D",
+     "text": "24",
+     "misconception_id": 18384,
+     "why": "Divides only the tens digit: 8 / 4 = 2, keeps the 4."
+    }
+   ]
+  },
+  {
+   "id": "q-164-3",
+   "role": "POOL",
+   "construct_id": 164,
+   "text": "240 ÷ 40 = ?",
+   "check": {
+    "kind": "value",
+    "expr": "F(240,40)"
+   },
+   "options": [
+    {
+     "key": "A",
+     "text": "24",
+     "misconception_id": 18518,
+     "why": "Treats dividing by 40 like dividing by 10."
+    },
+    {
+     "key": "B",
+     "text": "200",
+     "misconception_id": 15384,
+     "why": "Reads the division sign as subtract."
+    },
+    {
+     "key": "C",
+     "text": "6",
+     "correct": true
+    },
+    {
+     "key": "D",
+     "text": "60",
+     "misconception_id": 22595,
+     "why": "Divides only by the significant digit: 240 / 4."
+    }
+   ]
+  }
+ ]
+}
