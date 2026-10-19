@@ -91,14 +91,14 @@ Root 345 after 5 questions, 2 levels down.
 
   | Seed 0, n=30 each | B+ | B | Unlearn (C) |
   | --- | --- | --- | --- |
-  | Root cause | 40% | 30% | 63% |
+  | Root cause | 40% | 33% | 63% |
   | Top-1 misconception | 23% | 13% | 50% |
-  | Top-3 misconception | 47% | 27% | 73% |
-  | p50 time per diagnosis (n timed) | 114 s (n=60) | 8.5 s (n=36) | 52 ms (n=30) |
+  | Top-3 misconception | 40% | 27% | 73% |
+  | p50 time per diagnosis (n timed) | 114 s (n=68) | 8.4 s (n=44) | 52 ms (n=30) |
 
   Times pool every diagnosis timed with fresh LLM calls across the eval runs of the same model (C makes no LLM calls: the latest run only).
 
-  Over all three seeds (90 students), without B+: C scores 72% on root cause against 37% for B and 32% for A.
+  Over all three seeds (90 students), without B+: C scores 72% on root cause against 38% for B and 30% for A.
 
   The graph's *knowledge* helps an LLM a little. The *traversal* (rule out, descend, weigh evidence, remember) is what finds the root.
 - **What the graph does that a prompt can't:**
