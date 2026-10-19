@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Confuses Highest Common Factor with Least Common Multiple\",\n    \"Adds the two numbers together instead of finding common factors\"\n  ],\n  \"prerequisite\": \"Understanding the difference between factors and multiples\"\n}"}

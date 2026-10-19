@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts numerators and denominators separately\",\n    \"Fails to find a common denominator before subtracting\"\n  ],\n  \"prerequisite\": \"Finding equivalent fractions with a common denominator\"\n}"}

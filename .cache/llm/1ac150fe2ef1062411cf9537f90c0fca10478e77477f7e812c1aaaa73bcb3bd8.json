@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Confuses the lowest common multiple with a common factor\",\n    \"Believes the LCM must be one of the original numbers\",\n    \"Selects the smaller number when comparing multiples\"\n  ],\n  \"prerequisite\": \"distinguishing between factors and multiples\"\n}"}

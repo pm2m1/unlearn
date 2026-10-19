@@ -1,14 +1,14 @@
 """make eval-check: re-run every simulated eval and fail if any committed number differs.
 
-    python -m eval.check              # everything (A, B and B+ replayed from the local LLM reply cache)
+    python -m eval.check              # everything (A, B and B+ replayed from the committed LLM reply cache)
     python -m eval.check --skip-llm   # C, noise, random baseline and design checks only
 
 1. Graph: the eval reads class_template from the local FalkorDB, not from the commit. Its fingerprint must equal
    the one recorded in eval.json, or nothing below means anything (rebuild with `make seed`).
 2. C (Unlearn): re-run on eval.json's seeds. Every student's predictions, root, questions asked, recall verdict
    and opening text, and every summary and per-seed metric, must match.
-3. A, B, B+: replayed with UNLEARN_LLM_CACHE_ONLY=1 from .cache/llm (not in git: a fresh clone can't do this
-   step, and a fresh model call at temperature 0.3 wouldn't reproduce anyway). B+ runs on eval.json's B+ seeds.
+3. A, B, B+: replayed with UNLEARN_LLM_CACHE_ONLY=1 from .cache/llm, which is committed (model replies only;
+   a fresh model call at temperature 0.3 wouldn't reproduce anyway). B+ runs on eval.json's B+ seeds.
    A reply missing from the cache fails the check.
 4. Bootstrap: every metric's 95% interval, recomputed from the re-run students, must match eval.json's.
 5. noise.json, random_baseline.json and design_checks.json: re-run into scratch files and compared value by
@@ -96,7 +96,7 @@ def check_file(name: str, run, committed_path: Path) -> list[str]:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--skip-llm", action="store_true", help="don't replay A, B and B+ (no LLM reply cache here)")
+    ap.add_argument("--skip-llm", action="store_true", help="don't replay A, B and B+")
     a = ap.parse_args(argv)
     committed = json.loads((RE.RESULTS / "eval.json").read_text())
     recorded = (committed["meta"].get("provenance") or {}).get("graph", {}).get("sha256")

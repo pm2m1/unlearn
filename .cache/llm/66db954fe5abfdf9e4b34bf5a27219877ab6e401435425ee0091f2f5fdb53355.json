@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Believes that 1 is not a factor of any number\",\n    \"Thinks only numbers greater than 1 can be factors\"\n  ],\n  \"prerequisite\": \"Understanding that 1 is a factor of every integer\"\n}"}

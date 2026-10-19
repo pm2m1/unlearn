@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Confuses lowest common multiple with the product of the two numbers\",\n    \"Calculates the highest common factor instead of the lowest common multiple\"\n  ],\n  \"prerequisite\": \"Understanding the definition and calculation method for LCM versus HCF\"\n}"}

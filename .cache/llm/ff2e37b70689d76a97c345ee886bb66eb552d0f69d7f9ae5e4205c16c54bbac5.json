@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Adds numerators instead of subtracting when denominators are the same\",\n    \"Confuses subtraction with addition for fractions\"\n  ],\n  \"prerequisite\": \"Subtracting fractions with like denominators\"\n}"}

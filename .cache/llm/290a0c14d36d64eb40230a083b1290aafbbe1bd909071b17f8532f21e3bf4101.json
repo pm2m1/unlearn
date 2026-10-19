@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts fractions instead of adding them\",\n    \"Confuses addition and subtraction operations in word problems\"\n  ],\n  \"prerequisite\": \"identifying the correct operation from a word problem context\"\n}"}

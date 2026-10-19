@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Simplifies integers when simplifying a mixed number\",\n    \"Does not fully simplify fraction\",\n    \"Confuses factors and multiples\"\n  ],\n  \"root_cause\": \"Understanding the relationship between multiplication and division in inverse operations\"\n}"}

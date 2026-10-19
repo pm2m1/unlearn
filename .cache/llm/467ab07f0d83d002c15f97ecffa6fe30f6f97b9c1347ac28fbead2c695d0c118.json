@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Believes the fraction with the largest numerator is always the largest\",\n    \"Ignores the size of the denominator when comparing fractions\"\n  ],\n  \"prerequisite\": \"Comparing fractions with unlike denominators by finding a common denominator or converting to decimals\"\n}"}

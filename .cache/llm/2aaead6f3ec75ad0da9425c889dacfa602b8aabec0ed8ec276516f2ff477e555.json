@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Adds the fractions instead of subtracting them\",\n    \"Believes the total amount eaten is the sum of the starting amount and the remaining amount\"\n  ],\n  \"prerequisite\": \"Identifying whether to add or subtract in fraction word problems\"\n}"}

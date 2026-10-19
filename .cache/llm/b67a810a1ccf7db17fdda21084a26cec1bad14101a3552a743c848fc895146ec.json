@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Student multiplies the known numbers instead of finding the missing factor\",\n    \"Student does not understand that multiplication and division are inverse operations\"\n  ],\n  \"prerequisite\": \"Understanding inverse operations between multiplication and division\"\n}"}

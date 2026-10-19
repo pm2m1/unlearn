@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n\"misconception_ids\": [\n14089,\n17669,\n15438\n],\n\"root_cause_id\": 409\n}"}

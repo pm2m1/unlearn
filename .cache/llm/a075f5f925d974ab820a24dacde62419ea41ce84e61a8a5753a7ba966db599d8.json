@@ -1,0 +1,1 @@
+{"provider": "gemini", "model": "gemini-3.6-flash", "text": "```json\n{\n  \"misconceptions\": [\n    \"Believes the denominator is the top number and the numerator is the bottom number\",\n    \"Confuses the terms numerator and denominator\"\n  ],\n  \"prerequisite\": \"Identifying the numerator as the top number and the denominator as the bottom number in a fraction\"\n}\n```"}

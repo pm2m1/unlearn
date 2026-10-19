@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"The student believes the whole number part of a mixed number is the numerator.\",\n    \"The student thinks the fractional part is always 1 divided by the denominator.\"\n  ],\n  \"prerequisite\": \"Converting improper fractions to mixed numbers using division\"\n}"}

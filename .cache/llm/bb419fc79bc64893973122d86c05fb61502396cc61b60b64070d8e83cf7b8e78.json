@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Believes the fraction with the smallest denominator is the largest\",\n    \"Ignores the numerator when comparing fractions with different denominators\"\n  ],\n  \"prerequisite\": \"Comparing fractions by finding a common denominator or converting to decimals\"\n}"}

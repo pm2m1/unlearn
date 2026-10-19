@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts the same number from both numerator and denominator instead of dividing by a common factor\",\n    \"Confuses simplifying fractions with reducing terms by subtraction\"\n  ],\n  \"prerequisite\": \"identifying common factors to divide both numerator and denominator\"\n}"}

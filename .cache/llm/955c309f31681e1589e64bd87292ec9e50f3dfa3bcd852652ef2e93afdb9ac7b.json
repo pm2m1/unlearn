@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"The student reverses the numerator and denominator when identifying equivalent fractions.\",\n    \"The student confuses the order of numbers in a fraction representation.\"\n  ],\n  \"prerequisite\": \"Understanding the structure of a fraction (numerator over denominator)\"\n}"}

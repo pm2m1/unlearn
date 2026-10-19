@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Adds an extra zero when dividing multiples of ten\",\n    \"Confuses the operation with multiplication or fails to simplify zeros correctly\"\n  ],\n  \"prerequisite\": \"Understanding place value and simplifying division by cancelling common factors of ten\"\n}"}

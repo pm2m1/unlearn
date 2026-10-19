@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Confuses division with multiplication\",\n    \"Applies the wrong operation symbol meaning\",\n    \"Calculates 48 multiplied by 6 instead of divided by 6\"\n  ],\n  \"prerequisite\": \"Understanding the difference between multiplication and division operations\"\n}"}

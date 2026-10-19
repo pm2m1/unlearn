@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Orders fractions by comparing numerators only\",\n    \"Believes a smaller numerator always means a smaller fraction regardless of the denominator\"\n  ],\n  \"prerequisite\": \"finding equivalent fractions with a common denominator to compare values\"\n}"}
