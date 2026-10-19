@@ -94,9 +94,9 @@ Root 345 after 5 questions, 2 levels down.
   | Root cause | 40% | 30% | 63% |
   | Top-1 misconception | 23% | 13% | 50% |
   | Top-3 misconception | 47% | 27% | 73% |
-  | p50 time per diagnosis (n timed) | 114 s (n=60) | 8.5 s (n=36) | 50 ms (n=30) |
+  | p50 time per diagnosis (n timed) | 114 s (n=60) | 8.5 s (n=36) | 52 ms (n=30) |
 
-  Times pool every diagnosis timed with fresh LLM calls across the pre-review and post-review runs (C makes no LLM calls: this run only).
+  Times pool every diagnosis timed with fresh LLM calls across the eval runs of the same model (C makes no LLM calls: the latest run only).
 
   Over all three seeds (90 students), without B+: C scores 72% on root cause against 37% for B and 32% for A.
 

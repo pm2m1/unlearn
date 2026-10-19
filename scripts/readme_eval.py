@@ -146,9 +146,14 @@ def block() -> str:
     pooled = ev.get("latency_pooled")
     if pooled:
         nb = {c: " + ".join(str(k) for k in pooled["overall"][c]["n_by_run"].values()) for c in ("A", "B", "B+")}
+        names = {"eval_pre_review": "the pre-review run", "eval_oct18_post_review": "the Oct 18 post-review run",
+                 "eval": "this run"}
+        runs = [names.get(r, f"`{r}`") for r in pooled["runs"]]
+        runs_text = ", ".join(runs[:-1]) + " and " + runs[-1] if len(runs) > 1 else runs[0]
         lines += ["", "Latency is p50 / p95 over every diagnosis timed with fresh LLM calls (cached ones are left out), "
-                  f"pooled across the pre-review and post-review runs of the same model: n = {nb['A']} for A, "
-                  f"{nb['B']} for B and {nb['B+']} for B+. C makes no LLM calls; its latency is this run's "
+                  f"pooled across {runs_text}, all on the same model: n = {nb['A']} for A, "
+                  f"{nb['B']} for B and {nb['B+']} for B+, in that order. This run's A, B and B+ replies all came from "
+                  "the reply cache, so it timed none of them. C makes no LLM calls; its latency is this run's "
                   f"{pooled['overall']['C']['n']} diagnoses. `n` in a latency cell is the number of diagnoses timed."]
     lines += seed_table(ev, conds, seeds_of)
     lines += ["",

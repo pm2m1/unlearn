@@ -121,7 +121,7 @@ Same simulated students for every condition: 90 per condition (30 × seeds 0–2
 | --- | --- | --- | --- |
 | Root-cause accuracy | 32% [22–42] | 37% [27–47] | **72% [63–81]** |
 | Top-1 misconception | 7% [2–12] | 7% [2–12] | **48% [38–58]** |
-| p50 latency per diagnosis | 14.9 s (n=50) | 7.5 s (n=120) | **50 ms (n=90)** |
+| p50 latency per diagnosis | 14.9 s (n=50) | 7.5 s (n=120) | **51 ms (n=90)** |
 
 Simulated students; the root-cause advantage is not yet confirmed on real data (see Real-data results).
 
