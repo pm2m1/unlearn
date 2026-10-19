@@ -107,6 +107,8 @@ GROUPS = {
         ("MISCONCEPTION_NAMES", "design check: planted misconception names", "range index lookup"),
         ("CONC_PROBE_WRITE", "a small timed write (isolation probes)", "MERGE"),
         ("CONC_HEAVY_WRITE", "a deliberately heavy write that holds a graph's write lock", "UNWIND + CREATE"),
+        ("EVAL_GRAPH_NODES", "eval provenance: every node of the graph an eval read, for its fingerprint", "label scan, `properties()`"),
+        ("EVAL_GRAPH_EDGES", "eval provenance: every edge, with its endpoints, for the fingerprint", "pattern match, `properties()`"),
     ],
     "Loading and indexes": [
         ("CURRICULUM_INDEXES", "range indexes on Subject/Topic/SubTopic/Construct/Misconception ids", "range index"),

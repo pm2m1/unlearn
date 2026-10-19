@@ -21,6 +21,7 @@ import json
 import statistics
 from pathlib import Path
 
+from eval.provenance import provenance
 from eval.simulator import Simulator
 from unlearn import llm
 from unlearn import queries as Q
@@ -104,9 +105,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--seeds", default="0,1,2")
     ap.add_argument("--only", choices=["recall", "thresholds"])
+    ap.add_argument("--out", default=str(OUT), help="where to write (eval/check.py writes a scratch copy)")
     a = ap.parse_args(argv)
     seeds = [int(s) for s in a.seeds.split(",")]
-    result = json.loads(OUT.read_text()) if OUT.exists() else {}
+    out = Path(a.out)
+    result = json.loads(out.read_text()) if out.exists() else {}
+    result["provenance"] = provenance(seeds)
     if a.only != "thresholds":
         result["recall"] = recall_check(seeds)
         print("recall rules:", json.dumps(result["recall"]))
@@ -114,8 +118,8 @@ def main(argv=None) -> int:
         result["thresholds"] = threshold_check(seeds)
         print("thresholds:", json.dumps(result["thresholds"]))
     result["method"] = __doc__.split("\n\n")[1]
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(result, indent=2) + "\n")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(result, indent=2) + "\n")
     return 0
 
 

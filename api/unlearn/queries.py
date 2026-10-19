@@ -835,3 +835,13 @@ ALL_SEEN_IN = """
 MATCH (m:Misconception)-[si:SEEN_IN]->(c:Construct)
 RETURN c.id AS cid, c.name AS cname, m.id AS mid, m.name AS mname, si.w AS w ORDER BY cid, w DESC, mid
 """
+
+# --- Eval provenance (eval/provenance.py): fingerprint of the graph an eval read ----------------------------
+
+EVAL_GRAPH_NODES = """
+MATCH (n) RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props
+"""
+
+EVAL_GRAPH_EDGES = """
+MATCH (a)-[r]->(b) RETURN id(a) AS a, type(r) AS type, properties(r) AS props, id(b) AS b
+"""

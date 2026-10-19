@@ -25,12 +25,14 @@ stops before doing anything. Writes eval/results/eval.json and eval/results/eval
 import argparse
 import functools
 import json
+import os
 import statistics
 import sys
 import time
 from pathlib import Path
 
 from eval import baselines as BL
+from eval.provenance import provenance
 from eval.simulator import Simulator
 from unlearn import llm
 from unlearn import queries as Q
@@ -225,6 +227,8 @@ def eval_provider(which: str, model: str | None):
     """The one model A and B use, with no fallback. None if it isn't available."""
     if which == "ollama":
         prov = llm.ollama_provider(model)
+        if os.getenv("UNLEARN_LLM_CACHE_ONLY") == "1":
+            return prov, None  # replaying from the reply cache (eval/check.py): Ollama isn't needed
         import httpx
         try:
             tags = httpx.get(prov.base_url.rsplit("/v1", 1)[0] + "/api/tags", timeout=5).json()
@@ -313,6 +317,8 @@ def main(argv=None) -> int:
     ap.add_argument("--merge", help="comma-separated result stems to combine into --out (e.g. eval_seed0,eval_seeds12)")
     ap.add_argument("--pool-latency", help="comma-separated result stems whose A/B/B+ timings to pool into --out")
     ap.add_argument("--noise", type=float, default=0.0, help="simulator noise p (eval/simulator.py); 0 for the main eval")
+    ap.add_argument("--bplus-seeds", help="run B+ on these seeds without timing it first (eval/check.py replays a "
+                                          "saved run's B+ seeds from the cache)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     if a.merge:
@@ -352,7 +358,10 @@ def main(argv=None) -> int:
         BL.reset_stats(a.max_calls)
 
     bplus_seeds = seeds
-    if "B+" in conds and not a.dry_run:
+    if "B+" in conds and a.bplus_seeds is not None:
+        bplus_seeds = [int(s) for s in a.bplus_seeds.split(",")]
+        calibration = {**(calibration or {}), "bplus_seeds": bplus_seeds}
+    elif "B+" in conds and not a.dry_run:
         bplus = time_bplus(provider, seeds[0], min(2, a.students))
         projected = bplus["seconds_per_call"] * a.students * len(seeds) / 60
         print(f"B+ timing on {bplus['calls']} real prompts ({bplus['prompt_tokens']} prompt tokens each): "
@@ -403,7 +412,8 @@ def main(argv=None) -> int:
 
     ran = [c for c in ORDER if c in conds and any(c in per_seed[s] for s in per_seed)]
     result = {
-        "meta": {"students": a.students, "seeds": seeds, "sessions": 2, "conditions_run": ran,
+        "meta": {"provenance": provenance(seeds),
+                 "students": a.students, "seeds": seeds, "sessions": 2, "conditions_run": ran,
                  "llm": f"{provider.name} / {provider.model}" if provider else None,
                  "llm_role": "A and B only, one model, no fallback; C uses template wording",
                  "n_per_condition": {c: sum(per_seed[s][c]["n"] for s in per_seed if c in per_seed[s]) for c in ran},

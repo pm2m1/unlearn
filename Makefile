@@ -1,7 +1,7 @@
 PY ?= .venv/bin/python
 export PYTHONPATH := api:.
 
-.PHONY: up dev prod down seed test topics latency demo serve real-eval
+.PHONY: up dev prod down seed test topics latency demo serve real-eval eval-check
 
 # FalkorDB only, on 127.0.0.1:6379, for running the scripts, tests and API on the host.
 up:
@@ -49,3 +49,8 @@ real-eval:
 	$(PY) -m eval.real.data
 	$(PY) -m eval.real.run
 	$(PY) -m eval.real.report
+
+# Re-run the simulated eval (C, A/B/B+ from the LLM reply cache, noise, random baseline, design checks) and fail if
+# any committed number in eval/results differs. Latency is not compared. See eval/check.py.
+eval-check:
+	$(PY) -m eval.check

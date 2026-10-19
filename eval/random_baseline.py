@@ -20,6 +20,7 @@ from math import comb
 from pathlib import Path
 
 from eval import baselines as BL
+from eval.provenance import provenance
 from eval.simulator import Simulator
 from unlearn.db import delete_graph, recreate_graph
 
@@ -37,7 +38,9 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--seeds", default="0,1,2")
     ap.add_argument("--students", type=int, default=30)
+    ap.add_argument("--out", default=str(OUT), help="where to write (eval/check.py writes a scratch copy)")
     a = ap.parse_args(argv)
+    prov = provenance(a.seeds.split(","))
     g = "class_random_baseline"
     recreate_graph("class_template", g)
     try:
@@ -81,8 +84,10 @@ def main(argv=None) -> int:
             print(f"seed {seed}: {json.dumps(per_seed[seed])}")
     finally:
         delete_graph(g)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({"method": __doc__.split("\n\n")[1], "per_seed": per_seed}, indent=2) + "\n")
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({"provenance": prov, "method": __doc__.split("\n\n")[1], "per_seed": per_seed},
+                              indent=2) + "\n")
     return 0
 
 

@@ -271,11 +271,17 @@ def _spend() -> None:
         _SPENT["n"] += 1
 
 
+class CacheMiss(RuntimeError):
+    """UNLEARN_LLM_CACHE_ONLY=1 and this prompt has no cached reply (eval/check.py reproduces runs from the cache)."""
+
+
 def complete(provider: Provider, messages: list[dict]) -> tuple[str, bool]:
     """One chat completion, cached on disk. Returns (text, from_cache)."""
     path = _cache_path(provider, messages)
     if path.exists():
         return json.loads(path.read_text())["text"], True
+    if os.getenv("UNLEARN_LLM_CACHE_ONLY") == "1":
+        raise CacheMiss(f"no cached reply for {provider.name} / {provider.model} ({path.name})")
     _spend()
     from openai import OpenAI
 
