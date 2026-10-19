@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fractions practice</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1d1d1f;--mute:#5b5f66;--line:#d9d6cf;--card:#fff;--acc:#2f6f4f;--acc-fg:#fff;--warn:#a23b2a}
+@media (prefers-color-scheme:dark){:root{--bg:#17181a;--fg:#ecebe8;--mute:#a4a7ad;--line:#3a3c40;--card:#212226;--acc:#6fbf94;--acc-fg:#0f1a14;--warn:#ef8f7d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif}
+main{max-width:34rem;margin:0 auto;padding:16px}
+h1{font-size:1.25rem;margin:.25rem 0 1rem}
+h2{font-size:1.1rem;margin:1.25rem 0 .5rem}
+p{margin:.5rem 0}
+.mute{color:var(--mute);font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+input{width:100%;font:inherit;font-size:1.3rem;letter-spacing:.08em;text-transform:uppercase;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg)}
+button{display:block;width:100%;font:inherit;padding:14px 16px;margin:10px 0;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);text-align:left;min-height:52px}
+button.primary{background:var(--acc);color:var(--acc-fg);border-color:var(--acc);text-align:center;font-weight:600}
+button:disabled{opacity:.55}
+.opt{display:flex;gap:12px;align-items:center}
+.opt b{flex:none;width:1.6em;color:var(--mute)}
+.stem{font-size:1.15rem;margin:.25rem 0 .75rem}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 .1em;font-size:.95em}
+.fr>span:last-child{border-top:2px solid currentColor;padding:0 .15em}
+.opt .fr{font-size:1.1em}
+.status{display:inline-block;font-size:.9rem;padding:2px 10px;border-radius:999px;border:1px solid var(--line)}
+.status.ok{color:var(--acc);border-color:var(--acc)}
+.warn{color:var(--warn)}
+[lang=hi]{font-size:1.02rem}
+</style>
+</head>
+<body>
+<main id="app"><p class="mute">Loading…</p></main>
+<script>
+"use strict";
+const app = document.getElementById("app");
+let W = null, code = "", shownAt = 0, lastSend = null;
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+// 3/4 is drawn as a stacked fraction; everything else stays as typed.
+const maths = s => esc(s).replace(/(\d+|\?)\/(\d+|\?)/g, '<span class="fr" role="text" aria-label="$1 over $2"><span>$1</span><span>$2</span></span>');
+const t = (k, vars) => (W.text[k] || k).replace(/\{(\w+)\}/g, (_, v) => vars && vars[v] != null ? vars[v] : "");
+const remember = c => { try { sessionStorage.setItem("pilot-code", c); } catch (e) {} };
+const recalled = () => { try { return sessionStorage.getItem("pilot-code") || ""; } catch (e) { return ""; } };
+
+async function post(path, body) {
+  const r = await fetch("/pilot/api/" + path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  let data = {};
+  try { data = await r.json(); } catch (e) {}
+  return {status: r.status, data};
+}
+
+function view(html) { app.innerHTML = html; window.scrollTo(0, 0); }
+
+async function start() {
+  try { W = await (await fetch("/pilot/api/wording")).json(); }
+  catch (e) { view('<p class="warn">Could not load. Check the internet connection and reload.</p>'); return; }
+  document.title = W.text.title;
+  showCode(recalled());
+}
+
+async function serverStatus() {
+  const el = document.getElementById("srv");
+  if (!el) return;
+  try {
+    const s = await (await fetch("/pilot/api/status", {cache: "no-store"})).json();
+    const ok = s.configured && s.ready;
+    el.className = "status" + (ok ? " ok" : "");
+    el.textContent = ok ? "● " + t("ready") : t("warming");
+    if (!ok) setTimeout(serverStatus, 5000);
+  } catch (e) { el.textContent = t("warming"); setTimeout(serverStatus, 5000); }
+}
+
+function showCode(prefill, msg) {
+  view(`<h1>${esc(t("title"))}</h1><p><span id="srv" class="status">…</span></p>
+    <div class="card"><label for="code">${esc(t("enter_code"))}</label>
+    <p><input id="code" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" value="${esc(prefill || "")}"></p>
+    ${msg ? `<p class="warn">${esc(msg)}</p>` : ""}
+    <button class="primary" id="go">${esc(t("start"))}</button></div>`);
+  document.getElementById("go").onclick = () => { code = document.getElementById("code").value.trim(); if (code) refresh(); };
+  serverStatus();
+}
+
+async function refresh() {
+  let r;
+  try { r = await post("state", {code}); } catch (e) { return showError(t("error"), refresh); }
+  handle(r, refresh);
+}
+
+function handle(r, retry) {
+  if (r.status === 200) { remember(code); return render(r.data); }
+  const d = r.data.detail;
+  if (r.status === 404) return showCode(code, t("bad_code"));
+  if (r.status === 429) return showCode(code, t("too_many"));
+  if (r.status === 503 && d === "save_failed") return showError(t("save_failed"), retry);
+  if (r.status === 503) return showCode(code, t(d === "not_open" || d === "off" ? "not_open" : "warming"));
+  return showError(t("error"), refresh);
+}
+
+function showError(msg, retry) {
+  view(`<div class="card"><p class="warn">${esc(msg)}</p><button class="primary" id="again">${esc(t("try_again"))}</button></div>`);
+  document.getElementById("again").onclick = () => retry();
+}
+
+function render(s) {
+  if (s.screen === "assent") return showAssent(s.session);
+  if (s.screen === "question") return showQuestion(s);
+  if (s.screen === "declined") return view(`<div class="card"><p>${esc(W.assent.en.declined)}</p><p lang="hi">${esc(W.assent.hi.declined)}</p></div>`);
+  if (s.screen === "wait") return view(`<div class="card"><p>${esc(t("wait_s2"))}</p></div>`);
+  if (s.screen === "finished") return view(`<div class="card"><p>${esc(t("finished"))}</p></div>`);
+  if (s.screen === "done") {
+    if (s.session === 1) return view(`<div class="card"><p>${esc(t(s.all_right ? "done_all_right" : "done_s1"))}</p></div>`);
+    const recall = s.recall ? t("recall", {construct: s.recall}) : t("recall_none");
+    return view(`<div class="card"><p>${esc(recall)}</p><p>${esc(t("done_s2"))}</p></div>`);
+  }
+  showError(t("error"), refresh);
+}
+
+function showAssent(session) {
+  const block = (lang) => {
+    const a = W.assent[lang];
+    return `<div class="card" lang="${lang}"><h2>${esc(a.title)}</h2>${a.body.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
+  };
+  view(`<h1>${esc(t("title"))}</h1>${block("en")}${block("hi")}
+    <button class="primary" id="yes">${esc(W.assent.en.yes)} · <span lang="hi">${esc(W.assent.hi.yes)}</span></button>
+    <button id="no">${esc(W.assent.en.no)} · <span lang="hi">${esc(W.assent.hi.no)}</span></button>`);
+  const send = async agree => {
+    document.querySelectorAll("button").forEach(b => b.disabled = true);
+    const go = async () => { let r; try { r = await post("assent", {code, session, agree}); } catch (e) { return showError(t("error"), go); } handle(r, go); };
+    go();
+  };
+  document.getElementById("yes").onclick = () => send(true);
+  document.getElementById("no").onclick = () => send(false);
+}
+
+function showQuestion(s) {
+  const q = s.question;
+  let head = "";
+  if (s.phase === "check") head = `<p class="mute">${esc(t("progress", s.progress))}</p>${s.progress.i === 1 ? `<p>${esc(t("check_intro"))}</p>` : ""}`;
+  if (s.phase === "diagnose") head = `<p>${esc(t("more_intro"))}</p>`;
+  if (s.phase === "tutor") head = `<div class="card"><h2>${esc(t("practise_title", {construct: s.practise || ""}))}</h2><p>${esc(t("practise_teacher"))}</p></div><p>${esc(t("practise_try"))}</p>`;
+  view(`${head}<div class="card"><p class="stem">${maths(q.text)}</p>
+    ${q.options.map(o => `<button class="opt" data-key="${esc(o.key)}"><b>${esc(o.key)}</b><span>${maths(o.text)}</span></button>`).join("")}</div>`);
+  shownAt = performance.now();
+  document.querySelectorAll("button.opt").forEach(b => b.onclick = () => {
+    document.querySelectorAll("button.opt").forEach(x => x.disabled = true);
+    b.style.borderColor = "var(--acc)";
+    lastSend = {code, session: s.session, qid: q.id, key: b.dataset.key, ms: Math.round(performance.now() - shownAt)};
+    sendAnswer();
+  });
+}
+
+async function sendAnswer() {
+  let r;
+  try { r = await post("answer", lastSend); } catch (e) { return showError(t("save_failed"), sendAnswer); }
+  handle(r, sendAnswer);
+}
+
+start();
+</script>
+</body>
+</html>

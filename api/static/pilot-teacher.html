@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pilot teacher view</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1d1d1f;--mute:#5b5f66;--line:#d9d6cf;--card:#fff;--acc:#2f6f4f;--acc-fg:#fff;--warn:#a23b2a}
+@media (prefers-color-scheme:dark){:root{--bg:#17181a;--fg:#ecebe8;--mute:#a4a7ad;--line:#3a3c40;--card:#212226;--acc:#6fbf94;--acc-fg:#0f1a14;--warn:#ef8f7d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:72rem;margin:0 auto;padding:16px}
+h1{font-size:1.3rem}h2{font-size:1.1rem;margin-top:1.5rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+label{display:block;margin:.5rem 0 .2rem}
+input,select{font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);max-width:100%}
+button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);margin:4px 4px 4px 0;cursor:pointer}
+button.primary{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
+button.danger{color:var(--warn);border-color:var(--warn)}
+.mute{color:var(--mute)}.warn{color:var(--warn)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+code{font-size:1rem}
+details summary{cursor:pointer;color:var(--mute)}
+#slips{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  main{display:none}
+  #slips{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .slip{border:1px dashed #888;padding:18px;break-inside:avoid;font:16px/1.4 system-ui,sans-serif}
+  .slip b{font-size:1.4rem;letter-spacing:.08em}
+}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<section id="slips" aria-hidden="true"></section>
+<script>
+"use strict";
+const app = document.getElementById("app");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+let cls = "", key = "";
+try { cls = sessionStorage.getItem("pilot-class") || ""; key = sessionStorage.getItem("pilot-key") || ""; } catch (e) {}
+
+async function api(path, body, headers) {
+  const r = await fetch("/pilot/api/" + path, {method: "POST", headers: {"Content-Type": "application/json", ...headers}, body: JSON.stringify(body || {})});
+  if ((r.headers.get("content-type") || "").startsWith("text/csv")) return {status: r.status, blob: await r.blob()};
+  let data = {};
+  try { data = await r.json(); } catch (e) {}
+  return {status: r.status, data};
+}
+const auth = () => ({"X-Pilot-Class": cls, "X-Pilot-Key": key});
+const msg = (r) => r.data && r.data.detail ? r.data.detail : "HTTP " + r.status;
+
+function login(note) {
+  app.innerHTML = `<h1>Pilot teacher view</h1>
+  <div class="card"><h2>Open your class</h2>
+    <label for="c">Class code</label><input id="c" value="${esc(cls)}" autocomplete="off">
+    <label for="k">Teacher key</label><input id="k" type="password" value="" autocomplete="off">
+    <p><button class="primary" id="open">Open</button></p>${note ? `<p class="warn">${esc(note)}</p>` : ""}</div>
+  <div class="card"><h2>Create a class</h2>
+    <p class="mute">Needs the admin key. You get a class code, a teacher key (shown once: write it down) and one code per student. No names are entered anywhere.</p>
+    <label for="a">Admin key</label><input id="a" type="password" autocomplete="off">
+    <label for="n">Number of students</label><input id="n" type="number" min="1" max="60" value="30">
+    <p><button id="create">Create class</button></p><div id="created"></div></div>`;
+  document.getElementById("open").onclick = () => {
+    cls = document.getElementById("c").value.trim().toUpperCase(); key = document.getElementById("k").value.trim();
+    try { sessionStorage.setItem("pilot-class", cls); sessionStorage.setItem("pilot-key", key); } catch (e) {}
+    overview();
+  };
+  document.getElementById("create").onclick = async () => {
+    const r = await api("teacher/create", {students: +document.getElementById("n").value}, {"X-Pilot-Admin": document.getElementById("a").value});
+    const box = document.getElementById("created");
+    if (r.status !== 200) { box.innerHTML = `<p class="warn">${esc(msg(r))}</p>`; return; }
+    cls = r.data.class_code; key = r.data.teacher_key;
+    try { sessionStorage.setItem("pilot-class", cls); sessionStorage.setItem("pilot-key", key); } catch (e) {}
+    box.innerHTML = `<p>Class code <code>${esc(cls)}</code> · Teacher key <code>${esc(key)}</code></p>
+      <p class="warn">Write the teacher key down now. It is not shown again and cannot be recovered.</p>
+      <p>${r.data.codes.length} student codes created.</p><button class="primary" id="go">Go to the class</button>`;
+    document.getElementById("go").onclick = overview;
+  };
+}
+
+function slips(codes) {
+  const url = location.origin + "/pilot";
+  document.getElementById("slips").innerHTML = codes.map(c =>
+    `<div class="slip">Fractions practice<br>Open <u>${esc(url)}</u><br>Your code: <b>${esc(c)}</b></div>`).join("");
+}
+
+async function overview() {
+  const r = await api("teacher/overview", {}, auth());
+  if (r.status !== 200) return login(msg(r));
+  const d = r.data;
+  if (d.error) { app.innerHTML = `<h1>Class ${esc(d.class_code)}</h1><p class="warn">${esc(d.error)}</p>`; return; }
+  slips(d.students.map(s => s.code));
+  const score = c => c.answered ? `${c.right}/${c.answered}` : "–";
+  const rows = d.students.map(s => `<tr>
+    <td><code>${esc(s.code)}</code></td><td>${esc(s.status)}</td><td>${score(s.check[1])}</td><td>${score(s.check[2])}</td>
+    <td>${esc(s.root || "–")}</td>
+    <td>${s.misconceptions.map(m => esc(m.name) + (m.count > 1 ? ` (×${m.count})` : "")).join("<br>") || "–"}</td>
+    <td>${s.skill ? `<details><summary>${esc(s.skill)}</summary><ol>${s.skill_steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol></details>` : "–"}</td>
+    <td><select data-code="${esc(s.code)}" aria-label="Does this match your view? 1 to 5">
+      ${["", 1, 2, 3, 4, 5].map(v => `<option value="${v}" ${s.rating == v && v !== "" ? "selected" : ""}>${v === "" ? "–" : v}</option>`).join("")}</select></td>
+    <td><button class="danger" data-del="${esc(s.code)}">Delete</button></td></tr>`).join("");
+  app.innerHTML = `<h1>Class ${esc(d.class_code)}</h1>
+  <div class="card">
+    <p>Session 2 is <b>${d.session2_open ? "open" : "closed"}</b>. ${d.session2_open ? "" : "Open it on the day of session 2."}
+      <button id="s2">${d.session2_open ? "Close session 2" : "Open session 2"}</button></p>
+    <p><button id="print">Print code slips</button><button id="ans">Download answers (CSV)</button><button id="sum">Download summary (CSV)</button><button id="reload">Refresh</button></p>
+    <p class="mute">Check items approved: ${d.items.S1} for session 1, ${d.items.S2} for session 2, ${d.items.POOL} more for the follow-up questions.</p>
+  </div>
+  <div class="scroll"><table><thead><tr><th>Code</th><th>Status</th><th>Check 1</th><th>Check 2</th><th>Root cause found</th>
+    <th>Misconceptions shown</th><th>Suggested approach</th><th>Matches your view? (1–5)</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="card"><h2>Delete the whole class</h2><p class="mute">Deletes every code's answers and the class itself. This cannot be undone.</p>
+    <input id="conf" placeholder="Type the class code" autocomplete="off"> <button class="danger" id="delc">Delete class</button></div>`;
+  document.getElementById("s2").onclick = async () => { await api("teacher/session2", {open: !d.session2_open}, auth()); overview(); };
+  document.getElementById("print").onclick = () => window.print();
+  document.getElementById("reload").onclick = overview;
+  document.getElementById("ans").onclick = () => download("answers");
+  document.getElementById("sum").onclick = () => download("summary");
+  document.querySelectorAll("select[data-code]").forEach(el => el.onchange = async () => {
+    const r = await api("teacher/rating", {code: el.dataset.code, rating: el.value ? +el.value : null}, auth());
+    if (r.status !== 200) alert(msg(r));
+  });
+  document.querySelectorAll("button[data-del]").forEach(b => b.onclick = async () => {
+    if (!confirm(`Delete all data for ${b.dataset.del}? The code stops working. This cannot be undone.`)) return;
+    const r = await api("teacher/delete-code", {code: b.dataset.del}, auth());
+    if (r.status !== 200) alert(msg(r));
+    overview();
+  });
+  document.getElementById("delc").onclick = async () => {
+    const r = await api("teacher/delete-class", {confirm: document.getElementById("conf").value}, auth());
+    if (r.status !== 200) return alert(msg(r));
+    try { sessionStorage.clear(); } catch (e) {}
+    cls = ""; key = ""; login("Class deleted.");
+  };
+}
+
+async function download(kind) {
+  const r = await api("teacher/export/" + kind, {}, auth());
+  if (!r.blob) return alert(msg(r));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(r.blob); a.download = `pilot-${cls}-${kind}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+cls && key ? overview() : login();
+</script>
+</body>
+</html>

@@ -31,6 +31,8 @@ from unlearn.agents.base import StepError
 from unlearn.agents.teacher_chat import chat
 from unlearn.db import client, list_graphs, run
 from unlearn import queries as Q
+from unlearn.pilot import engine as pilot_engine
+from unlearn.pilot import routes as pilot_routes
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = Path(__file__).resolve().parent / "static"
@@ -44,9 +46,24 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 log = logging.getLogger("unlearn.api")
 
 
+class _NoClientAddress(logging.Filter):
+    """Access log lines keep method, path and status but never the client's address (pilot students are minors;
+    nobody's IP is logged by this app). The hosting provider's own logs are outside this app's control."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if isinstance(record.args, tuple) and record.args:
+            record.args = ("-",) + record.args[1:]
+        return True
+
+
+logging.getLogger("uvicorn.access").addFilter(_NoClientAddress())
+
+
 def class_ids() -> list[str]:
+    """The demo's classes. Pilot classes (class_pilot_*) are never listed, simulated, chatted about or polled."""
     return sorted(g.removeprefix("class_") for g in list_graphs()
-                  if g.startswith("class_") and g != "class_template")
+                  if g.startswith("class_") and g != "class_template"
+                  and not pilot_engine.is_pilot_class(g.removeprefix("class_")))
 
 
 @asynccontextmanager
@@ -54,6 +71,8 @@ async def lifespan(app: FastAPI):
     app.state.heal_log = []
     if os.getenv("UNLEARN_SELF_HEAL", "1") != "0":
         app.state.heal_log = await asyncio.to_thread(heal.self_heal)
+    if pilot := pilot_routes.configure():
+        pilot_routes.start_loading(pilot)
     stop = asyncio.Event()
     worker = asyncio.create_task(_teacher_loop(stop))
     yield
@@ -86,6 +105,7 @@ async def _teacher_loop(stop: asyncio.Event) -> None:
 
 
 app = FastAPI(title="Unlearn", lifespan=lifespan)
+app.include_router(pilot_routes.router)
 
 
 @app.exception_handler(StepError)
@@ -134,7 +154,7 @@ LIMITED = [Depends(llm_rate_limit)]
 
 
 def _class(cid: str) -> str:
-    if not _CLASS_ID.match(cid) or tools.graph_name(cid) not in list_graphs():
+    if not _CLASS_ID.match(cid) or pilot_engine.is_pilot_class(cid) or tools.graph_name(cid) not in list_graphs():
         raise HTTPException(404, f"no class {cid!r}")
     return cid
 
@@ -177,7 +197,7 @@ def _tool_view(tool_out: dict, agent: str, name: str) -> dict:
 
 @app.get("/health")
 def health():
-    graphs = sorted(list_graphs())
+    graphs = sorted(g for g in list_graphs() if not pilot_engine.is_pilot_class(g.removeprefix("class_")))
     counts = {g: run(g, Q.COUNT_NODES)[0][0]["n"] for g in graphs}
     version = None
     for mod in client().connection.execute_command("MODULE", "LIST"):
@@ -187,7 +207,17 @@ def health():
             v = int(fields.get("ver"))
             version = f"{v // 10000}.{v // 100 % 100}.{v % 100}"
     return {"ok": True, "graphs": graphs, "node_counts": counts, "falkordb_version": version,
-            "receipts_stored": receipts.size(), "self_heal": getattr(app.state, "heal_log", []), "started_at": STARTED_AT}
+            "receipts_stored": receipts.size(), "self_heal": getattr(app.state, "heal_log", []), "started_at": STARTED_AT,
+            "pilot": _pilot_health()}
+
+
+def _pilot_health() -> dict:
+    """Counts only: class codes stay out of a public endpoint."""
+    p = pilot_routes.pilot()
+    if p is None:
+        return {"configured": False}
+    s = p.status()
+    return {"configured": True, "ready": s["ready"], "classes": s["classes"], "load_error": s["load_error"]}
 
 
 # --- class lists for the UI ------------------------------------------------------

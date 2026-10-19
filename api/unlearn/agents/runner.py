@@ -43,11 +43,15 @@ def _guarded(class_id: str, task_id: str, fn, *args):
 # --- Step API (one call = one agent step) --------------------------------------
 
 def start(class_id: str, student_id: str, construct_id: int, session_id: str | None = None,
-          on_step=None, writer=llm.write, worker: str = "http") -> dict:
-    """Open a session on a target construct and return the Diagnoser's first question (plus recall)."""
+          on_step=None, writer=llm.write, worker: str = "http", new_session: bool = True) -> dict:
+    """Open a session on a target construct and return the Diagnoser's first question (plus recall).
+    new_session=False diagnoses inside a Session that is already open (a pilot session starts with its check)."""
     session_id = session_id or f"{student_id}-{tools.now_ms()}"
     task_id = f"{session_id}-diagnose"
-    n = tools.start_session(class_id, student_id, session_id)["rows"][0]["n"]
+    if new_session:
+        n = tools.start_session(class_id, student_id, session_id)["rows"][0]["n"]
+    else:
+        n = tools.session_lookup(class_id, session_id)["rows"][0]["n"]
     tools.create_task(class_id, task_id, "diagnose", student_id, "Diagnoser", construct_id=construct_id,
                       session_id=session_id)
     if not tools.claim_task(class_id, task_id, "Diagnoser", worker)["rows"]:

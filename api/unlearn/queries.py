@@ -232,11 +232,12 @@ ORDER BY score ASC LIMIT 3
 
 # Changed from SPEC (decision on REVIEW item 4): exclude only questions attempted in the current session, so
 # session 2 can ask about the root again. Never-attempted questions first, then least recently attempted,
-# then the SPEC's probe ordering.
+# then the SPEC's probe ordering. Pilot classes mark their fixed check items check_only, so the Diagnoser and
+# Tutor never ask them; no other graph sets that property.
 NEXT_QUESTION = """
 MATCH (s:Student {id:$sid})
 MATCH (q:Question)-[:ASSESSES]->(:Construct {id:$cid})
-WHERE NOT (s)-[:ATTEMPTED {session:$sess}]->(q)
+WHERE NOT (s)-[:ATTEMPTED {session:$sess}]->(q) AND q.check_only IS NULL
 OPTIONAL MATCH (s)-[a:ATTEMPTED]->(q)
 WITH s, q, max(a.ts) AS last_ts
 MATCH (o:Option)-[:OPTION_OF]->(q)
@@ -857,4 +858,55 @@ MATCH (a)-[r]->(b) RETURN id(a) AS a, type(r) AS type, properties(r) AS props, i
 EVAL_GRAPH_INDEXES = """
 CALL db.indexes() YIELD label, properties, types, options, entitytype
 RETURN label, properties, types, options, entitytype ORDER BY entitytype, label
+"""
+
+# --- Pilot classes (unlearn/pilot/engine.py) ---------------------------------------------------------------
+# A pilot class graph is a copy of class_template cut down to the approved questions, with the pilot's wording.
+
+PILOT_DROP_UNKEPT_OPTIONS = """
+MATCH (o:Option)-[:OPTION_OF]->(q:Question) WHERE NOT q.id IN $keep
+DETACH DELETE o
+"""
+
+PILOT_DROP_UNKEPT_QUESTIONS = """
+MATCH (q:Question) WHERE NOT q.id IN $keep
+DETACH DELETE q
+"""
+
+PILOT_CLEAR_OPTIONS = """
+MATCH (o:Option)-[:OPTION_OF]->(:Question {id:$qid})
+DETACH DELETE o
+"""
+
+# check_only is null for pool items, which removes the property.
+PILOT_SET_QUESTION = """
+MATCH (q:Question {id:$id})
+SET q.text = $text, q.check_only = $check_only
+RETURN q.id AS id
+"""
+
+PILOT_OPTION_TAGS = """
+MATCH (o:Option)-[:OPTION_OF]->(q:Question)
+OPTIONAL MATCH (o)-[:INDICATES]->(m:Misconception)
+RETURN q.id AS qid, q.text AS text, q.check_only AS check_only, o.key AS key, o.text AS option, o.correct AS correct,
+       m.id AS mid
+ORDER BY qid, key
+"""
+
+PILOT_PREREQ_COUNTS = """
+MATCH (c:Construct) WHERE c.id IN $ids
+OPTIONAL MATCH (c)-[:REQUIRES*1..6]->(p:Construct)
+RETURN c.id AS id, count(DISTINCT p) AS n
+"""
+
+PILOT_DIAGNOSES = """
+MATCH (:Student {id:$sid})-[:HAD_SESSION]->(se:Session)-[:HAD_EVENT]->(ev:Event {type:'diagnosis'})-[:ABOUT]->(c:Construct)
+RETURN se.n AS session, c.id AS id, c.name AS name, ev.summary AS summary
+ORDER BY ev.ts
+"""
+
+PILOT_TUTOR_PLANS = """
+MATCH (t:Task {kind:'remediate'})-[:ABOUT]->(:Student {id:$sid})
+RETURN t.session AS session, t.skill AS skill, t.root_id AS root_id
+ORDER BY t.created_ts
 """
