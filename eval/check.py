@@ -14,6 +14,10 @@
 5. noise.json, random_baseline.json and design_checks.json: re-run into scratch files and compared value by
    value.
 Latency is never compared: it is wall time. Nothing in eval/results is written.
+
+Known limit: FalkorDB's vector search is approximate, and a freshly seeded graph builds its index differently, so
+the recall judge's and A/B's retrieval results can differ on another database even when the graph fingerprint
+matches. The check reproduces a run on the database it ran on, not yet from a fresh seed (docs/EVALUATION.md).
 """
 
 import argparse
