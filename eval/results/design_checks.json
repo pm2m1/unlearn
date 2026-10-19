@@ -49,5 +49,21 @@
       }
     }
   },
-  "method": "    python eval/design_checks.py                 # both, seeds 0-2; writes eval/results/design_checks.json\n    python eval/design_checks.py --only recall   # or --only thresholds"
+  "method": "    python eval/design_checks.py                 # both, seeds 0-2; writes eval/results/design_checks.json\n    python eval/design_checks.py --only recall   # or --only thresholds",
+  "provenance": {
+    "commit": "cdf3bb76ed6217257e7ba3cfba4324e1480b4363",
+    "uncommitted_changes": false,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "graph": {
+      "name": "class_template",
+      "sha256": "bc268f15eaaf77236355575e97e76dd4460f31989ed0a1d3b08e965597745499",
+      "nodes": 1060,
+      "edges": 1826
+    },
+    "run_at": "2026-10-19T13:11:05Z"
+  }
 }

@@ -1,4 +1,20 @@
 {
+  "provenance": {
+    "commit": "cdf3bb76ed6217257e7ba3cfba4324e1480b4363",
+    "uncommitted_changes": false,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "graph": {
+      "name": "class_template",
+      "sha256": "bc268f15eaaf77236355575e97e76dd4460f31989ed0a1d3b08e965597745499",
+      "nodes": 1060,
+      "edges": 1826
+    },
+    "run_at": "2026-10-19T13:11:04Z"
+  },
   "method": "The simulator picks wrong answers through the same option-to-misconception map Unlearn reads. noise=p adds\nanswers that map can't explain (eval/simulator.py): a uniformly random wrong option outside the student's\nplanted misconceptions with probability p, and a correct answer slipping to a random wrong option with\nprobability p/2. Only C is re-run (template wording, no LLM calls). A, B and B+ are their saved clean-simulator\nscores from eval/results/eval.json; B+ ran on seed 0 only, so it is compared with C's seed 0 at the same p.",
   "seeds": [
     0,
@@ -25,6 +41,11 @@
       "session2_recall": 0.067
     }
   },
+  "clean_baselines_from": {
+    "file": "eval/results/eval.json",
+    "commit": "cdf3bb76ed6217257e7ba3cfba4324e1480b4363",
+    "graph_sha256": "bc268f15eaaf77236355575e97e76dd4460f31989ed0a1d3b08e965597745499"
+  },
   "levels": {
     "0.0": {
       "C": {
@@ -32,7 +53,7 @@
         "top3_misconception": 0.789,
         "root_cause_accuracy": 0.722,
         "questions_to_diagnosis": 5.189,
-        "session2_recall": 0.589
+        "session2_recall": 0.578
       },
       "C_ci95": {
         "top1_misconception": [
@@ -52,8 +73,8 @@
           5.4222
         ],
         "session2_recall": [
-          0.4889,
-          0.6778
+          0.4778,
+          0.6667
         ]
       },
       "C_seed0": {
