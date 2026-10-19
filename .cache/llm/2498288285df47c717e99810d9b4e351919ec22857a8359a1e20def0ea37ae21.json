@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Confuses factors and multiples\",\n    \"Believes adding numbers together gives the highest common factor\",\n    \"Does not fully simplify fraction\"\n  ],\n  \"root_cause\": \"Understanding of prime factorization and the definition of factors versus multiples\"\n}"}

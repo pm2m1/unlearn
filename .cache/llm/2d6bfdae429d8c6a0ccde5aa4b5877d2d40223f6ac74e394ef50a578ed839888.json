@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Confuses lowest common multiple with highest common factor\",\n    \"Selects the largest number that divides both integers instead of a multiple\"\n  ],\n  \"prerequisite\": \"distinguishing between factors and multiples\"\n}"}

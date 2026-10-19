@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts the known factor from the product instead of dividing\",\n    \"Confuses multiplication with subtraction when solving for a missing factor\"\n  ],\n  \"prerequisite\": \"Understanding that division is the inverse operation of multiplication\"\n}"}

@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Calculates the exact sum instead of estimating by rounding\",\n    \"Confuses the instruction to estimate with the instruction to compute exactly\"\n  ],\n  \"prerequisite\": \"Understanding the difference between estimation and exact calculation\"\n}"}

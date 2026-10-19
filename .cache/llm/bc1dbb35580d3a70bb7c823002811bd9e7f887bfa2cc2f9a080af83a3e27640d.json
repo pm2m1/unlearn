@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Assumes the fraction with the larger numerator is always greater\",\n    \"Ignores the denominator when comparing fractions with different denominators\"\n  ],\n  \"prerequisite\": \"finding a common denominator to compare fractions\"\n}"}

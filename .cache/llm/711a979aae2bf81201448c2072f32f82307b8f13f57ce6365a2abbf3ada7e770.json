@@ -1,0 +1,1 @@
+{"provider": "gemini", "model": "gemini-3.8-flash", "text": "```json\n{\"misconceptions\": [\"Believes a mixed number's whole number component represents the numerator\", \"Confuses the structure of a mixed number with that of a simple fraction\"], \"prerequisite\": \"Identifying the numerator and denominator in a simple fraction\"}\n```"}

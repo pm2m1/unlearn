@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Adds the whole numbers instead of subtracting them\",\n    \"Adds the fractional parts instead of subtracting them\",\n    \"Confuses subtraction with addition for mixed numbers\"\n  ],\n  \"prerequisite\": \"Subtracting mixed numbers with unlike denominators\"\n}"}

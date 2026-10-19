@@ -1,0 +1,1 @@
+{"provider": "gemini", "model": "gemini-3.6-flash", "text": "```json\n{\n  \"misconceptions\": [\n    \"Subtracted the fractions instead of adding them\",\n    \"Confused the operation required for 'in total' with finding a difference\"\n  ],\n  \"prerequisite\": \"Identifying the correct arithmetic operation to use from word problems\"\n}\n```"}

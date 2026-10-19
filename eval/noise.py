@@ -13,8 +13,11 @@ import argparse
 import json
 import statistics
 
+from pathlib import Path
+
 from eval import bootstrap as BS
 from eval import run_eval as RE
+from eval.provenance import provenance
 
 OUT = RE.RESULTS / "noise.json"
 COMPARED = ("top1_misconception", "top3_misconception", "root_cause_accuracy", "session2_recall")
@@ -24,6 +27,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--levels", default="0,0.2,0.4")
     ap.add_argument("--seeds", default="0,1,2")
+    ap.add_argument("--out", default=str(OUT), help="where to write (eval/check.py writes a scratch copy)")
     a = ap.parse_args(argv)
     clean = json.loads((RE.RESULTS / "eval.json").read_text())
     seeds = [s.strip() for s in a.seeds.split(",")]
@@ -46,8 +50,13 @@ def main(argv=None) -> int:
                             for m in COMPARED},
         }
         print(f"p={p}: " + ", ".join(f"{m} {c[m]:.0%}" for m in COMPARED))
-    OUT.write_text(json.dumps({"method": __doc__.split("\n\n")[2].strip(), "seeds": [int(s) for s in seeds],
-                               "clean_baselines": base, "levels": levels}, indent=2) + "\n")
+    clean_from = clean["meta"].get("provenance", {})
+    Path(a.out).write_text(json.dumps({
+        "provenance": provenance(seeds), "method": __doc__.split("\n\n")[2].strip(), "seeds": [int(s) for s in seeds],
+        "clean_baselines": base,
+        "clean_baselines_from": {"file": "eval/results/eval.json", "commit": clean_from.get("commit"),
+                                 "graph_sha256": (clean_from.get("graph") or {}).get("sha256")},
+        "levels": levels}, indent=2) + "\n")
     return 0
 
 

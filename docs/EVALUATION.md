@@ -17,7 +17,7 @@
   - **B: vector RAG.** The full attempt history, plus the top-10 misconceptions retrieved from FalkorDB's vector index by embedding each question with the chosen option.
   - **B+: LLM + graph as text.** B's prompt, plus every curated `REQUIRES` edge and every construct's misconceptions with their `SEEN_IN.w` weights, as plain text (about 22,000 tokens). B+ tests whether the graph's value is the *knowledge* in it, which can be pasted into a prompt, or the *traversal* Unlearn runs over it.
   - **C: Unlearn.** The agents, through the same step API the web UI uses.
-- **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk. Cached diagnoses, and A's diagnoses that made no call (a student with no wrong answer), are left out of the latency figures. On the post-review re-run most A and B diagnoses were cache hits (A had 5 fresh diagnoses, B 30), so A's, B's and B+'s latency pools every timed diagnosis from the pre-review and post-review runs (`run_eval.py --pool-latency`). Each fresh call is timed once, in the run that made it. Every latency cell shows its n.
+- **Same model throughout.** A, B and B+ use one local model with no fallback: `qwen3.5:27b-q4_K_M` through Ollama, thinking off. Replies are cached on disk. Cached diagnoses, and A's diagnoses that made no call (a student with no wrong answer), are left out of the latency figures. Re-runs hit the cache for most diagnoses (the Oct 18 post-review run had 5 fresh A diagnoses and 30 fresh B; the Oct 19 exact-index run 12 A, 31 B and 8 B+), so A's, B's and B+'s latency pools every timed diagnosis from the pre-review, Oct 18 and Oct 19 runs (`run_eval.py --pool-latency`). Each fresh call is timed once, in the run that made it. Every latency cell shows its n.
 - **Same question pool.** A, B and B+ ask the same seeded 6 questions from the pool C draws from (the target and everything it depends on). C chooses its questions adaptively.
 - **Answers are IDs.** A, B and B+ choose from candidate lists with IDs and must reply with IDs. An ID the condition wasn't shown counts as wrong.
   - Root-cause candidates are the target's prerequisites, taken from the curated graph. **That narrows their choice to about 7 skills and favours them.** A random pick is already right 21–24% of the time.
@@ -31,34 +31,40 @@
   - Root cause stayed at 37%: every planted root is one of the prerequisites B+ was offered anyway.
   - A, B, C, latency and recall are unchanged.
 - **Re-run after the human review (Oct 18).** Parth's review of the curated data ([REVIEW.md](../REVIEW.md), section 0) deleted 2 `REQUIRES` edges and removed 9 options. Every condition was then re-run on the new data with the same seeds, so all the numbers below are post-review. The simulator draws each student's planted state from the graph, so 14 of the 90 students have a different planted root or misconceptions than before; within the run, every condition still faces the same students. The pre-review run is kept in [`eval/results/eval_pre_review.json`](../eval/results/eval_pre_review.json).
+- **Oct 19: re-run from current code; the vector index is now exact.**
+  - **First re-run (recall 57% → 58%).** The earlier number predated an Oct 18 wording fix to the session-2 opening ("1 time", trimmed names), which moves the embedding judge's verdict for a few students. The noise table was re-run from current code at the same time.
+  - **Then the cause of the drift was found: an approximate vector index.** FalkorDB's vector index is HNSW, and with its default search width (efRuntime 10) its nearest neighbours were approximate and depended on how the index happened to be built: on the local template, 63 of 200 fixed queries differed from exact cosine search, and two databases with identical content disagreed on 40 of 200. The eval uses that search in the recall judge and in A's and B's retrieval, so results varied between seeds of the database (the old noise file's 59% never reproduced; a freshly seeded database gave 58.9% where this one gave 57.8%).
+  - **Fix:** efRuntime is now 1000, more than the 410 misconception vectors in a class graph, so every search is exact (`queries.VECTOR_EF_RUNTIME`). `tests/test_vector_exact.py` checks 200 fixed queries against brute-force cosine on a freshly built index and on `class_template`, and fails if any top-10 differs.
+  - **Everything re-run on the exact index:** every condition and seed (A, B and B+ with fresh model calls, since their retrieved lists changed), the noise test, the random baseline and the design checks. What moved: C's session-2 recall 57% → 60% (seed 0: 50% → 53%); A's top-1 7% → 9%, top-3 7% → 10% and root cause 32% → 30%; B's root cause 37% → 38%; B+'s top-3 47% → 40%; the noise test's recall column; and the random baseline's A lists on seeds 0 and 1. C's top-1, top-3, root cause and questions, B's misconception scores and the design checks did not move. Latency pools this run's timed calls with the earlier runs' (the Oct 18 run is kept as [`eval_oct18_post_review.json`](../eval/results/eval_oct18_post_review.json)).
+  - **Reproducibility from now on:** every result file records the git commit, the seeds and a SHA-256 fingerprint of the graph the eval read, including its index options (`eval/provenance.py`). `make eval-check` re-runs everything, replays A, B and B+ from the committed model reply cache (`.cache/llm`: replies only, no prompts, scanned for keys and personal data), and fails if any committed number differs (latency excluded: it is wall time). It passes from a fresh clone on an empty database after `make seed`.
 
 **Results** (generated from [`eval/results/eval.json`](../eval/results/eval.json) and [`random_baseline.json`](../eval/results/random_baseline.json) by `scripts/readme_eval.py`):
 
 <!-- eval:start -->
 | Metric | A. No memory (n=90, seeds 0, 1, 2) | B. Vector RAG (n=90, seeds 0, 1, 2) | B+. LLM + graph as text (n=30, seed 0) | C. Unlearn (n=90, seeds 0, 1, 2) | Random guess (A / B / B+) |
 | --- | --- | --- | --- | --- | --- |
-| Top-1 misconception | 7% [2–12] | 7% [2–12] | 23% [10–40] | 48% [38–58] | 2.6% / 2.3% / 0.5% |
-| Top-3 misconception | 7% [2–12] | 13% [7–21] | 47% [27–63] | 79% [70–87] | 7.5% / 6.8% / 1.5% |
-| Root-cause accuracy | 32% [22–42] | 37% [27–47] | 40% [23–57] | 72% [63–81] | 23% / 23% / 2.5% |
+| Top-1 misconception | 9% [3–16] | 7% [2–12] | 23% [10–40] | 48% [38–58] | 2.6% / 2.3% / 0.5% |
+| Top-3 misconception | 10% [4–18] | 13% [7–21] | 40% [23–57] | 79% [70–87] | 7.5% / 6.8% / 1.5% |
+| Root-cause accuracy | 30% [21–40] | 38% [28–48] | 40% [23–57] | 72% [63–81] | 23% / 23% / 2.5% |
 | Questions to diagnosis | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 5.2 [4.9–5.4] | – |
-| Session-2 recall | 0% [0–0] | 9% [3–16] | 7% [0–17] | 57% [47–67] | – |
-| p50 latency per diagnosis | 14.9 s [11.1–17.3] (n=50) | 7.5 s [7.3–7.8] (n=120) | 113.8 s [113.0–115.6] (n=60) | 50 ms [48–51] (n=90) | – |
-| p95 latency per diagnosis | 32.4 s [24.8–33.2] (n=50) | 9.2 s [8.6–10.2] (n=120) | 130.8 s [124.9–134.3] (n=60) | 61 ms [57–73] (n=90) | – |
+| Session-2 recall | 0% [0–0] | 9% [3–16] | 7% [0–17] | 60% [50–70] | – |
+| p50 latency per diagnosis | 13.3 s [11.4–16.5] (n=62) | 7.7 s [7.5–7.9] (n=151) | 114.4 s [113.1–117.1] (n=68) | 52 ms [51–53] (n=90) | – |
+| p95 latency per diagnosis | 32.2 s [23.7–32.6] (n=62) | 9.2 s [8.9–9.7] (n=151) | 137.0 s [130.6–154.7] (n=68) | 99 ms [75–152] (n=90) | – |
 
 Mean with its 95% bootstrap interval in brackets: 1000 resamples of students, from the saved per-student predictions (`eval/bootstrap.py`); the per-seed min–max is in [`eval/results/eval.md`](../eval/results/eval.md). Model for A, B and B+: `qwen3.5:27b-q4_K_M` (local, Ollama, thinking off), one model, no fallback. C: template wording; its metrics come from the graph.
 
-Latency is p50 / p95 over every diagnosis timed with fresh LLM calls (cached ones are left out), pooled across the pre-review and post-review runs of the same model: n = 45 + 5 for A, 90 + 30 for B and 30 + 30 for B+. C makes no LLM calls; its latency is this run's 90 diagnoses. `n` in a latency cell is the number of diagnoses timed.
+Latency is p50 / p95 over every diagnosis timed with fresh LLM calls (cached ones are left out), pooled across the pre-review run, the Oct 18 post-review run and this run, all on the same model: n = 45 + 5 + 12 for A, 90 + 30 + 31 for B and 30 + 30 + 8 for B+, in that order. C makes no LLM calls; its latency is this run's 90 diagnoses. `n` in a latency cell is the number of diagnoses timed.
 
 **B+ ran on seed 0 only**, so its column above is not comparable with the other columns' three-seed means. On seed 0, the same 30 students for every condition:
 
 | Seed 0 | A. No memory (n=30) | B. Vector RAG (n=30) | B+. LLM + graph as text (n=30) | C. Unlearn (n=30) |
 | --- | --- | --- | --- | --- |
-| Top-1 misconception | 10% [0–23] | 13% [3–27] | 23% [10–40] | 50% [33–67] |
-| Top-3 misconception | 10% [0–23] | 27% [13–43] | 47% [27–63] | 73% [57–90] |
-| Root-cause accuracy | 33% [17–50] | 30% [13–47] | 40% [23–57] | 63% [47–80] |
+| Top-1 misconception | 17% [7–30] | 13% [3–27] | 23% [10–40] | 50% [33–67] |
+| Top-3 misconception | 17% [7–30] | 27% [13–43] | 40% [23–57] | 73% [57–90] |
+| Root-cause accuracy | 27% [10–43] | 33% [17–53] | 40% [23–57] | 63% [47–80] |
 | Questions to diagnosis | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 6.0 [6.0–6.0] | 5.2 [4.8–5.6] |
-| Session-2 recall | 0% [0–0] | 7% [0–17] | 7% [0–17] | 50% [33–67] |
-| p50 latency per diagnosis | 18.0 s [12.4–24.8] (n=25) | 8.5 s [8.1–8.6] (n=36) | 113.8 s [113.0–115.6] (n=60) | 50 ms [48–51] (n=30) |
+| Session-2 recall | 0% [0–0] | 7% [0–17] | 7% [0–17] | 53% [37–70] |
+| p50 latency per diagnosis | 17.2 s [12.4–22.6] (n=31) | 8.4 s [8.0–8.6] (n=44) | 114.4 s [113.1–117.1] (n=68) | 52 ms [50–53] (n=30) |
 
 Candidate lists, averaged over the same students: 6.6 root-cause candidates (the target's prerequisites), 9.4 misconception candidates for A and 10 for B. A planted misconception is on A's list for 23% of students and on B's for 20%, which caps A's and B's misconception scores whatever the model does. **B+ is not capped:** it is scored on every ID it was shown, B's lists plus its graph text (410 misconceptions and 40 constructs), and every planted misconception (100%) is in it. The random-guess column picks uniformly from those same sets.
 
@@ -73,15 +79,15 @@ Candidate lists, averaged over the same students: 6.6 root-cause candidates (the
 
 **What the table says.**
 - **C wins on every metric.** Against A and B, over the same 90 students (seeds 0–2):
-  - Root cause: 72% against 32% (A) and 37% (B), and 23% for a random pick from their own lists.
-  - Misconceptions: 48% top-1 and 79% top-3, against at most 7% and 13% (B).
-  - It asks fewer questions (5.2 against 6) and answers in about 50 ms (n=90) instead of 7.5 s for B (n=120) and 15 s for A (n=50), at p50.
+  - Root cause: 72% against 30% (A) and 38% (B), and 23% for a random pick from their own lists.
+  - Misconceptions: 48% top-1 and 79% top-3, against at most 9% (A) and 13% (B).
+  - It asks fewer questions (5.2 against 6) and answers in about 52 ms (n=90) instead of 7.7 s for B (n=151) and 13 s for A (n=62), at p50.
 - **B+ tests knowledge against traversal.** It ran on seed 0 only, so it is compared on seed 0's 30 students (the seed-0 table above), never with the three-seed means:
-  - **Against B:** B+ beats B on root cause (40% against 30%), top-1 misconception (23% against 13%) and top-3 (47% against 27%). So the graph's knowledge does help an LLM.
-  - **Against C:** it's still far behind: 40% against 63% on root cause, 23% against 50% on top-1 and 47% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. On seed 0, a B+ diagnosis takes 114 s at p50 (n=60), against 8.5 s for B (n=36) and 50 ms for C (n=30).
-- **B+ trails C on every seed-0 metric.** With 30 students, though, the intervals overlap on top-1, top-3 and root cause; only session-2 recall is clear-cut (50% [33–67] against 7% [0–17]).
-- **Uncertainty.** The bracketed 95% intervals settle the three-seed gap: C's root cause (72% [63–81]) doesn't overlap A's or B's (37% [27–47] at best). On seed 0's 30 students, C and B+ overlap on root cause (63% [47–80] against 40% [23–57]). That gap is suggestive, not conclusive.
-- **Session-2 recall.** Over seeds 0–2, C scores 57% against 9% for B and 0% for A. On seed 0, C scores 50% against 7% for both B and B+, whose openings are identical.
+  - **Against B:** B+ beats B on root cause (40% against 33%), top-1 misconception (23% against 13%) and top-3 (40% against 27%). So the graph's knowledge does help an LLM.
+  - **Against C:** it's still far behind: 40% against 63% on root cause, 23% against 50% on top-1 and 40% against 73% on top-3. Pasting the graph into the prompt doesn't reproduce what traversing it does. On seed 0, a B+ diagnosis takes 114 s at p50 (n=68), against 8.4 s for B (n=44) and 52 ms for C (n=30).
+- **B+ trails C on every seed-0 metric.** With 30 students, though, the intervals overlap on top-1 and root cause and just touch on top-3 (B+ [23–57], C [57–90]); only session-2 recall is clear-cut (53% [37–70] against 7% [0–17]).
+- **Uncertainty.** The bracketed 95% intervals settle the three-seed gap: C's root cause (72% [63–81]) doesn't overlap A's or B's (38% [28–48] at best). On seed 0's 30 students, C and B+ overlap on root cause (63% [47–80] against 40% [23–57]). That gap is suggestive, not conclusive.
+- **Session-2 recall.** Over seeds 0–2, C scores 60% against 9% for B and 0% for A. On seed 0, C scores 53% against 7% for both B and B+, whose openings are identical.
   - The eval's figure comes from the embedding judge applied to the real opening text.
   - The 68% in the recall table under "Design decisions worth knowing" ([DESIGN.md](DESIGN.md)) counts the named IDs exactly. The two measure slightly different things.
 
@@ -96,18 +102,18 @@ Candidate lists, averaged over the same students: 6.6 root-cause candidates (the
 
 | C under noise p (n=90, seeds 0–2) | Top-1 misconception | Top-3 misconception | Root cause | Session-2 recall |
 | --- | --- | --- | --- | --- |
-| p = 0 | 48% [38–58] | 79% [70–87] | 72% [63–81] | 59% [49–68] |
-| p = 0.2 | 31% [22–40] | 58% [47–68] | 52% [42–63] | 37% [27–47] |
-| p = 0.4 | 18% [10–26] | 28% [19–37] | 33% [23–44] | 17% [10–26] |
-| A, clean simulator (n=90) | 7% | 7% | 32% | 0% |
-| B, clean simulator (n=90) | 7% | 13% | 37% | 9% |
-| B+, clean simulator (seed 0, n=30) | 23% | 47% | 40% | 7% |
+| p = 0 | 48% [38–58] | 79% [70–87] | 72% [63–81] | 60% [50–70] |
+| p = 0.2 | 31% [22–40] | 58% [47–68] | 52% [42–63] | 38% [28–48] |
+| p = 0.4 | 18% [10–26] | 28% [19–37] | 33% [23–44] | 18% [10–27] |
+| A, clean simulator (n=90) | 9% | 10% | 30% | 0% |
+| B, clean simulator (n=90) | 7% | 13% | 38% | 9% |
+| B+, clean simulator (seed 0, n=30) | 23% | 40% | 40% | 7% |
 
 | C on seed 0 only (n=30), to compare with B+ | Top-1 misconception | Top-3 misconception | Root cause | Session-2 recall |
 | --- | --- | --- | --- | --- |
 | p = 0 | 50% | 73% | 63% | 53% |
-| p = 0.2 | 37% | 67% | 67% | 50% |
-| p = 0.4 | 27% | 37% | 47% | 27% |
+| p = 0.2 | 37% | 67% | 67% | 53% |
+| p = 0.4 | 27% | 37% | 47% | 30% |
 
 Brackets are 95% bootstrap intervals over students.
 
@@ -115,10 +121,10 @@ Brackets are 95% bootstrap intervals over students.
 - **C degrades steadily with noise**, as it should: it reads exactly the evidence the noise corrupts.
 - **At p = 0.2**, C still beats the clean A, B and B+ on every metric.
 - **At p = 0.4**, C no longer wins everywhere:
-  - Root cause (33% [23–44]) falls below clean B's 37% and only just clears A's 32%. The intervals overlap.
-  - On seed 0, its top-3 (37%) falls below B+'s 47%.
+  - Root cause (33% [23–44]) falls below clean B's 38% and only just clears A's 30%. The intervals overlap.
+  - On seed 0, its top-3 (37%) falls below B+'s 40%.
   - It still beats every baseline on top-1 and session-2 recall.
-- **p = 0 reproduces the main table's top-1, top-3 and root cause exactly.** Its recall is 59% against the table's 57%: the session-2 opening's wording changed after the eval ran ("1 time", trimmed names), and that moves one student under the embedding judge.
+- **p = 0 reproduces the main table exactly**, recall included (60%), and C's seed-0 row matches the seed-0 table. Before the Oct 19 re-run the two disagreed on recall (59% against 57%); see the note under Method.
 - **A stronger model may narrow the gap** on naming misconceptions. The baselines here run on a 27B local model.
 
 ## Teacher chat tool routing (`eval/tool_routing.py`, [`eval/results/tool_routing.json`](../eval/results/tool_routing.json))

@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts numerators and denominators separately\",\n    \"Believes the denominator of the difference is the product of the original denominators without adjusting the numerator\"\n  ],\n  \"prerequisite\": \"finding a common denominator before subtracting fractions\"\n}"}

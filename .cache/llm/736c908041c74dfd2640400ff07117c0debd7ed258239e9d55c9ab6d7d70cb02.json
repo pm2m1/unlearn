@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts whole numbers and fractions separately without finding a common denominator\",\n    \"Ignores the fractional parts when subtracting mixed numbers\"\n  ],\n  \"prerequisite\": \"finding a common denominator for fraction operations\"\n}"}

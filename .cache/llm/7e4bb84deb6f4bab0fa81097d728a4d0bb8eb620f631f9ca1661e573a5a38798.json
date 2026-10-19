@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts the divisor from the dividend instead of dividing\",\n    \"Confuses division with subtraction when dealing with multiples of ten\"\n  ],\n  \"prerequisite\": \"Understanding the inverse relationship between multiplication and division\"\n}"}

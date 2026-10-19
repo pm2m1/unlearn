@@ -4,7 +4,9 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
-.cache/
+.cache/*
+# ...except the model reply cache: eval/check.py replays A, B and B+ from it (replies only, no prompts or keys)
+!.cache/llm/
 .DS_Store
 # Eedi NeurIPS 2020 data (CC BY-NC-ND 4.0): never commit it or anything per-student derived from it
 data/external/

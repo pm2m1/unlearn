@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Adds numerators and denominators separately instead of finding a common denominator\",\n    \"Fails to simplify the resulting improper fraction in the fractional part\"\n  ],\n  \"prerequisite\": \"adding fractions with unlike denominators\"\n}"}

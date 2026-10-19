@@ -1,0 +1,1 @@
+{"provider": "gemini", "model": "gemini-3.6-flash", "text": "```json\n{\n  \"misconceptions\": [\n    \"Believes that adding the whole numbers is sufficient and forgets to add the fractional parts\",\n    \"Believes that fractions can be ignored or dropped when adding mixed numbers\"\n  ],\n  \"prerequisite\": \"Adding proper fractions with common denominators\"\n}\n```"}

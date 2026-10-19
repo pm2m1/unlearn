@@ -82,11 +82,18 @@ RETURN label, properties, types, entitytype ORDER BY label
 # --- class_template (scripts/04_build_template.py) ----------------------------
 # Indexes from SPEC "Indexes", plus the hierarchy indexes the loader MERGEs on.
 
+# The vector index is HNSW, which is approximate: with the default efRuntime (10) two graphs with identical content
+# returned different nearest neighbours for 1 query in 5, so eval results depended on how the index happened to be
+# built. efRuntime at least the number of vectors (410 misconceptions in a class graph) makes every search exact;
+# tests/test_vector_exact.py checks it against brute-force cosine on a freshly built index.
+VECTOR_EF_RUNTIME = 1000
+
 CLASS_INDEXES = CURRICULUM_INDEXES + [
     "CREATE INDEX FOR (q:Question) ON (q.id)",
     "CREATE INDEX FOR (s:Student) ON (s.id)",
     "CREATE INDEX FOR (t:Task) ON (t.state)",
-    "CREATE VECTOR INDEX FOR (m:Misconception) ON (m.embedding) OPTIONS {dimension:384, similarityFunction:'cosine'}",
+    "CREATE VECTOR INDEX FOR (m:Misconception) ON (m.embedding) "
+    f"OPTIONS {{dimension:384, similarityFunction:'cosine', efRuntime:{VECTOR_EF_RUNTIME}}}",
 ]
 
 # Read the topic slice out of `curriculum` (run against the curriculum graph).
@@ -834,4 +841,20 @@ RETURN a.id AS a, a.name AS a_name, b.id AS b, b.name AS b_name ORDER BY a, b
 ALL_SEEN_IN = """
 MATCH (m:Misconception)-[si:SEEN_IN]->(c:Construct)
 RETURN c.id AS cid, c.name AS cname, m.id AS mid, m.name AS mname, si.w AS w ORDER BY cid, w DESC, mid
+"""
+
+# --- Eval provenance (eval/provenance.py): fingerprint of the graph an eval read ----------------------------
+
+EVAL_GRAPH_NODES = """
+MATCH (n) RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props
+"""
+
+EVAL_GRAPH_EDGES = """
+MATCH (a)-[r]->(b) RETURN id(a) AS a, type(r) AS type, properties(r) AS props, id(b) AS b
+"""
+
+# Index definitions with their options: an approximate vector index gives different results on identical content.
+EVAL_GRAPH_INDEXES = """
+CALL db.indexes() YIELD label, properties, types, options, entitytype
+RETURN label, properties, types, options, entitytype ORDER BY entitytype, label
 """

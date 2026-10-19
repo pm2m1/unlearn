@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:9b-q4_K_M", "text": "To add fractions like $1/3$ and $1/6$, we need to make the pieces the same size so they can be counted together easily. We find a common denominator by turning $1/3$ into $2/6$, which lets us simply add the numerators: $2 + 1 = 3$, giving us $3/6$ or simplified, $1/2$."}

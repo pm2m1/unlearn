@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Adds denominators and multiplies numerators when adding fractions\",\n    \"Applies multiplication rules (multiply top, multiply bottom) to addition problems\"\n  ],\n  \"prerequisite\": \"Finding a common denominator before adding fractions\"\n}"}

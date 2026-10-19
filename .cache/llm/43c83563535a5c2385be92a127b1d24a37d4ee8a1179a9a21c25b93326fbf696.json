@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Mixes up the numerator and denominator\",\n    \"Uses numerator as whole part of a fraction\",\n    \"Believes that a fraction means dividing the denominator by the numerator\"\n  ],\n  \"root_cause\": \"Understanding the meaning of fractions on a number line\"\n}"}

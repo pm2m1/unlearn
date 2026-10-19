@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "Hello! Great job on the mixed number and first-gap questions. However, we need to review identifying fractions when a line is split into *n* parts. You often added 1 to the denominator (like choosing 7/11 instead of 7/10). Let's practice counting gaps versus dashes to fix this! Ready to start?"}

@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"When adding fractions, multiplies the denominators\",\n    \"Believes all fractions have 1 in the numerator\",\n    \"Confuses decimal notation with fraction notation\"\n  ],\n  \"root_cause\": \"Understanding how to find a common denominator for fraction addition\"\n}"}

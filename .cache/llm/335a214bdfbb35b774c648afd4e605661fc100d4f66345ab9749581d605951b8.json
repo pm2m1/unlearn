@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Confuses factors and multiples\",\n    \"Believes that if there is no common factor other than 1, the answer is 0\",\n    \"Believes 1 is not a factor of a number\"\n  ],\n  \"root_cause\": \"Does not understand the term factor\"\n}"}

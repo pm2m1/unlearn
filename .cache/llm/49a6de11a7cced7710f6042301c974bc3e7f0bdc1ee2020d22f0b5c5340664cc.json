@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Subtracts numerators and denominators separately\",\n    \"Believes the result of subtracting fractions is always a whole number or improper fraction greater than one\"\n  ],\n  \"prerequisite\": \"finding a common denominator for unlike fractions\"\n}"}

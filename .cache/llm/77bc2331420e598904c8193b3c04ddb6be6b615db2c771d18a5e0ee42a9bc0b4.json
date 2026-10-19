@@ -1,0 +1,1 @@
+{"provider": "gemini", "model": "gemini-3.8-flash", "text": "```json\n{\"misconceptions\": [\"Believes the fraction represents the complement (unshaded part) rather than the shaded part (12 - 4 = 8 instead of 9)\", \"Confuses finding 3/4 with finding 2/3 (since 2/3 of 12 is 8)\"], \"prerequisite\": \"Find a fraction of a whole number\"}\n```"}

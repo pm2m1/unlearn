@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"Does not fully simplify fraction\",\n    \"Believes the highest common factor is the product of the two numbers\",\n    \"Thinks that fractions with the same numerator are equivalent\"\n  ],\n  \"root_cause\": \"Understanding factors and multiples\"\n}"}

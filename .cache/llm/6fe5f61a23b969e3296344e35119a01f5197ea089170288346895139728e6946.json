@@ -1,0 +1,1 @@
+{"provider": "gemini", "model": "gemini-3.6-flash", "text": "```json\n{\n  \"misconceptions\": [\n    \"Confuses multiples with factors\",\n    \"Believes any number containing or ending in 4 is a multiple of 4\",\n    \"Confuses dividing by 2 with dividing by 4\"\n  ],\n  \"prerequisite\": \"Recall times tables facts for the 4 times table\"\n}\n```"}

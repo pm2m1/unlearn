@@ -1,0 +1,1 @@
+{"provider": "ollama", "model": "qwen3.5:27b-q4_K_M", "text": "{\n  \"misconceptions\": [\n    \"A number cannot be a factor of itself\",\n    \"Factors must be smaller than the original number\"\n  ],\n  \"prerequisite\": \"Understanding that a number is always a factor of itself\"\n}"}
