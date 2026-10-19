@@ -15,9 +15,9 @@
    value.
 Latency is never compared: it is wall time. Nothing in eval/results is written.
 
-Known limit: FalkorDB's vector search is approximate, and a freshly seeded graph builds its index differently, so
-the recall judge's and A/B's retrieval results can differ on another database even when the graph fingerprint
-matches. The check reproduces a run on the database it ran on, not yet from a fresh seed (docs/EVALUATION.md).
+The vector index is exact (efRuntime >= the number of vectors; tests/test_vector_exact.py), so a freshly seeded
+database gives the same nearest neighbours, and the check passes from a fresh clone after `make seed`. Before
+Oct 19 the index was approximate and results varied between seeds (docs/EVALUATION.md).
 """
 
 import argparse

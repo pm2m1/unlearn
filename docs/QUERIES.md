@@ -3,7 +3,7 @@
 [Back to the README](../README.md)
 
 <!-- queries:start -->
-117 queries, all parameterised, all in [`api/unlearn/queries.py`](../api/unlearn/queries.py).
+118 queries, all parameterised, all in [`api/unlearn/queries.py`](../api/unlearn/queries.py).
 
 **Agent tools (the 16 tools and the queries they run)**
 
@@ -112,13 +112,14 @@
 | `CONC_HEAVY_WRITE` | a deliberately heavy write that holds a graph's write lock | UNWIND + CREATE |
 | `EVAL_GRAPH_NODES` | eval provenance: every node of the graph an eval read, for its fingerprint | label scan, `properties()` |
 | `EVAL_GRAPH_EDGES` | eval provenance: every edge, with its endpoints, for the fingerprint | pattern match, `properties()` |
+| `EVAL_GRAPH_INDEXES` | eval provenance: every index and its options (the vector index's efRuntime), for the fingerprint | `db.indexes()` |
 
 **Loading and indexes**
 
 | Query | Purpose | FalkorDB feature |
 | --- | --- | --- |
 | `CURRICULUM_INDEXES` | range indexes on Subject/Topic/SubTopic/Construct/Misconception ids | range index |
-| `CLASS_INDEXES` | plus Question, Student, Task.state and the 384-d cosine vector index | range + vector index |
+| `CLASS_INDEXES` | plus Question, Student, Task.state and the 384-d cosine vector index (efRuntime 1000: exact search) | range + vector index |
 | `LOAD_HIERARCHY` | Subject → Topic → SubTopic → Construct from construct-map.csv | UNWIND + MERGE (batches of 500) |
 | `LOAD_MISCONCEPTIONS` | misconceptions and weighted SEEN_IN edges | UNWIND + MERGE |
 | `LOAD_SHARES_MISCONCEPTION` | derived SHARES_MISCONCEPTION edges (curriculum graph) | UNWIND + MERGE |

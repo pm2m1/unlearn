@@ -2,9 +2,11 @@
 
 Every eval reads class_template from the local FalkorDB, not from the commit, so the commit alone doesn't pin
 a result: a template rebuilt from changed data gives different numbers on the same code. The fingerprint is a
-SHA-256 over every node (labels and properties) and every edge (type, properties and both endpoints), with
-floats rounded so it doesn't depend on how they print. eval/check.py refuses to compare against a result whose
-fingerprint differs from the graph it would read now.
+SHA-256 over every node (labels and properties), every edge (type, properties and both endpoints) and every index
+definition with its options, with floats rounded so it doesn't depend on how they print. The indexes count
+because the vector index's search width decides whether nearest-neighbour results are exact
+(queries.VECTOR_EF_RUNTIME). eval/check.py refuses to compare against a result whose fingerprint differs from the
+graph it would read now.
 """
 
 import hashlib
@@ -33,6 +35,7 @@ def _canon(value):
 def graph_fingerprint(graph: str = GRAPH) -> dict:
     nodes, _ = run(graph, Q.EVAL_GRAPH_NODES, read_only=True)
     edges, _ = run(graph, Q.EVAL_GRAPH_EDGES, read_only=True)
+    indexes, _ = run(graph, Q.EVAL_GRAPH_INDEXES, read_only=True)
     key = {n["id"]: json.dumps([sorted(n["labels"]), _canon(n["props"])], sort_keys=True) for n in nodes}
     h = hashlib.sha256()
     for line in sorted(key.values()):
@@ -41,7 +44,12 @@ def graph_fingerprint(graph: str = GRAPH) -> dict:
     for line in sorted(json.dumps([key[e["a"]], e["type"], _canon(e["props"]), key[e["b"]]], sort_keys=True)
                        for e in edges):
         h.update(line.encode() + b"\n")
-    return {"name": graph, "sha256": h.hexdigest(), "nodes": len(nodes), "edges": len(edges)}
+    h.update(b"--indexes--\n")
+    for ix in indexes:
+        h.update(json.dumps(_canon(ix), sort_keys=True).encode() + b"\n")
+    vector = [ix["options"] for ix in indexes if "VECTOR" in str(ix["types"])]
+    return {"name": graph, "sha256": h.hexdigest(), "nodes": len(nodes), "edges": len(edges),
+            "indexes": len(indexes), "vector_index_options": vector}
 
 
 def git_state() -> dict:
