@@ -147,6 +147,10 @@ class RatingBody(CodeBody):
     rating: int | None = Field(None, ge=1, le=5)
 
 
+class FollowupBody(CodeBody):
+    followed_up: bool
+
+
 class ConfirmBody(BaseModel):
     confirm: str = Field(..., max_length=20)
 
@@ -173,6 +177,11 @@ def session2(body: OpenBody, x_pilot_class: str | None = Header(None), x_pilot_k
 @router.post("/api/teacher/rating")
 def rating(body: RatingBody, x_pilot_class: str | None = Header(None), x_pilot_key: str | None = Header(None)):
     return _call(lambda p: p.set_rating(_teacher(p, x_pilot_class, x_pilot_key), body.code, body.rating))
+
+
+@router.post("/api/teacher/followup")
+def followup(body: FollowupBody, x_pilot_class: str | None = Header(None), x_pilot_key: str | None = Header(None)):
+    return _call(lambda p: p.set_followup(_teacher(p, x_pilot_class, x_pilot_key), body.code, body.followed_up))
 
 
 @router.post("/api/teacher/export/answers")

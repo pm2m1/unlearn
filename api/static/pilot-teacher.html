@@ -103,6 +103,7 @@ async function overview() {
     <td>${s.skill ? `<details><summary>${esc(s.skill)}</summary><ol>${s.skill_steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol></details>` : "–"}</td>
     <td><select data-code="${esc(s.code)}" aria-label="Does this match your view? 1 to 5">
       ${["", 1, 2, 3, 4, 5].map(v => `<option value="${v}" ${s.rating == v && v !== "" ? "selected" : ""}>${v === "" ? "–" : v}</option>`).join("")}</select></td>
+    <td><input type="checkbox" data-follow="${esc(s.code)}" ${s.followed_up ? "checked" : ""} aria-label="I went through the practice topic with ${esc(s.code)}"></td>
     <td><button class="danger" data-del="${esc(s.code)}">Delete</button></td></tr>`).join("");
   app.innerHTML = `<h1>Class ${esc(d.class_code)}</h1>
   <div class="card">
@@ -112,7 +113,7 @@ async function overview() {
     <p class="mute">Check items approved: ${d.items.S1} for session 1, ${d.items.S2} for session 2, ${d.items.POOL} more for the follow-up questions.</p>
   </div>
   <div class="scroll"><table><thead><tr><th>Code</th><th>Status</th><th>Check 1</th><th>Check 2</th><th>Root cause found</th>
-    <th>Misconceptions shown</th><th>Suggested approach</th><th>Matches your view? (1–5)</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <th>Misconceptions shown</th><th>Suggested approach</th><th>Matches your view? (1–5)</th><th>I went through the practice topic</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
   <div class="card"><h2>Delete the whole class</h2><p class="mute">Deletes every code's answers and the class itself. This cannot be undone.</p>
     <input id="conf" placeholder="Type the class code" autocomplete="off"> <button class="danger" id="delc">Delete class</button></div>`;
   document.getElementById("s2").onclick = async () => { await api("teacher/session2", {open: !d.session2_open}, auth()); overview(); };
@@ -123,6 +124,10 @@ async function overview() {
   document.querySelectorAll("select[data-code]").forEach(el => el.onchange = async () => {
     const r = await api("teacher/rating", {code: el.dataset.code, rating: el.value ? +el.value : null}, auth());
     if (r.status !== 200) alert(msg(r));
+  });
+  document.querySelectorAll("input[data-follow]").forEach(el => el.onchange = async () => {
+    const r = await api("teacher/followup", {code: el.dataset.follow, followed_up: el.checked}, auth());
+    if (r.status !== 200) { alert(msg(r)); el.checked = !el.checked; }
   });
   document.querySelectorAll("button[data-del]").forEach(b => b.onclick = async () => {
     if (!confirm(`Delete all data for ${b.dataset.del}? The code stops working. This cannot be undone.`)) return;

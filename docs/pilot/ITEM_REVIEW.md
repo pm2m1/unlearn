@@ -2,7 +2,7 @@
 
 Every question and every fixed sentence a pilot student can see is listed here. **The pilot uses an item only while its decision line reads `APPROVED`**; anything else (`PENDING`, `DROPPED`, `EDIT`) keeps it out. The pilot also refuses to create a class until the wording block is `APPROVED` and at least one session-1 and one session-2 check item are.
 
-- **How to decide:** change `PENDING` after `**Decision:**` to `APPROVED` or `DROPPED`. For a change, write `EDIT` and a note; Claude Code applies the edit in `scripts/pilot_items.py` and the item comes back as `PENDING`.
+- **How to decide:** change `PENDING` after `**Decision:**` to `APPROVED` or `DROPPED`. For a change, write `EDIT` and a note on the same line; Claude Code applies the edit in `scripts/pilot_items.py` and the item comes back as `PENDING`. Anything after the decision word on that line is kept when the file is regenerated.
 - **Fingerprints:** each block has a fingerprint of exactly what students see (stem, options, key, misconception tags). If the item changes, the fingerprint changes and an earlier decision no longer counts.
 - **Regenerate:** `PYTHONPATH=api .venv/bin/python scripts/pilot_items.py` rewrites this file and keeps decisions whose fingerprint is unchanged.
 - **Source:** copies of `data/curated/questions.json` with pilot-only edits; the demo's questions are not changed. Every item is re-checked by `verify_question` (maths and SEEN_IN) and the script refuses to write if one fails. Answer keys were also recomputed by hand in Phase 0.
@@ -12,7 +12,7 @@ Every question and every fixed sentence a pilot student can see is listed here. 
 
 ### wording · fixed sentences and construct names
 
-`fingerprint: ef3cbff276`
+`fingerprint: 2b8354c70b`
 
 From `api/unlearn/pilot/wording.py`. **The Hindi is a draft and needs a native speaker's check.**
 
@@ -45,7 +45,8 @@ From `api/unlearn/pilot/wording.py`. **The Hindi is a draft and needs a native s
 - `warming`: Getting ready. Please wait a minute and try again.
 - `ready`: Ready
 - `not_open`: This activity is not open yet. Please ask your teacher.
-- `check_intro`: Answer each question. Give answers in simplest form.
+- `check_intro`: Answer each question.
+- `rule`: Give answers in simplest form, unless the question asks for an equivalent fraction.
 - `more_intro`: Thank you! Now a few more questions to find what to practise.
 - `progress`: Question {i} of {n}
 - `practise_title`: Let's practise: {construct}
@@ -160,7 +161,7 @@ Session 1 asks the S1 items in this order; session 2 asks the S2 items. Each pai
 - C. `4/3`: 24501 When subtracting fractions, believes you just subtract the numerators and subtract the denominators
 - D. `4/6`: 14107 Does not consider the denominator when adding/ subtracting fractions. Adds/subtracts the numerator and makes the denominator the one with the highest value
 
-**Flag:** Key is 1/2 (3/6 simplified). Fine with the "simplest form" instruction.
+**Flag:** Key is 1/2 (3/6 simplified). Fine with the instruction "Give answers in simplest form, unless the question asks for an equivalent fraction".
 
 **Decision:** PENDING
 
@@ -304,7 +305,7 @@ Session 1 asks the S1 items in this order; session 2 asks the S2 items. Each pai
 - C. `4/3`: 22626 Believes that only numerators need to be changed to create equivalent fractions, ignoring the denominators
 - D. `3/2`: 22644 Assumes that the numerator and denominator are not order-dependent, resulting in the belief that a/b is equivalent to b/a
 
-**Flag:** The answer 8/12 is not in simplest form by design (it asks for an equivalent fraction), which sits a little against the "Give answers in simplest form" instruction. Exempt from that rule.
+**Flag:** The answer 8/12 is not in simplest form by design: the question asks for an equivalent fraction, which the instruction "Give answers in simplest form, unless the question asks for an equivalent fraction" exempts.
 
 **Decision:** PENDING
 
@@ -466,7 +467,7 @@ Session 1 asks the S1 items in this order; session 2 asks the S2 items. Each pai
 - C. `2/16`: 15931 When subtracting fractions, subtracts the numerators and adds the denominators
 - D. `2`: 19220 When subtracting fractions with the same denominator, believes they subtract the numerators and the denominators cancel out
 
-**Pilot edit:** Correct option in simplest form (was 2/8), to match "Give answers in simplest form". (A was `2/8` (correct))
+**Pilot edit:** Correct option in simplest form (was 2/8), to match "Give answers in simplest form, unless the question asks for an equivalent fraction". (A was `2/8` (correct))
 
 **Suggested:** APPROVE (your default: simplest form)
 

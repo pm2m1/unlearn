@@ -426,12 +426,19 @@ class Pilot:
             raise PilotError("rating is 1 to 5")
         self.store.set_rating(normalise(code), rating, now_ms())
 
+    def set_followup(self, pc: PilotClass, code: str, followed_up: bool) -> None:
+        """The teacher went through the practice topic with this student (or not). Not controlled by the pilot:
+        this toggle is the only record of follow-up between sessions."""
+        if normalise(code) not in pc.learners:
+            raise NotFound("no such code in this class")
+        self.store.set_followup(normalise(code), bool(followed_up))
+
     def overview(self, pc: PilotClass) -> dict:
         """Per code: progress, check scores, the diagnosed root, misconceptions shown, the Tutor's skill."""
         if pc.error:
             return {"class_code": pc.code, "error": pc.error, "students": []}
         g = tools.graph_name(pc.cid)
-        ratings = self.store.ratings(pc.code)
+        ratings, followups = self.store.ratings(pc.code), self.store.followups(pc.code)
         with pc.lock:  # snapshot, then read the graph without holding up the students
             learners = sorted((code, _status(L)) for code, L in pc.learners.items())
             events = list(pc.events)
@@ -452,7 +459,8 @@ class Pilot:
                 "questions_after_check": sum(1 for e in evs if e.kind == "answer" and e.phase != "check"),
                 "root": dx[-1]["name"] if dx else None,
                 "misconceptions": [{"name": r["name"], "count": r["count"]} for r in showed[:5]],
-                "skill": skill, "skill_steps": steps, "rating": ratings.get(code)})
+                "skill": skill, "skill_steps": steps, "rating": ratings.get(code),
+                "followed_up": followups.get(code, False)})
         return {"class_code": pc.code, "session2_open": pc.session2_open, "items": self.items.counts(),
                 "students": students}
 
@@ -474,13 +482,14 @@ class Pilot:
         buf = io.StringIO()
         w = csv.writer(buf, lineterminator="\n")
         w.writerow(["code", "status", "session1_check_right", "session2_check_right", "questions_after_check",
-                    "diagnosed_root", "misconceptions_shown", "tutor_skill", "teacher_rating"])
+                    "diagnosed_root", "misconceptions_shown", "tutor_skill", "teacher_rating",
+                    "teacher_went_through_practice"])
         for s in self.overview(pc)["students"]:
             c1, c2 = s["check"][1], s["check"][2]
             w.writerow([s["code"], s["status"], f"{c1['right']}/{c1['answered']}" if c1["answered"] else "",
                         f"{c2['right']}/{c2['answered']}" if c2["answered"] else "", s["questions_after_check"],
                         s["root"] or "", "; ".join(f"{m['name']} (x{m['count']})" for m in s["misconceptions"]),
-                        s["skill"] or "", s["rating"] or ""])
+                        s["skill"] or "", s["rating"] or "", "yes" if s["followed_up"] else "no"])
         return buf.getvalue()
 
     # --- deletion --------------------------------------------------------------------------------------------

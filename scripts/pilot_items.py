@@ -52,7 +52,8 @@ WHY_EDITED = {
     "q-3378-1": "× for multiplication.",
     "q-3378-2": "× for multiplication.",
     "q-3378-3": "÷ for division.",
-    "q-432-1": "Correct option in simplest form (was 2/8), to match \"Give answers in simplest form\".",
+    "q-432-1": "Correct option in simplest form (was 2/8), to match \"Give answers in simplest form, unless the question "
+               "asks for an equivalent fraction\".",
     "q-432-3": "Correct option in simplest form (was 5/10), same rule.",
     "q-435-1": "Negative distractor -1/2 (24501) replaced by 13/15 (26054, adds instead of subtracting; SEEN_IN 435).",
     "q-3342-3": "Stem said \"Which mixed number\", but two options aren't mixed numbers.",
@@ -63,9 +64,11 @@ WHY_EDITED = {
 NOT_SIMPLEST_OK = {"q-409-1"}
 
 FLAGS = {
-    "q-409-1": "The answer 8/12 is not in simplest form by design (it asks for an equivalent fraction), which sits "
-               "a little against the \"Give answers in simplest form\" instruction. Exempt from that rule.",
-    "q-433-2": "Key is 1/2 (3/6 simplified). Fine with the \"simplest form\" instruction.",
+    "q-409-1": "The answer 8/12 is not in simplest form by design: the question asks for an equivalent fraction, "
+               "which the instruction \"Give answers in simplest form, unless the question asks for an equivalent "
+               "fraction\" exempts.",
+    "q-433-2": "Key is 1/2 (3/6 simplified). Fine with the instruction \"Give answers in simplest form, unless the "
+               "question asks for an equivalent fraction\".",
     "q-410-3": "Simplifying a mixed number; option D repeats the question. Fine for Class 7, less sure for Class 6.",
     "q-427-2": "D \"9/15\" tagged 19088: the working (multiplies both numerators by 3) is plausible but unusual.",
     "q-342-3": "\"First multiple of 6\" = 6 matches NCERT; low risk.",
@@ -149,10 +152,11 @@ def render(items: list[dict], constructs: dict[int, str], old: dict) -> str:
     source = {q["id"]: q for q in json.loads((CURATED / "questions.json").read_text())}
 
     def decision(block_id: str, fp: str) -> str:
+        """The block's decision line: kept whole (with any note) while the fingerprint is unchanged."""
         was = old.get(block_id)
         if was and was[0] == fp:
             return was[1]
-        return "PENDING"
+        return "**Decision:** PENDING"
 
     out = [
         "# Pilot item review",
@@ -163,8 +167,8 @@ def render(items: list[dict], constructs: dict[int, str], old: dict) -> str:
         "and one session-2 check item are.",
         "",
         "- **How to decide:** change `PENDING` after `**Decision:**` to `APPROVED` or `DROPPED`. For a change, write "
-        "`EDIT` and a note; Claude Code applies the edit in `scripts/pilot_items.py` and the item comes back as "
-        "`PENDING`.",
+        "`EDIT` and a note on the same line; Claude Code applies the edit in `scripts/pilot_items.py` and the item "
+        "comes back as `PENDING`. Anything after the decision word on that line is kept when the file is regenerated.",
         "- **Fingerprints:** each block has a fingerprint of exactly what students see (stem, options, key, "
         "misconception tags). If the item changes, the fingerprint changes and an earlier decision no longer counts.",
         "- **Regenerate:** `PYTHONPATH=api .venv/bin/python scripts/pilot_items.py` rewrites this file and keeps "
@@ -193,7 +197,7 @@ def render(items: list[dict], constructs: dict[int, str], old: dict) -> str:
     out += [f"- {cid} {name}" for cid, name in constructs.items()]
     out += ["", "The Tutor's remediation skills are not shown to students: their steps are written as teacher "
             "instructions, so they appear only in the teacher view.", "",
-            f"**Decision:** {decision(P.WORDING_ID, wfp)}", ""]
+            decision(P.WORDING_ID, wfp), ""]
 
     def block(it: dict, label: str) -> list[str]:
         fp = P.item_fingerprint(it)
@@ -216,7 +220,7 @@ def render(items: list[dict], constructs: dict[int, str], old: dict) -> str:
             lines += ["", f"**Flag:** {FLAGS[it['id']]}"]
         if it["id"] in SUGGEST:
             lines += ["", f"**Suggested:** {SUGGEST[it['id']]}"]
-        lines += ["", f"**Decision:** {decision(it['id'], fp)}", ""]
+        lines += ["", decision(it["id"], fp), ""]
         return lines
 
     out += ["## Check items", "", "Session 1 asks the S1 items in this order; session 2 asks the S2 items. "
@@ -240,7 +244,7 @@ def main() -> int:
     P.ITEMS.parent.mkdir(parents=True, exist_ok=True)
     P.ITEMS.write_text(json.dumps({"constructs": {str(k): v for k, v in constructs.items()}, "items": items},
                                   indent=1, ensure_ascii=False) + "\n")
-    old = P.decisions(P.REVIEW.read_text()) if P.REVIEW.exists() else {}
+    old = P.decision_lines(P.REVIEW.read_text()) if P.REVIEW.exists() else {}
     P.REVIEW.parent.mkdir(parents=True, exist_ok=True)
     P.REVIEW.write_text(render(items, constructs, old))
     marks = P.decisions(P.REVIEW.read_text())

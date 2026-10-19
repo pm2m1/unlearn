@@ -105,7 +105,8 @@ def test_schema_has_only_the_allowed_fields(kind, tmp_path):
     for table, cols in SCHEMA.items():
         for col in cols:
             assert not set(col.lower().split("_")) & BANNED, f"{table}.{col} looks like personal data"
-    assert sorted(SCHEMA) == ["pilot_classes", "pilot_codes", "pilot_events", "pilot_ratings"]
+    assert sorted(SCHEMA) == ["pilot_classes", "pilot_codes", "pilot_events", "pilot_followups", "pilot_ratings"]
+    assert SCHEMA["pilot_followups"] == ["code", "followed_up"]                # code + yes/no, nothing else
     assert SCHEMA["pilot_events"] == ["id", "code", "session", "kind", "phase", "question_id", "option", "correct",
                                       "misconception_id", "ts", "ms", "assent"]
 
@@ -264,11 +265,13 @@ def test_deleting_a_code_really_deletes_it(env):
     run_session(env, a, 1, wrong={427, 345})
     run_session(env, b, 1, wrong={433})
     env.set_rating(pc, a, 2)
+    env.set_followup(pc, a, True)
+    env.set_followup(pc, b, True)
     env.delete_code(pc, a)
 
     st = env.store
     rows = st._exec("SELECT code FROM pilot_events UNION ALL SELECT code FROM pilot_ratings "
-                    "UNION ALL SELECT code FROM pilot_codes", fetch=True)
+                    "UNION ALL SELECT code FROM pilot_followups UNION ALL SELECT code FROM pilot_codes", fetch=True)
     assert a not in {r["code"] for r in rows} and b in {r["code"] for r in rows}
     g = tools.graph_name(pc.cid)
     assert run(g, "MATCH (s:Student {id:$sid}) RETURN count(s) AS n", {"sid": a})[0][0]["n"] == 0
@@ -322,6 +325,27 @@ def test_only_approved_items_are_used(tmp_path):
     changed = tmp_path / "items.json"
     changed.write_text(data)
     assert "q-3378-1" not in I.load(changed, tmp_path / "ITEM_REVIEW.md").items
+
+
+def test_the_follow_up_toggle_is_code_and_yes_no(env):
+    out = env.create_class(ADMIN, 2)
+    a, b = out["codes"]
+    pc = env.classes[out["class_code"]]
+    env.set_followup(pc, a, True)
+    env.set_followup(pc, a, False)
+    env.set_followup(pc, b, True)
+    assert env.store.followups(pc.code) == {a: False, b: True}
+    assert {s["code"]: s["followed_up"] for s in env.overview(pc)["students"]} == {a: False, b: True}
+    summary = env.summary_csv(pc).splitlines()
+    assert summary[0].endswith(",teacher_went_through_practice") and summary[1].endswith(",no")
+    with pytest.raises(NotFound):
+        env.set_followup(pc, "ZZZZ-ZZZZZ", True)
+
+
+def test_a_note_after_the_decision_word_is_kept():
+    text = "### q-1\n`fingerprint: abc`\n**Decision:** EDIT use 3/4 not 2/3\n### q-2\n`fingerprint: def`\n"
+    assert I.decisions(text) == {"q-1": ("abc", "EDIT"), "q-2": ("def", "PENDING")}
+    assert I.decision_lines(text)["q-1"] == ("abc", "**Decision:** EDIT use 3/4 not 2/3")
 
 
 def test_a_class_needs_approved_wording_and_check_items(tmp_path):

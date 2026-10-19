@@ -44,6 +44,16 @@ def wording_fingerprint(constructs: dict) -> str:
     return fingerprint({"wording": wording.bundle(), "constructs": constructs})
 
 
+def decision_lines(text: str) -> dict[str, tuple[str | None, str]]:
+    """{block id: (fingerprint, the whole decision line)}, so a note written after the decision word is kept."""
+    out = {}
+    for m in _BLOCK.finditer(text):
+        fp = _FP.search(m.group(2))
+        line = re.search(r"^\*\*Decision:\*\*.*$", m.group(2), re.M)
+        out[m.group(1)] = (fp.group(1) if fp else None, line.group(0) if line else "**Decision:** PENDING")
+    return out
+
+
 def decisions(text: str) -> dict[str, tuple[str | None, str]]:
     """{block id: (fingerprint, decision word)} from the review file."""
     out = {}

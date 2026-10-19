@@ -23,6 +23,7 @@ SCHEMA = {
     "pilot_events": ["id", "code", "session", "kind", "phase", "question_id", "option", "correct",
                      "misconception_id", "ts", "ms", "assent"],
     "pilot_ratings": ["code", "rating", "ts"],
+    "pilot_followups": ["code", "followed_up"],   # the teacher went through the practice topic with this code
 }
 
 _DDL = {
@@ -35,6 +36,8 @@ _DDL = {
                     "correct BOOLEAN, misconception_id INTEGER, ts BIGINT NOT NULL, ms INTEGER, assent BOOLEAN)",
     "pilot_ratings": "CREATE TABLE IF NOT EXISTS pilot_ratings (code TEXT PRIMARY KEY, rating INTEGER NOT NULL, "
                      "ts BIGINT NOT NULL)",
+    "pilot_followups": "CREATE TABLE IF NOT EXISTS pilot_followups (code TEXT PRIMARY KEY, "
+                       "followed_up BOOLEAN NOT NULL)",
 }
 # One answer per question per session: a resent answer is recognised, never stored twice.
 _ONE_ANSWER = ("CREATE UNIQUE INDEX IF NOT EXISTS pilot_events_one_answer ON pilot_events (code, session, question_id) "
@@ -196,11 +199,19 @@ class Store:
                     self._exec("INSERT INTO pilot_ratings (code, rating, ts) VALUES (?, ?, ?)", (code, rating, ts))
         self._retry(go)
 
+    def set_followup(self, code: str, followed_up: bool) -> None:
+        def go():
+            with self._lock:
+                self._exec("DELETE FROM pilot_followups WHERE code = ?", (code,))
+                self._exec("INSERT INTO pilot_followups (code, followed_up) VALUES (?, ?)", (code, followed_up))
+        self._retry(go)
+
     def delete_code(self, code: str) -> None:
         def go():
             with self._lock:
                 self._exec("DELETE FROM pilot_events WHERE code = ?", (code,))
                 self._exec("DELETE FROM pilot_ratings WHERE code = ?", (code,))
+                self._exec("DELETE FROM pilot_followups WHERE code = ?", (code,))
                 self._exec("DELETE FROM pilot_codes WHERE code = ?", (code,))
         self._retry(go)
 
@@ -210,6 +221,7 @@ class Store:
                 sub = "SELECT code FROM pilot_codes WHERE class_code = ?"
                 self._exec(f"DELETE FROM pilot_events WHERE code IN ({sub})", (class_code,))
                 self._exec(f"DELETE FROM pilot_ratings WHERE code IN ({sub})", (class_code,))
+                self._exec(f"DELETE FROM pilot_followups WHERE code IN ({sub})", (class_code,))
                 self._exec("DELETE FROM pilot_codes WHERE class_code = ?", (class_code,))
                 self._exec("DELETE FROM pilot_classes WHERE class_code = ?", (class_code,))
         self._retry(go)
@@ -218,7 +230,7 @@ class Store:
         """Delete every pilot row (scripts/pilot_wipe.py)."""
         def go():
             with self._lock:
-                for table in ("pilot_events", "pilot_ratings", "pilot_codes", "pilot_classes"):
+                for table in ("pilot_events", "pilot_ratings", "pilot_followups", "pilot_codes", "pilot_classes"):
                     self._exec(f"DELETE FROM {table}")
         self._retry(go)
 
@@ -247,6 +259,12 @@ class Store:
             "SELECT r.code, r.rating FROM pilot_ratings r JOIN pilot_codes c ON c.code = r.code "
             "WHERE c.class_code = ?", (class_code,), fetch=True))
         return {r["code"]: r["rating"] for r in rows}
+
+    def followups(self, class_code: str) -> dict[str, bool]:
+        rows = self._retry(lambda: self._exec(
+            "SELECT f.code, f.followed_up FROM pilot_followups f JOIN pilot_codes c ON c.code = f.code "
+            "WHERE c.class_code = ?", (class_code,), fetch=True))
+        return {r["code"]: bool(r["followed_up"]) for r in rows}
 
     def count(self, table: str) -> int:
         assert table in SCHEMA

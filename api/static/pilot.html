@@ -143,7 +143,8 @@ function showQuestion(s) {
   if (s.phase === "diagnose") head = `<p>${esc(t("more_intro"))}</p>`;
   if (s.phase === "tutor") head = `<div class="card"><h2>${esc(t("practise_title", {construct: s.practise || ""}))}</h2><p>${esc(t("practise_teacher"))}</p></div><p>${esc(t("practise_try"))}</p>`;
   view(`${head}<div class="card"><p class="stem">${maths(q.text)}</p>
-    ${q.options.map(o => `<button class="opt" data-key="${esc(o.key)}"><b>${esc(o.key)}</b><span>${maths(o.text)}</span></button>`).join("")}</div>`);
+    ${q.options.map(o => `<button class="opt" data-key="${esc(o.key)}"><b>${esc(o.key)}</b><span>${maths(o.text)}</span></button>`).join("")}
+    <p class="mute">${esc(t("rule"))}</p></div>`);
   shownAt = performance.now();
   document.querySelectorAll("button.opt").forEach(b => b.onclick = () => {
     document.querySelectorAll("button.opt").forEach(x => x.disabled = true);
